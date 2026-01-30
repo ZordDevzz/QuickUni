@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickUni - Tóm tắt Giải pháp và Kiến trúc Hệ thống</title>
+    <style>
+        :root {
+            --primary: #1e40af;
+            --secondary: #334155;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #cbd5e1;
+            --accent: #2563eb;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.7;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 50px 25px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            color: var(--primary);
+            margin-top: 40px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-title::after {
+            content: "";
+            flex-grow: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            font-size: 1.3rem;
+            margin-top: 0;
+            color: var(--primary);
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        .tag {
+            background-color: var(--primary);
+            color: white;
+            padding: 3px 12px;
+            font-size: 0.8rem;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        ul {
+            padding-left: 0;
+            margin: 0;
+        }
+
+        li {
+            list-style: none;
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+            font-size: 0.95rem;
+        }
+
+        li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .feature-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            display: block;
+            border-left: 3px solid #e2e8f0;
+            padding-left: 10px;
+        }
+
+        .roadmap-card {
+            border-top: 5px solid var(--accent);
+        }
+
+        .tech-footer {
+            background-color: #1e293b;
+            color: #f8fafc;
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 50px;
+        }
+
+        .tech-footer h4 {
+            color: #60a5fa;
+            margin-top: 0;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        strong {
+            color: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Giải pháp Đại học số QuickUni</h1>
+            <div class="subtitle">Tóm tắt kiến trúc và các tính năng cốt lõi của hệ thống</div>
+        </header>
+
+        <!-- PHẦN 1: TÍNH NĂNG HIỆN TẠI -->
+        <div class="section-title">Tính năng đã hoàn thiện</div>
+        <div class="grid">
+            <!-- Quản lý Tài khoản -->
+            <div class="card">
+                <span class="tag">Hệ thống</span>
+                <h3>Quản lý Tài khoản & Hồ sơ</h3>
+                <span class="feature-desc">Thiết kế linh hoạt giúp tách biệt quyền đăng nhập và dữ liệu cá nhân.</span>
+                <ul>
+                    <li><strong>Đăng nhập đa năng:</strong> Hỗ trợ đăng nhập qua tên người dùng, email hoặc số điện thoại. Quản lý trạng thái tài khoản (Đang hoạt động, Tạm khóa, Cấm).</li>
+                    <li><strong>Hồ sơ cá nhân động:</strong> Cho phép lưu trữ mọi thông tin từ sơ yếu lý lịch đến dữ liệu đặc thù của từng trường mà không cần lập trình lại hệ thống.</li>
+                    <li><strong>Bảo mật phân quyền:</strong> Hệ thống phân quyền chi tiết đến từng chức năng nhỏ nhất, đảm bảo sinh viên và giảng viên chỉ thấy những gì họ được phép.</li>
+                </ul>
+            </div>
+
+            <!-- Quản lý Đào tạo -->
+            <div class="card">
+                <span class="tag">Đào tạo</span>
+                <h3>Quản lý Chương trình học</h3>
+                <span class="feature-desc">Trái tim của hệ thống giáo dục, xử lý toàn bộ logic về môn học và ngành học.</span>
+                <ul>
+                    <li><strong>Cấu trúc khối kiến thức:</strong> Tổ chức môn học theo các khối (Đại cương, Cơ sở ngành, Chuyên ngành) giúp sinh viên dễ dàng theo dõi tiến độ học tập.</li>
+                    <li><strong>Ràng buộc môn tiên quyết:</strong> Tự động chặn đăng ký nếu sinh viên chưa hoàn thành các môn học bắt buộc trước đó.</li>
+                    <li><strong>Minh bạch điểm số:</strong> Hệ thống ghi lại toàn bộ lịch sử sửa điểm. Bất kỳ sự thay đổi điểm số nào cũng đều biết ai sửa, sửa lúc nào và giá trị cũ là bao nhiêu.</li>
+                </ul>
+            </div>
+
+            <!-- Vận hành lớp học -->
+            <div class="card">
+                <span class="tag">Vận hành</span>
+                <h3>Thời khóa biểu & Lớp học</h3>
+                <span class="feature-desc">Tối ưu hóa nguồn lực nhà trường và tài nguyên cơ sở vật chất.</span>
+                <ul>
+                    <li><strong>Quản lý cơ sở vật chất:</strong> Danh mục tòa nhà và phòng học chi tiết kèm theo sức chứa, đảm bảo không bị quá tải khi xếp lớp.</li>
+                    <li><strong>Thời khóa biểu thông minh:</strong> Quản lý lịch học theo ngày, giờ và tiết học. Tích hợp ghi chú và trạng thái lớp học (Đã xong, Tạm hoãn).</li>
+                    <li><strong>Đăng ký tín chỉ:</strong> Hỗ trợ mở các đợt đăng ký theo kỳ học, giới hạn sĩ số và đối tượng sinh viên được phép đăng ký.</li>
+                </ul>
+            </div>
+
+            <!-- Giao tiếp nội bộ -->
+            <div class="card">
+                <span class="tag">Kết nối</span>
+                <h3>Hệ thống Trao đổi Nội bộ</h3>
+                <span class="feature-desc">Môi trường làm việc số giúp giảng viên và sinh viên kết nối thời gian thực.</span>
+                <ul>
+                    <li><strong>Nhóm Chat Lớp học:</strong> Tự động tạo nhóm trao đổi cho từng lớp học phần. Hỗ trợ trả lời tin nhắn, trích dẫn và ghim các thông báo quan trọng.</li>
+                    <li><strong>Kho tài liệu số:</strong> Giảng viên có thể tải lên slide bài giảng, giáo trình cho từng lớp học. Sinh viên có thể truy cập và tải về mọi lúc mọi nơi.</li>
+                    <li><strong>Lịch sử tương tác:</strong> Lưu trữ bền vững nội dung trao đổi, giúp việc tra cứu thông tin học tập trở nên dễ dàng.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- PHẦN 2: ĐỊNH HƯỚNG PHÁT TRIỂN -->
+        <div class="section-title">Định hướng nâng cấp tiếp theo</div>
+        <div class="grid">
+            <!-- Tài chính -->
+            <div class="card roadmap-card">
+                <span class="tag" style="background-color: #10b981;">Đang thiết kế</span>
+                <h3>Quản lý Học phí & Tài chính</h3>
+                <span class="feature-desc">Tự động hóa toàn bộ quy trình thu chi và đối soát tài chính.</span>
+                <ul>
+                    <li><strong>Tự động tính phí:</strong> Hệ thống tự tính toán học phí ngay khi sinh viên đăng ký tín chỉ thành công dựa trên quy định của nhà trường.</li>
+                    <li><strong>Thanh toán trực tuyến:</strong> Kết nối với các ngân hàng và ví điện tử để sinh viên nộp học phí ngay trên ứng dụng.</li>
+                    <li><strong>Quản lý công nợ:</strong> Tự động cảnh báo và giới hạn quyền lợi (như đăng ký thi, xem điểm) đối với sinh viên chưa hoàn thành nghĩa vụ tài chính.</li>
+                </ul>
+            </div>
+
+            <!-- Thông báo -->
+            <div class="card roadmap-card">
+                <span class="tag" style="background-color: #f59e0b;">Sắp ra mắt</span>
+                <h3>Trung tâm Thông báo tập trung</h3>
+                <span class="feature-desc">Đảm bảo thông tin quan trọng luôn đến được người nhận một cách nhanh nhất.</span>
+                <ul>
+                    <li><strong>Thông báo đa kênh:</strong> Gửi tin nhắn tức thời qua ứng dụng điện thoại, email và cả tin nhắn SMS cho các sự kiện khẩn cấp.</li>
+                    <li><strong>Nhắc lịch tự động:</strong> Tự động nhắc sinh viên trước giờ học, giờ thi hoặc khi có giảng viên vừa nhập điểm mới.</li>
+                    <li><strong>Trạng thái tin nhắn:</strong> Nhà trường có thể theo dõi được sinh viên nào đã đọc thông báo, sinh viên nào chưa để có biện pháp hỗ trợ kịp thời.</li>
+                </ul>
+            </div>
+
+            <!-- Báo cáo -->
+            <div class="card roadmap-card">
+                <span class="tag" style="background-color: #8b5cf6;">Tầm nhìn</span>
+                <h3>Báo cáo & Phân tích thông minh</h3>
+                <span class="feature-desc">Hỗ trợ ban giám hiệu đưa ra các quyết định dựa trên dữ liệu thực tế.</span>
+                <ul>
+                    <li><strong>Cảnh báo học tập:</strong> Tự động nhận diện và báo cáo danh sách sinh viên có kết quả học tập kém hoặc nghỉ học nhiều để nhà trường tư vấn kịp thời.</li>
+                    <li><strong>Tối ưu tài nguyên:</strong> Phân tích hiệu suất sử dụng phòng học để sắp xếp lịch học khoa học hơn, tránh lãng phí.</li>
+                    <li><strong>Biểu đồ trực quan:</strong> Các biểu đồ thống kê về tài chính, số lượng sinh viên và chất lượng đào tạo theo từng năm học.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="tech-footer">
+            <h4>Ưu điểm kỹ thuật nổi bật</h4>
+            <ul>
+                <li><strong>Độ tin cậy cao:</strong> Hệ thống sử dụng công nghệ khóa định danh chuẩn quốc tế (UUID), đảm bảo dữ liệu không bao giờ bị trùng lặp hay lộ thông tin nhạy cảm.</li>
+                <li><strong>Khả năng mở rộng:</strong> Cấu trúc dữ liệu linh hoạt (JSONB) cho phép nhà trường thêm mới các loại thông tin quản lý mà không cần dừng hệ thống để bảo trì.</li>
+                <li><strong>An toàn dữ liệu:</strong> Mọi hành động quan trọng trên hệ thống đều được lưu vết (Audit Log), giúp ngăn chặn gian lận và sai sót trong quản lý.</li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 Giải pháp QuickUni - Tài liệu tóm tắt kiến trúc hệ thống phiên bản 29.01.26</p>
+        </footer>
+    </div>
+</body>
+</html>

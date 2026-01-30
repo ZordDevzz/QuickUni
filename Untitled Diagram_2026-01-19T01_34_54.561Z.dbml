@@ -1,0 +1,232 @@
+enum enum_account_type {
+	employee
+	student
+	dev
+}
+
+
+
+enum enum_gender {
+	male
+	female
+	other
+}
+
+
+
+enum enum_schedule_type {
+	regular
+	substitute
+	off
+	makeup
+}
+
+
+
+enum enum_enroll_status {
+	enrolled
+	dropped
+	expelled
+	completed
+}
+
+Table account [headercolor: #175e7a] {
+	id uuid [ pk, not null, unique ]
+	username varchar(255) [ not null, unique ]
+	pwd varchar(64) [ not null ]
+	type enum_account_type
+}
+
+Table employee [headercolor: #175e7a] {
+	account_id uuid
+	id varchar(30) [ pk, not null, unique ]
+	fullname varchar(255) [ not null ]
+	gender enum_gender [ not null ]
+	dob date
+	role_id varchar(30) [ not null ]
+	address varchar(512) [ not null ]
+	country_code varchar(2) [ not null, default: 'VN' ]
+	national_id varchar(255)
+	department_id varchar(30) [ not null ]
+}
+
+Table student [headercolor: #175e7a] {
+	account_id uuid [ unique ]
+	id varchar(30) [ pk, not null, unique ]
+	fullname varchar(255) [ not null ]
+	gender enum_gender [ not null ]
+	dob date
+	address varchar(512)
+	country_code varchar(2) [ default: 'VN' ]
+	national_id varchar(255)
+	main_class_id varchar(30)
+}
+
+Table department [headercolor: #175e7a] {
+	head varchar(30) [ not null ]
+	id varchar(30) [ pk, not null, unique ]
+	name varchar(255) [ not null ]
+	des varchar(512)
+}
+
+Table main_class [headercolor: #175e7a] {
+	monitor varchar(30)
+	id varchar(30) [ pk, not null, unique ]
+	teacher varchar(30) [ not null ]
+	major_id varchar(30) [ not null ]
+}
+
+Table course_class [headercolor: #175e7a] {
+	id varchar(30) [ pk, not null, unique ]
+	subject_id varchar(30) [ not null ]
+	teacher_id varchar(30) [ not null ]
+}
+
+Table subject [headercolor: #175e7a] {
+	id varchar(30) [ pk, not null, unique ]
+	name varchar(255) [ not null ]
+	credits smallint [ not null ]
+	major_id varchar(30) [ not null ]
+	des varchar(255)
+}
+
+Table enrollment [headercolor: #175e7a] {
+	student_id varchar(30) [ not null ]
+	course_class_id varchar(30) [ not null ]
+	id bigint [ pk, increment, not null, unique ]
+	status enum_enroll_status
+
+	indexes {
+		(student_id, course_class_id) [ name: 'enrollment_index_0', unique ]
+	}
+}
+
+Table message [headercolor: #175e7a] {
+	id bigint [ pk, increment, not null, unique ]
+	source varchar(255)
+	type varchar(255)
+}
+
+Table target [headercolor: #175e7a] {
+	id bigint [ pk, increment, not null, unique ]
+	type varchar(255) [ not null ]
+	entity_id varchar(255)
+}
+
+Table entities_group [headercolor: #175e7a] {
+	uid uuid [ pk, not null ]
+	guid uuid [ pk, not null ]
+}
+
+Table role [headercolor: #175e7a] {
+	id varchar(30) [ pk, not null, unique ]
+}
+
+Table authority [headercolor: #175e7a] {
+	id integer [ pk, increment, not null, unique ]
+}
+
+Table schedule [headercolor: #175e7a] {
+	id bigint [ pk, increment, not null, unique ]
+	type enum_schedule_type [ not null ]
+	schedule_date date [ not null ]
+	course_class_id varchar(30) [ not null ]
+}
+
+Table major [headercolor: #175e7a] {
+	id varchar(30) [ pk, not null, unique ]
+	des varchar(512)
+	department_id varchar(30) [ not null ]
+}
+
+Table mess2target [headercolor: #175e7a] {
+	id bigint [ pk, increment, not null, unique ]
+	msg_id bigint [ not null ]
+	target_id bigint
+}
+
+Table group [headercolor: #175e7a] {
+	id uuid [ pk, not null, unique ]
+	type varchar(255) [ not null ]
+	head uuid
+}
+
+Ref fk_mess2target_msg_id_message {
+	mess2target.msg_id > message.id [ delete: no action, update: no action ]
+}
+
+Ref fk_employee_account_id_account {
+	employee.account_id - account.id [ delete: no action, update: no action ]
+}
+
+Ref fk_student_account_id_account {
+	student.account_id - account.id [ delete: no action, update: no action ]
+}
+
+Ref fk_employee_id_department {
+	employee.id - department.head [ delete: no action, update: no action ]
+}
+
+Ref fk_main_class_id_student {
+	main_class.id < student.main_class_id [ delete: no action, update: no action ]
+}
+
+Ref fk_employee_id_main_class {
+	employee.id < main_class.teacher [ delete: no action, update: no action ]
+}
+
+Ref fk_main_class_monitor_student {
+	main_class.monitor - student.id [ delete: no action, update: no action ]
+}
+
+Ref fk_course_class_subject_id_subject {
+	course_class.subject_id > subject.id [ delete: no action, update: no action ]
+}
+
+Ref fk_employee_id_course_class {
+	employee.id < course_class.teacher_id [ delete: no action, update: no action ]
+}
+
+Ref fk_schedule_course_class_id_course_class {
+	schedule.course_class_id > course_class.id [ delete: no action, update: no action ]
+}
+
+Ref fk_major_department_id_department {
+	major.department_id > department.id [ delete: no action, update: no action ]
+}
+
+Ref fk_main_class_major_id_major {
+	main_class.major_id > major.id [ delete: no action, update: no action ]
+}
+
+Ref fk_major_id_subject {
+	major.id < subject.major_id [ delete: no action, update: no action ]
+}
+
+Ref fk_employee_department_id_department {
+	employee.department_id > department.id [ delete: no action, update: no action ]
+}
+
+Ref fk_enrollment_course_class_id_course_class {
+	enrollment.course_class_id > course_class.id [ delete: no action, update: no action ]
+}
+
+Ref fk_enrollment_student_id_student {
+	enrollment.student_id > student.id [ delete: no action, update: no action ]
+}
+
+Ref fk_mess2target_target_id_target {
+	mess2target.target_id > target.id [ delete: no action, update: no action ]
+}
+
+Ref fk_group_head_account {
+	group.head > account.id [ delete: no action, update: no action ]
+}
+
+Ref fk_entities_group_uid_account {
+	entities_group.uid > account.id [ delete: no action, update: no action ]
+}
+
+Ref fk_entities_group_guid_group {
+	entities_group.guid > group.id [ delete: no action, update: no action ]
+}

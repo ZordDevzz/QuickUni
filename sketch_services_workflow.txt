@@ -1,0 +1,8 @@
+
+ENROLLMENT
+    BEGIN
+    ├── checkCap()
+    ├── checkScheduleConflict()
+    ├── createEnrollment()
+    └── emit EnrollmentCreated
+COMMIT

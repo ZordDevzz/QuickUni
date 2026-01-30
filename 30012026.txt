@@ -1,0 +1,806 @@
+Enum "public"."enum_account_type" {
+    "student"
+    "employee"
+    "tech"
+    "dev"
+}
+
+Enum "public"."enum_attendance_state" {
+    "present"
+    "absent"
+    "late"
+    "excused"
+}
+
+Enum "public"."enum_gender" {
+    "male"
+    "female"
+    "others"
+}
+
+Enum "public"."enum_msg_state" {
+    "archived"
+    "deleted"
+    "normal"
+}
+
+Enum "public"."enum_payment_status" {
+    "pending"
+    "paid"
+    "cancelled"
+    "refunded"
+}
+
+Enum "public"."enum_discount_type" {
+    "percentage"
+    "fixed_amount"
+}
+
+// ==============================================
+// CORE USER MANAGEMENT
+// ==============================================
+
+Table "public"."account" {
+  "id" uuid [pk, not null]
+  "username" varchar(255) [unique, not null]
+  "pwd_hash" varchar(255) [not null]
+  "type" enum_account_type
+  "email" varchar(255) [unique]
+  "phone" varchar(20) [unique]
+  "status" varchar(20) [default: `active`]
+  "last_login_at" timestamptz
+  
+  // ADDED: Full Audit
+  "create_at" timestamptz [not null, default: `now()`]
+  "update_at" timestamptz
+  "deleted_at" timestamptz
+
+  Indexes {
+    username [name: "idx_acc_usrname"]
+  }
+}
+
+Table "public"."profile" {
+  "id" uuid [pk, not null]
+  // Nullable FK: Only enforces constraint if account exists
+  "account_id" uuid [ref: - "public"."account"."id"] 
+  "fullname" varchar(255)
+  "gender" enum_gender [not null]
+  "dob" date [not null]
+  "address" text
+  "country_code" varchar(2)
+  // ADDED: Unique constraint for National ID
+  "national_id" varchar(255) [unique, not null] 
+  "ethnic" varchar(255)
+  "religious" varchar(255)
+  "schema_id" bigint [not null, ref: > "public"."profile_schema"."id"]
+  "dynamic_data" jsonb
+
+  // ADDED: Full Audit
+  "create_at" timestamptz [not null, default: `now()`]
+  "update_at" timestamptz
+  "deleted_at" timestamptz
+}
+
+Table "public"."student" {
+  "id" uuid [pk, not null]
+  "code" varchar(30) [unique, not null]
+  "profile_id" uuid [unique, not null, ref: - "public"."profile"."id"]
+  "create_at" timestamptz [not null, default: `now()`]
+  "update_at" timestamptz
+  "deleted_at" timestamptz
+}
+
+Table "public"."employee" {
+  "id" uuid [pk, not null]
+  "code" varchar(30) [unique, not null]
+  "profile_id" uuid [ref: - "public"."profile"."id"]
+  "create_at" timestamptz [not null, default: `now()`]
+  // ADDED: Audit
+  "update_at" timestamptz
+  "deleted_at" timestamptz
+}
+
+// ==============================================
+// ACADEMIC CORE
+// ==============================================
+
+Table "public"."department" {
+  "id" uuid [pk, not null]
+  "code" varchar(30) [unique]
+  "name" varchar(255) [not null]
+  "des" varchar(512)
+  "create_at" timestamptz [not null, default: `now()`]
+  // ADDED: Audit
+  "update_at" timestamptz
+  "deleted_at" timestamptz
+}
+
+Table "public"."major" {
+  "id" uuid [pk, not null]
+  "code" varchar(30) [unique, not null]
+  "des" varchar(512)
+  "department_id" uuid [not null, ref: > "public"."department"."id"]
+  "create_at" timestamptz [not null, default: `now()`]
+  // ADDED: Audit
+  "update_at" timestamptz
+  "deleted_at" timestamptz
+}
+
+Table "public"."subject" {
+  "id" uuid [pk, not null]
+  "code" varchar(30) [unique, not null]
+  "name" varchar(255) [not null]
+  "credits" smallint [not null]
+  "des" varchar(255)
+  "recommended_semester_index" smallint
+  // ADDED: Audit
+  "create_at" timestamptz [not null, default: `now()`]
+  "update_at" timestamptz
+  "deleted_at" timestamptz
+}
+
+Table "public"."curriculum" {
+  "id" int [pk, not null, increment]
+  "major_id" uuid [not null, ref: > "public"."major"."id"]
+  "code" varchar(50) [unique, not null]
+  "name" varchar(255) [not null]
+  "academic_year" smallint [not null]
+  "total_credits" smallint
+  "des" text
+  // ADDED: Audit
+  "create_at" timestamptz [default: `now()`]
+  "update_at" timestamptz
+}
+
+// ==============================================
+// COURSE & REGISTRATION
+// ==============================================
+
+Table "public"."semester" {
+  "id" smallint [pk, not null, increment]
+  "code" varchar(30) [unique, not null]
+  "name" varchar(255) [not null]
+  "academic_year" smallint [not null]
+  "start_date" date [not null]
+  "end_date" date [not null]
+  "is_current" boolean [default: false]
+}
+
+Table "public"."course_class" {
+  "id" uuid [pk, not null]
+  "code" varchar(30) [unique, not null]
+  "teacher_id" uuid [not null, ref: > "public"."employee"."id"]
+  "subject_id" uuid [not null, ref: > "public"."subject"."id"]
+  "cap" smallint [not null, default: 30]
+  "current_slot" smallint [not null, default: 0]
+  "status" varchar(20) [default: `opened`]
+  "type" smallint [not null, ref: > "public"."course_class_type"."id"]
+  "semester_id" smallint [not null, ref: > "public"."semester"."id"]
+  "create_at" timestamptz [default: `now()`]
+  // ADDED: Audit
+  "update_at" timestamptz
+  "deleted_at" timestamptz
+}
+
+Table "public"."enrollment" {
+  "id" bigint [pk, not null, increment]
+  "status" smallint [ref: > "public"."enroll_status"."id"]
+  "student_id" uuid [not null, ref: > "public"."student"."id"]
+  "course_class_id" uuid [not null, ref: > "public"."course_class"."id"]
+  "create_at" timestamptz [not null, default: `now()`]
+  // ADDED: Audit
+  "update_at" timestamptz
+  "deleted_at" timestamptz
+
+  Indexes {
+    (student_id, course_class_id) [unique, name: "enrollment_index_0"]
+  }
+}
+
+// ==============================================
+// SCHEDULING & ATTENDANCE
+// ==============================================
+
+Table "public"."building" {
+  "id" smallint [pk, not null, increment]
+  "code" varchar(30) [unique, not null]
+  "name" varchar(255)
+  "des" text
+}
+
+Table "public"."room" {
+  "id" smallint [pk, not null, increment]
+  "code" varchar(30) [unique, not null]
+  "building_id" smallint [not null, ref: > "public"."building"."id"]
+  "capacity" smallint
+  "type" varchar(50)
+}
+
+Table "public"."schedule" {
+  "id" bigint [pk, not null, increment]
+  "type" smallint [not null, ref: > "public"."schedule_type"."id"]
+  "course_class_id" uuid [not null, ref: > "public"."course_class"."id"]
+  "start_time" time [not null]
+  "end_time" time [not null]
+  "period" smallint [not null]
+  "m_per_period" int [default: 45]
+  "sch_date" date [not null]
+  "note" varchar(512)
+  "status_id" smallint [ref: > "public"."schedule_status"."id"]
+  "room_id" smallint [ref: > "public"."room"."id"]
+  "conductor_id" uuid [ref: > "public"."employee"."id"]
+  
+  // ADDED: Full Audit for Schedule (Critical)
+  "create_at" timestamptz [default: `now()`]
+  "update_at" timestamptz
+  "deleted_at" timestamptz
+
+  Indexes {
+    course_class_id [name: "idx_schedule_c_class"]
+    (conductor_id, sch_date) [name: "idx_schedule_conductor"]
+  }
+}
+
+Table "public"."attendance_status" {
+  "enroll_id" bigint [not null, ref: > "public"."enrollment"."id"]
+  "schedule_id" bigint [not null, ref: > "public"."schedule"."id"]
+  "state" enum_attendance_state [not null]
+  "note" varchar(255)
+  // ADDED: Track when attendance was taken
+  "create_at" timestamptz [default: `now()`]
+  "update_at" timestamptz
+
+  Indexes {
+    (enroll_id, schedule_id) [pk]
+  }
+}
+
+// ==============================================
+// GRADES & EXAMS
+// ==============================================
+
+Table "public"."grade" {
+  "id" bigint [pk, not null, increment]
+  "enrollment_id" bigint [not null, ref: > "public"."enrollment"."id"]
+  "type_id" bigint [not null, ref: > "public"."grade_type"."id"]
+  "assignment_id" bigint [ref: > "public"."assignment"."id"]
+  "score" numeric(5,2) [not null]
+  "create_at" timestamptz [not null, default: `now()`]
+  "update_at" timestamptz
+  // ADDED: Soft delete for grades (Safety)
+  "deleted_at" timestamptz
+
+  Indexes {
+    enrollment_id [name: "idx_grade_enrollment_id"]
+    (enrollment_id, type_id, assignment_id) [unique, name: "idx_grade_unique_entry"]
+  }
+}
+
+Table "public"."grade_audit" {
+  "id" bigint [pk, not null]
+  "grade_id" bigint [not null, ref: > "public"."grade"."id"]
+  "change_by" uuid [not null, ref: > "public"."employee"."id"]
+  "old_score" numeric(5,2) [not null]
+  "new_score" numeric(5,2)
+  "change_at" timestamptz [not null]
+}
+
+// ==============================================
+// FINANCE
+// ==============================================
+
+Table "public"."invoice" {
+  "id" uuid [pk, not null]
+  "student_id" uuid [not null, ref: > "public"."student"."id"]
+  "semester_id" smallint [not null, ref: > "public"."semester"."id"]
+  "original_amount" numeric(15,2) [not null]
+  "discount_amount" numeric(15,2) [default: 0]
+  "final_amount" numeric(15,2) [not null]
+  "status" enum_payment_status
+  "create_at" timestamptz [default: `now()`]
+  // ADDED: Audit
+  "update_at" timestamptz
+  "due_date" timestamptz
+}
+
+Table "public"."invoice_detail" {
+  "id" bigint [pk, not null, increment]
+  "invoice_id" uuid [not null, ref: > "public"."invoice"."id"]
+  "enrollment_id" bigint [unique, not null, ref: > "public"."enrollment"."id"]
+  "credit_price" numeric(10,2) [not null]
+  "subject_credits" smallint [not null]
+  "amount" numeric(15,2) [not null]
+  "note" varchar(255)
+}
+
+Table "public"."transaction" {
+  "id" uuid [pk, not null]
+  "invoice_id" uuid [not null, ref: > "public"."invoice"."id"]
+  "amount" numeric(15,2)
+  "payment_method" varchar(50)
+  "transaction_code" varchar(255)
+  "pay_at" timestamptz
+}
+
+// ==============================================
+// CONFIGS & DICTIONARIES
+// ==============================================
+
+Table "public"."main_class" {
+  "id" uuid [pk, not null]
+  "code" varchar(30) [unique, not null]
+  "teacher" uuid [not null, ref: > "public"."employee"."id"]
+  "type_id" smallint [ref: > "public"."education_type"."id"]
+  "major_id" uuid [not null, ref: > "public"."major"."id"]
+  "academic_year" smallint [not null]
+}
+
+Table "public"."registration_period" {
+  "id" int [pk, not null, increment]
+  "semester_id" smallint [not null, ref: > "public"."semester"."id"]
+  "name" varchar(255)
+  "start_at" timestamptz [not null]
+  "end_at" timestamptz [not null]
+  "is_active" boolean [default: true]
+}
+
+Table "public"."subject_prerequisite" {
+  "subject_id" uuid [not null, ref: > "public"."subject"."id"]
+  "prerequisite_id" uuid [not null, ref: > "public"."subject"."id"]
+  "type" varchar(50)
+
+  Indexes {
+    (subject_id, prerequisite_id) [pk]
+  }
+}
+
+Table "public"."curriculum_subject" {
+  "subject_id" uuid [not null, ref: > "public"."subject"."id"]
+  "curriculum_id" int [not null, ref: > "public"."curriculum"."id"]
+  "semester_index" smallint
+  "is_compulsory" boolean [default: true]
+  "knowledge_block_id" smallint [ref: > "public"."knowledge_block"."id"]
+
+  Indexes {
+    (subject_id, curriculum_id) [pk]
+  }
+}
+
+Table "public"."grade_type" {
+  "id" bigint [pk, not null]
+  "code" varchar(30) [not null]
+  "weight" smallint [not null]
+  "name" varchar(255)
+}
+
+Table "public"."schedule_type" {
+  "id" smallint [pk, not null]
+  "code" varchar(30) [not null]
+  "name" varchar(255)
+  "des" text
+}
+
+Table "public"."enroll_status" {
+  "id" smallint [pk, not null]
+  "code" varchar(30)
+  "name" varchar(255)
+}
+
+Table "public"."grade_scale" {
+  "id" smallint [pk, not null, increment]
+  "min_score_10" numeric(4,2)
+  "letter_grade" varchar(5)
+  "gpa_score_4" numeric(4,2)
+  "des" varchar(100)
+}
+
+Table "public"."department_employment" {
+  "employee_id" uuid [not null, ref: > "public"."employee"."id"]
+  "department_id" uuid [not null, ref: > "public"."department"."id"]
+  "assign_date" date [not null]
+  "unassign_date" date
+  "role_code" varchar(30)
+  "role_name" varchar(255)
+
+  Indexes {
+    (employee_id, department_id) [pk]
+  }
+}
+
+Table "public"."education_type" {
+  "id" smallint [pk, not null, increment]
+  "code" varchar(30) [not null]
+  "name" varchar(255) [not null]
+  "des" varchar(512)
+  "length" smallint [not null]
+}
+
+Table "public"."knowledge_block" {
+  "id" smallint [pk, not null, increment]
+  "code" varchar(30) [unique, not null]
+  "name" varchar(255) [not null]
+  "parent_id" smallint [ref: > "public"."knowledge_block"."id"]
+  "des" text
+}
+
+Table "public"."main_class_member" {
+  "student_id" uuid [not null, ref: > "public"."student"."id"]
+  "role_id" smallint [ref: > "public"."class_role"."id"]
+  "class_id" uuid [not null, ref: > "public"."main_class"."id"]
+
+  Indexes {
+    (student_id, class_id) [pk]
+  }
+}
+
+Table "public"."class_role" {
+  "id" smallint [pk, not null, increment]
+  "code" varchar(30) [not null]
+  "name" varchar(255)
+  "des" varchar(255)
+}
+
+Table "public"."profile_schema" {
+  "id" bigint [pk, not null]
+  "effective_date" date [not null]
+  "expired_date" date
+  "schema_code" varchar(255) [not null]
+  "create_at" timestamptz [not null]
+  "update_at" timestamptz
+  "des" text
+}
+
+Table "public"."profile_field" {
+  "id" bigint [pk, not null]
+  "name" varchar(255)
+  "datatype" varchar(255)
+  "ui_section" varchar(255) [not null]
+  "create_at" timestamptz [not null]
+  "update_at" timestamptz
+  "label" varchar(255)
+  "des" text
+}
+
+Table "public"."profile_schema_field" {
+  "field_id" bigint [not null, ref: > "public"."profile_field"."id"]
+  "schema_id" bigint [not null, ref: > "public"."profile_schema"."id"]
+  "is_required" boolean [not null, default: false]
+
+  Indexes {
+    (field_id, schema_id) [pk]
+  }
+}
+
+Table "public"."archive" {
+  "id" bigint [pk, not null]
+  "origin" varchar(255)
+  "data" json
+  "create_at" timestamptz
+}
+
+Table "public"."system_setting" {
+  "key" varchar(255) [pk, not null]
+  "value" jsonb
+  "value_type" varchar(255)
+  "display_name" varchar(255)
+  "des" text
+  "update_at" timestamptz
+  "update_by" uuid [ref: > "public"."account"."id"]
+  "is_sensitive" boolean [not null, default: false]
+}
+
+Table "public"."feature_flag" {
+  "id" varchar(255) [pk, not null]
+  "enabled" boolean
+  "display_name" varchar(255)
+  "version" varchar(30)
+  "des" text
+  "target" jsonb
+  "create_at" timestamptz [not null]
+  "update_at" timestamptz
+  "update_by" uuid [ref: > "public"."account"."id"]
+  "expires_at" timestamptz
+  "status" varchar(30)
+}
+
+Table "public"."feature_flag_audit" {
+  "id" bigint [pk, not null]
+  "change_by" uuid [not null, ref: > "public"."account"."id"]
+  "flag_id" varchar(255) [not null, ref: > "public"."feature_flag"."id"]
+  "old_enabled" boolean [not null]
+  "new_enabled" boolean [not null, default: `now()`]
+  "change_at" timestamptz [not null]
+  "reason" text
+}
+
+Table "public"."system_authority" {
+  "id" varchar(255) [pk, not null]
+  "name" varchar(255)
+  "des" text
+  "is_sensitive" boolean [not null, default: false]
+}
+
+Table "public"."system_role" {
+  "id" bigint [pk, not null]
+  "is_default_role" boolean
+  "name" varchar(255)
+}
+
+Table "public"."system_role_authority" {
+  "role_id" bigint [not null, ref: > "public"."system_role"."id"]
+  "authority_id" varchar(255) [not null, ref: > "public"."system_authority"."id"]
+
+  Indexes {
+    (role_id, authority_id) [pk]
+  }
+}
+
+Table "public"."user_system_role" {
+  "user_id" uuid [not null, ref: > "public"."account"."id"]
+  "system_role" bigint [not null, ref: > "public"."system_role"."id"]
+
+  Indexes {
+    (user_id, system_role) [pk]
+  }
+}
+
+Table "public"."schedule_status" {
+  "id" smallint [pk, not null, increment]
+  "code" varchar(30)
+  "name" varchar(255)
+  "des" text
+  "is_complete" boolean [not null, default: false]
+}
+
+Table "public"."course_class_type" {
+  "id" smallint [pk, not null]
+  "code" varchar(30) [unique, not null]
+  "name" varchar(255)
+  "des" text
+}
+
+Table "public"."assignment" {
+  "id" bigint [pk, not null]
+  "title" varchar(512)
+  "data" jsonb
+  "course_class_id" uuid [not null, ref: > "public"."course_class"."id"]
+}
+
+Table "public"."system_audit_log" {
+  "id" bigint [pk, not null, increment]
+  "actor_id" uuid [not null, ref: > "public"."account"."id"]
+  "action" varchar(50) [not null]
+  "target_resource" varchar(100)
+  "target_id" varchar(255)
+  "payload" jsonb
+  "create_at" timestamptz [default: `now()`]
+}
+
+Table "public"."tuition_fee_config" {
+  "id" int [pk, not null, increment]
+  "major_id" uuid [ref: > "public"."major"."id"]
+  "academic_year" smallint [not null]
+  "price_per_credit" numeric(10,2) [not null]
+  "note" text
+}
+
+Table "public"."scholarship_policy" {
+  "id" smallint [pk, not null, increment]
+  "code" varchar(50) [unique, not null]
+  "name" varchar(255) [not null]
+  "type" enum_discount_type [not null]
+  "value" numeric(15,2) [not null]
+  "des" text
+}
+
+Table "public"."student_scholarship" {
+  "id" bigint [pk, not null, increment]
+  "student_id" uuid [not null, ref: > "public"."student"."id"]
+  "policy_id" smallint [not null, ref: > "public"."scholarship_policy"."id"]
+  "semester_id" smallint [not null, ref: > "public"."semester"."id"]
+  "is_active" boolean [default: true]
+  "grant_date" timestamptz [default: `now()`]
+
+  Indexes {
+    (student_id, semester_id) [name: "idx_student_scholarship_student_id_semester_id"]
+  }
+}
+
+// ==============================================
+// MODULE CHAT
+// ==============================================
+
+Table "public"."chat_group" {
+  "id" uuid [pk, not null]
+  "type" varchar(255) [not null]
+  "head" uuid [not null, ref: > "public"."account"."id"]
+  "create_at" timestamptz [not null, default: `now()`]
+}
+
+Table "public"."chat_group_member" {
+  "id" bigint [pk, not null, increment]
+  "group_id" uuid [not null, ref: > "public"."chat_group"."id"]
+  "uid" uuid [not null, ref: > "public"."account"."id"]
+  "create_at" timestamptz
+  "nickname" varchar(255)
+  "pfp_url" text
+
+  Indexes {
+    (group_id, uid) [unique, name: "idx_chat_gmember"]
+  }
+}
+
+Table "public"."message" {
+  "id" bigint [pk, not null, increment]
+  "reply_to_id" bigint [ref: > "public"."message"."id"]
+  "type" varchar(255)
+  "group_id" uuid [ref: > "public"."chat_group"."id"]
+  "sender" uuid [ref: > "public"."account"."id"]
+  "create_at" timestamptz [not null, default: `now()`]
+  "expires_at" timestamptz
+  "payload" jsonb [not null]
+  "state" enum_msg_state
+  "is_pinned" boolean [default: false]
+}
+
+Table "public"."message_read" {
+  "message_id" bigint [not null, ref: > "public"."message"."id"]
+  "recipient_id" uuid [not null, ref: > "public"."account"."id"]
+
+  Indexes {
+    (message_id, recipient_id) [pk]
+  }
+}
+
+Table "public"."group_role" {
+  "id" bigint [pk, not null]
+  "name" varchar(255)
+  "group_id" uuid [ref: > "public"."chat_group"."id"]
+  "is_group_role" boolean [not null, default: true]
+}
+
+Table "public"."group_authority" {
+  "id" varchar(255) [pk, not null]
+  "name" varchar(255) [not null]
+}
+
+Table "public"."group_role_authority" {
+  "authority_id" varchar(255) [not null, ref: > "public"."group_authority"."id"]
+  "role_id" bigint [not null, ref: > "public"."group_role"."id"]
+
+  Indexes {
+    (authority_id, role_id) [pk]
+  }
+}
+
+Table "public"."member_role" {
+  "role_id" bigint [not null, ref: > "public"."group_role"."id"]
+  "member_id" bigint [not null, ref: > "public"."chat_group_member"."id"]
+
+  Indexes {
+    (role_id, member_id) [pk]
+  }
+}
+
+Table "public"."course_material" {
+  "id" bigint [pk, not null, increment]
+  "course_class_id" uuid [not null, ref: > "public"."course_class"."id"]
+  "title" varchar(255) [not null]
+  "file_url" text [not null]
+  "upload_by" uuid [ref: > "public"."employee"."id"]
+  "create_at" timestamptz [default: `now()`]
+}
+
+
+// ==============================================
+// MODULE THÔNG BÁO (NOTIFICATION) - OPTIMIZED
+// ==============================================
+
+Enum "public"."notification_type" {
+  "system"      // Bảo trì, nâng cấp
+  "academic"    // Điểm số, lịch học, thi
+  "finance"     // Học phí
+  "social"      // Chat, tương tác
+}
+
+Enum "public"."notification_channel" {
+  "in_app"
+  "email"
+  "push"
+  "sms"
+}
+
+Enum "public"."notification_status" {
+  "queued"
+  "sent"
+  "failed"
+  "read"        // Đã xem
+  "unread"      // Chưa xem
+}
+
+// 1. Mẫu thông báo
+Table "public"."notification_template" {
+  "id" int [pk, increment]
+  "code" varchar(50) [unique, not null]
+  "title_template" varchar(255) [not null]
+  "body_template" text [not null]
+  "type" notification_type [not null]
+  "create_at" timestamptz [default: `now()`]
+  // ADDED: Audit
+  "update_at" timestamptz
+}
+
+// 2. Bảng chứa nội dung gốc (Master Data)
+Table "public"."notification" {
+  "id" uuid [pk, not null]
+  "template_id" int [ref: > "public"."notification_template"."id"]
+  "actor_id" uuid [ref: > "public"."account"."id"]
+  "title" varchar(255) [not null]
+  "body" text
+  "data" jsonb // Deep link data
+  "create_at" timestamptz [not null, default: `now()`]
+}
+
+// 3. Bảng phân phối (Chi tiết từng user) - Tối ưu Query
+Table "public"."notification_recipient" {
+  "id" bigint [pk, increment]
+  "notification_id" uuid [not null, ref: > "public"."notification"."id"]
+  "recipient_id" uuid [not null, ref: > "public"."account"."id"]
+  "channel" notification_channel [not null]
+  "status" notification_status [default: "unread"]
+  "create_at" timestamptz [not null] 
+  "read_at" timestamptz
+
+  Indexes {
+    (recipient_id, create_at) [name: "idx_notif_feed"] 
+    // OPTIMIZED: Index for unread count
+    (recipient_id, status) [name: "idx_notif_unread_count"]
+  }
+}
+
+// 4. Cấu hình User
+Table "public"."user_notification_setting" {
+  "user_id" uuid [not null, ref: > "public"."account"."id"]
+  "notification_type" notification_type [not null]
+  "channel" notification_channel [not null]
+  "is_enabled" boolean [default: true]
+
+  Indexes {
+    (user_id, notification_type, channel) [pk]
+  }
+}
+
+// 5. Device Token
+Table "public"."user_device_token" {
+  "id" bigint [pk, increment]
+  "user_id" uuid [not null, ref: > "public"."account"."id"]
+  "device_token" varchar(512) [not null]
+  "platform" varchar(20)
+  "last_active_at" timestamptz [default: `now()`]
+
+  Indexes {
+    (user_id, device_token) [unique]
+  }
+}
+
+// 6. Bảng thông báo toàn hệ thống (Broadcast)
+Table "public"."system_broadcast" {
+  "id" int [pk, increment]
+  "title" varchar(255)
+  "body" text
+  "target_roles" jsonb // VD: ["student", "teacher"] hoặc null = all
+  "create_at" timestamptz [default: `now()`]
+  "expire_at" timestamptz
+}
+
+// User đã đọc broadcast nào rồi thì lưu vào đây
+Table "public"."system_broadcast_read" {
+  "broadcast_id" int [ref: > "public"."system_broadcast"."id"]
+  "user_id" uuid [ref: > "public"."account"."id"]
+  "read_at" timestamptz [default: `now()`]
+  
+  Indexes {
+    (user_id, broadcast_id) [pk]
+  }
+}

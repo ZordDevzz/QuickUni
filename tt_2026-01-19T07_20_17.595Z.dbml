@@ -1,0 +1,274 @@
+enum enum_account_type {
+	employee
+	student
+	dev
+}
+
+
+
+enum enum_gender {
+	male
+	female
+	other
+}
+
+
+
+enum enum_schedule_type {
+	regular
+	substitute
+	off
+	makeup
+}
+
+
+
+enum enum_enroll_status {
+	enrolled
+	dropped
+	expelled
+	completed
+}
+
+Table account [headercolor: #175e7a] {
+	id uuid [ pk, not null, unique ]
+	username varchar(255) [ not null, unique ]
+	pwd varchar(64) [ not null ]
+	type enum_account_type
+}
+
+Table employee [headercolor: #175e7a] {
+	account_id uuid
+	id varchar(30) [ pk, not null, unique ]
+	fullname varchar(255) [ not null ]
+	gender enum_gender [ not null ]
+	dob date
+	role_id varchar(30) [ not null ]
+	address varchar(512) [ not null ]
+	country_code varchar(2) [ not null, default: 'VN' ]
+	national_id varchar(255)
+	department_id varchar(30) [ not null ]
+}
+
+Table student [headercolor: #175e7a] {
+	account_id uuid [ unique ]
+	id varchar(30) [ pk, not null, unique ]
+	main_class_id varchar(30)
+	fullname varchar(255) [ not null ]
+	gender enum_gender [ not null ]
+	dob date
+	address varchar(512)
+	country_code varchar(2) [ default: 'VN' ]
+	national_id varchar(255)
+}
+
+Table department [headercolor: #175e7a] {
+	head varchar(30) [ not null ]
+	id varchar(30) [ pk, not null, unique ]
+	name varchar(255) [ not null ]
+	des varchar(512)
+}
+
+Table main_class [headercolor: #175e7a] {
+	monitor varchar(30)
+	id varchar(30) [ pk, not null, unique ]
+	teacher varchar(30) [ not null ]
+	major_id varchar(30) [ not null ]
+}
+
+Table course_class [headercolor: #175e7a] {
+	id varchar(30) [ pk, not null, unique ]
+	subject_id varchar(30) [ not null ]
+	teacher_id varchar(30) [ not null ]
+}
+
+Table subject [headercolor: #175e7a] {
+	id varchar(30) [ pk, not null, unique ]
+	name varchar(255) [ not null ]
+	credits smallint [ not null ]
+	major_id varchar(30) [ not null ]
+	des varchar(255)
+}
+
+Table enrollment [headercolor: #175e7a] {
+	student_id varchar(30) [ not null ]
+	course_class_id varchar(30) [ not null ]
+	id bigint [ pk, increment, not null, unique ]
+	status enum_enroll_status
+
+	indexes {
+		(student_id, course_class_id) [ name: 'enrollment_index_0', unique ]
+	}
+}
+
+Table message [headercolor: #175e7a] {
+	id bigint [ pk, increment, not null, unique ]
+	source varchar(255)
+	type varchar(255)
+	group_id uuid
+}
+
+Table target [headercolor: #175e7a] {
+	id bigint [ pk, increment, not null, unique ]
+	type varchar(255) [ not null ]
+	entity_id varchar(255)
+}
+
+Table entities_group [headercolor: #175e7a] {
+	role bigint
+	uid uuid [ pk, not null ]
+	guid uuid [ pk, not null ]
+}
+
+Table group_role [headercolor: #175e7a] {
+	id bigint [ pk, not null, unique ]
+	name varchar(255)
+}
+
+Table group_authority [headercolor: #175e7a] {
+	id varchar(255) [ pk, not null, unique ]
+}
+
+Table schedule [headercolor: #175e7a] {
+	id bigint [ pk, increment, not null, unique ]
+	type enum_schedule_type [ not null ]
+	schedule_date date [ not null ]
+	course_class_id varchar(30) [ not null ]
+}
+
+Table major [headercolor: #175e7a] {
+	id varchar(30) [ pk, not null, unique ]
+	des varchar(512)
+	department_id varchar(30) [ not null ]
+}
+
+Table mess2target [headercolor: #175e7a] {
+	id bigint [ pk, increment, not null, unique ]
+	msg_id bigint [ not null ]
+	target_id bigint
+}
+
+Table chat_group [headercolor: #175e7a] {
+	id uuid [ pk, not null, unique ]
+	type varchar(255) [ not null ]
+	head uuid
+}
+
+Table group_role_authority [headercolor: #175e7a] {
+	role_id bigint [ pk, not null ]
+	authority_id varchar(255) [ pk, not null ]
+}
+
+Table notif [headercolor: #175e7a] {
+	id bigint [ pk, increment, not null, unique ]
+	is_read boolean [ not null ]
+	title varchar(255) [ not null ]
+	sub varchar(512)
+	action json [ not null ]
+	target uuid
+	src bigint
+}
+
+Ref fk_mess2target_msg_id_message {
+	mess2target.msg_id > message.id [ delete: no action, update: no action ]
+}
+
+Ref fk_student_account_id_account {
+	student.account_id - account.id [ delete: no action, update: no action ]
+}
+
+Ref fk_enrollment_student_id_student {
+	enrollment.student_id > student.id [ delete: no action, update: no action ]
+}
+
+Ref fk_mess2target_target_id_target {
+	mess2target.target_id > target.id [ delete: no action, update: no action ]
+}
+
+Ref fk_group_head_account {
+	chat_group.head > account.id [ delete: no action, update: no action ]
+}
+
+Ref fk_entities_group_uid_account {
+	entities_group.uid > account.id [ delete: no action, update: no action ]
+}
+
+Ref fk_entities_group_guid_group {
+	entities_group.guid > chat_group.id [ delete: no action, update: no action ]
+}
+
+Ref fk_course_class_teacher_id_employee {
+	course_class.teacher_id > employee.id [ delete: no action, update: no action ]
+}
+
+Ref fk_main_class_teacher_employee {
+	main_class.teacher > employee.id [ delete: no action, update: no action ]
+}
+
+Ref fk_department_head_employee {
+	department.head > employee.id [ delete: no action, update: no action ]
+}
+
+Ref fk_department_id_employee {
+	department.id < employee.department_id [ delete: no action, update: no action ]
+}
+
+Ref fk_department_id_major {
+	department.id < major.department_id [ delete: no action, update: no action ]
+}
+
+Ref fk_major_id_subject {
+	major.id < subject.major_id [ delete: no action, update: no action ]
+}
+
+Ref fk_subject_id_course_class {
+	subject.id < course_class.subject_id [ delete: no action, update: no action ]
+}
+
+Ref fk_employee_account_id_account {
+	employee.account_id - account.id [ delete: no action, update: no action ]
+}
+
+Ref fk_course_class_id_schedule {
+	course_class.id < schedule.course_class_id [ delete: no action, update: no action ]
+}
+
+Ref fk_course_class_id_enrollment {
+	course_class.id < enrollment.course_class_id [ delete: no action, update: no action ]
+}
+
+Ref fk_student_main_class_id_main_class {
+	student.main_class_id > main_class.id [ delete: no action, update: no action ]
+}
+
+Ref fk_major_id_main_class {
+	major.id < main_class.major_id [ delete: no action, update: no action ]
+}
+
+Ref fk_student_id_main_class {
+	student.id - main_class.monitor [ delete: no action, update: no action ]
+}
+
+Ref fk_entities_group_role_role {
+	entities_group.role > group_role.id [ delete: no action, update: no action ]
+}
+
+Ref fk_role_authority_role_id_role {
+	group_role_authority.role_id > group_role.id [ delete: no action, update: no action ]
+}
+
+Ref fk_role_authority_authority_id_authority {
+	group_role_authority.authority_id > group_authority.id [ delete: no action, update: no action ]
+}
+
+Ref fk_message_group_id_chat_group {
+	message.group_id > chat_group.id [ delete: no action, update: no action ]
+}
+
+Ref fk_notif_target_account {
+	notif.target > account.id [ delete: no action, update: no action ]
+}
+
+Ref fk_notif_src_message {
+	notif.src > message.id [ delete: no action, update: no action ]
+}
