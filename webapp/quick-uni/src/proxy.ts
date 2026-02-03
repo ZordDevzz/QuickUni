@@ -6,7 +6,6 @@ export async function proxy(req: NextRequest) {
   const isAuth = !!token;
   const isAuthPage = req.nextUrl.pathname.startsWith("/login");
 
-  // If user is logged in and trying to access login page, redirect to home
   if (isAuthPage) {
     if (isAuth) {
       return NextResponse.redirect(new URL("/", req.url));
@@ -14,13 +13,11 @@ export async function proxy(req: NextRequest) {
     return null;
   }
 
-  // If user is not logged in and trying to access a protected route
   if (!isAuth) {
     let from = req.nextUrl.pathname;
     if (req.nextUrl.search) {
       from += req.nextUrl.search;
     }
-
     return NextResponse.redirect(
       new URL(`/login?from=${encodeURIComponent(from)}`, req.url)
     );
@@ -30,5 +27,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/profile/:path*", "/login"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)"],
 };

@@ -5,19 +5,19 @@ import { getUserByEmail } from "@/services/db/user";
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
+      id: "user-credentials",
       name: "Credentials",
       credentials: {
         
-        email: { label: "Email", type: "email", placeholder: "test@example.com" },
+        username: { label: "Email", type: "text", placeholder: "Định danh đăng nhập" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        if (!credentials?.username || !credentials?.password) {
           return null;
         }
 
-        const user = await getUserByEmail(credentials.email);
-
+        const user = await getUserByEmail(credentials.username);
         if (user && user.password === credentials.password) {
           // In a real app, verify the password hash here
           return { id: user.id, name: user.name, email: user.email };
