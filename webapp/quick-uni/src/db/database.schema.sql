@@ -217,7 +217,7 @@ CREATE TABLE "public"."feature_flag_audit" (
     "change_by" uuid NOT NULL,
     "flag_id" varchar(255) NOT NULL,
     "old_enabled" boolean NOT NULL,
-    "new_enabled" boolean NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "new_enabled" boolean NOT NULL,
     "change_at" timestamptz NOT NULL,
     "reason" text,
     PRIMARY KEY ("id")
