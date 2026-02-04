@@ -8,3 +8,4 @@ export * from "./schemas/grade";
 export * from "./schemas/finance";
 export * from "./schemas/communication";
 export * from "./schemas/system";
+export * from "./relations";

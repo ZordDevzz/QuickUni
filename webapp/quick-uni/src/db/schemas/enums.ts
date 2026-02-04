@@ -6,6 +6,12 @@ export const enumAccountType = pgEnum("enum_account_type", [
   "tech",
   "dev",
 ]);
+export const enumAccountStatus = pgEnum("enum_account_status", [
+  "active",
+  "suspended",
+  "banned",
+  "expired",
+]);
 export const enumAttendanceState = pgEnum("enum_attendance_state", [
   "present",
   "absent",

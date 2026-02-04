@@ -11,10 +11,12 @@ import {
   unique,
   uniqueIndex,
   text,
-  primaryKey
+  primaryKey,
+  jsonb
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
-import { enumAccountType } from "./enums";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { enumAccountType, enumAccountStatus } from "./enums";
 
 export const account = pgTable(
   "account",
@@ -25,7 +27,7 @@ export const account = pgTable(
     type: enumAccountType(),
     email: varchar({ length: 255 }),
     phone: varchar({ length: 20 }),
-    status: varchar({ length: 20 }).default("active"),
+    status: enumAccountStatus().default("active"),
     lastLoginAt: timestamp("last_login_at", {
       withTimezone: true,
       mode: "string",
@@ -46,6 +48,39 @@ export const account = pgTable(
     unique("account_phone_key").on(table.phone),
   ],
 );
+
+export const insertAccountSchema = createInsertSchema(account);
+export const selectAccountSchema = createSelectSchema(account);
+
+/**
+ * Audit table for account changes
+ */
+export const accountAudit = pgTable(
+  "account_audit",
+  {
+    id: bigserial({ mode: "bigint" }).primaryKey().notNull(),
+    accountId: uuid("account_id").notNull(),
+    action: varchar({ length: 100 }).notNull(), // e.g., 'update_status', 'change_password', 'update_email'
+    oldValue: jsonb("old_value"),
+    newValue: jsonb("new_value"),
+    ipAddress: varchar("ip_address", { length: 45 }),
+    userAgent: text("user_agent"),
+    createAt: timestamp("create_at", { withTimezone: true, mode: "string" })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.accountId],
+      foreignColumns: [account.id],
+      name: "fk_account_audit_account_id_account_id",
+    }),
+    index("account_audit_idx_account_id").on(table.accountId),
+  ]
+);
+
+export const insertAccountAuditSchema = createInsertSchema(accountAudit);
+export const selectAccountAuditSchema = createSelectSchema(accountAudit);
 
 export const systemRole = pgTable("system_role", {
   id: bigint({ mode: "number" }).primaryKey().notNull(),

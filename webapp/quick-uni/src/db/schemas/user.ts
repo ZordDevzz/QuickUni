@@ -13,6 +13,7 @@ import {
   primaryKey
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { enumGender } from "./enums";
 import { account } from "./auth";
 
@@ -64,6 +65,9 @@ export const profile = pgTable(
     unique("profile_national_id_key").on(table.nationalId),
   ],
 );
+
+export const insertProfileSchema = createInsertSchema(profile);
+export const selectProfileSchema = createSelectSchema(profile);
 
 export const employee = pgTable(
   "employee",
