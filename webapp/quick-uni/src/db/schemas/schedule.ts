@@ -1,5 +1,5 @@
 import {
-  pgTable,
+  pgSchema,
   bigint,
   varchar,
   foreignKey,
@@ -9,27 +9,29 @@ import {
   unique,
   smallint,
   smallserial,
-  bigserial,
   time,
   integer,
   date,
   index,
   boolean,
-  primaryKey
+  primaryKey,
+  bigserial
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { enumAttendanceState } from "./enums";
 import { employee } from "./user";
 import { courseClass, enrollment } from "./course";
 
-export const scheduleType = pgTable("schedule_type", {
+export const scheduleSchema = pgSchema("schedule");
+
+export const scheduleType = scheduleSchema.table("schedule_type", {
   id: smallint().primaryKey().notNull(),
   code: varchar({ length: 30 }).notNull(),
   name: varchar({ length: 255 }),
   des: text(),
 });
 
-export const scheduleStatus = pgTable("schedule_status", {
+export const scheduleStatus = scheduleSchema.table("schedule_status", {
   id: smallserial().primaryKey().notNull(),
   code: varchar({ length: 30 }),
   name: varchar({ length: 255 }),
@@ -37,7 +39,7 @@ export const scheduleStatus = pgTable("schedule_status", {
   isComplete: boolean("is_complete").default(false).notNull(),
 });
 
-export const building = pgTable(
+export const building = scheduleSchema.table(
   "building",
   {
     id: smallserial().primaryKey().notNull(),
@@ -48,7 +50,7 @@ export const building = pgTable(
   (table) => [unique("building_code_key").on(table.code)],
 );
 
-export const room = pgTable(
+export const room = scheduleSchema.table(
   "room",
   {
     id: smallserial().primaryKey().notNull(),
@@ -67,10 +69,10 @@ export const room = pgTable(
   ],
 );
 
-export const schedule = pgTable(
+export const schedule = scheduleSchema.table(
   "schedule",
   {
-    id: bigserial({ mode: "bigint" }).primaryKey().notNull(),
+    id: bigserial({ mode: "number" }).primaryKey().notNull(),
     type: smallint().notNull(),
     courseClassId: uuid("course_class_id").notNull(),
     startTime: time("start_time").notNull(),
@@ -96,7 +98,7 @@ export const schedule = pgTable(
     ),
     index("schedule_idx_schedule_conductor").using(
       "btree",
-      table.conductorId.asc().nullsLast().op("date_ops"),
+      table.conductorId.asc().nullsLast().op("uuid_ops"),
       table.schDate.asc().nullsLast().op("date_ops"),
     ),
     foreignKey({
@@ -127,7 +129,7 @@ export const schedule = pgTable(
   ],
 );
 
-export const attendanceStatus = pgTable(
+export const attendanceStatus = scheduleSchema.table(
   "attendance_status",
   {
     enrollId: bigint("enroll_id", { mode: "number" }).notNull(),

@@ -25,7 +25,7 @@ export default function AdminLayoutContent({ children }: { children: ReactNode }
         <AdminHeader setIsMobileOpen={setIsMobileOpen} />
         
         <main className="flex-1 p-4 lg:p-8">
-          <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-8xl">
             {children}
           </div>
         </main>

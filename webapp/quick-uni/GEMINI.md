@@ -20,6 +20,7 @@ The project follows a **Feature-Based Architecture** aligned with the database d
 - **Services:** Business logic and data access (queries), located in `src/services/{domain}.ts`.
 - **Components:** UI is split into generic (`ui`, `shared`) and domain-specific (`features/{domain}`).
 - **i18n Routing:** Uses localized routes via `src/app/[locale]` segment.
+- **Middleware:** The project uses `src/proxy.ts` as the standard middleware entry point instead of `middleware.ts`. This file handles both `next-intl` routing and `NextAuth` authentication logic.
 
 ## Directory Structure
 - **`src/app`**: Next.js App Router root.
@@ -53,7 +54,7 @@ The project follows a **Feature-Based Architecture** aligned with the database d
 
 ## Development Conventions
 - **Naming:** standard TypeScript/React conventions.
-- **Middleware:** `src/proxy.ts` (Handles authentication redirects and i18n routing).
+- **Middleware:** `src/proxy.ts` handles authentication redirects and i18n routing.
 - **Data Access:** Prefer Server Actions (`src/actions`) for mutations and Services (`src/services`) for data fetching.
 - **Validation:** `src/lib/validators` for Zod schemas.
 - **Multi-language (i18n):**
@@ -62,3 +63,22 @@ The project follows a **Feature-Based Architecture** aligned with the database d
     - Use `getTranslations` function in Server Components.
     - Avoid hardcoded strings in JSX.
     - Use namespaces (e.g., `t('Admin.Dashboard')`) to keep translations organized.
+- **Drizzle ORM:**
+    - Define schemas in `src/db/schemas/`.
+    - Use `relations` to define associations.
+    - Use `db.insert()`, `db.select()`, `db.update()`, `db.delete()` in services/actions.
+- **Authentication:**
+    - Session management via `NextAuth`.
+    - Use `getToken` in `proxy.ts` for edge-side auth checks.
+
+## Gemini Added Memories
+- SDKs and Tools are located at "G:/Tools".
+- Use the 'es' tool (Everything CLI) to search for missing tools or files.
+- Always use Context7 MCP (resolve-library-id, query-docs) for library/API documentation, code generation patterns, setup, or configuration steps without being explicitly asked.
+- In this project and newer Next.js versions, 'proxy.ts' is used as the standard middleware entry point instead of 'middleware.ts'.
+
+## Documentation (via Context7)
+- [Next.js App Router](https://nextjs.org/docs)
+- [Drizzle ORM Docs](https://orm.drizzle.team/docs)
+- [next-intl Docs](https://next-intl-docs.vercel.app/)
+- [NextAuth.js Docs](https://next-auth.js.org/)

@@ -1,5 +1,5 @@
 import {
-  pgTable,
+  pgSchema,
   bigint,
   boolean,
   varchar,
@@ -8,13 +8,12 @@ import {
   numeric,
   timestamp,
   index,
-  bigserial,
   unique,
   smallint,
   serial,
   smallserial,
   text,
-  primaryKey
+  bigserial
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { enumDiscountType, enumPaymentStatus } from "./enums";
@@ -22,7 +21,9 @@ import { semester, major } from "./academic";
 import { student } from "./user";
 import { enrollment } from "./course";
 
-export const scholarshipPolicy = pgTable(
+export const financeSchema = pgSchema("finance");
+
+export const scholarshipPolicy = financeSchema.table(
   "scholarship_policy",
   {
     id: smallserial().primaryKey().notNull(),
@@ -35,10 +36,10 @@ export const scholarshipPolicy = pgTable(
   (table) => [unique("scholarship_policy_code_key").on(table.code)],
 );
 
-export const studentScholarship = pgTable(
+export const studentScholarship = financeSchema.table(
   "student_scholarship",
   {
-    id: bigserial({ mode: "bigint" }).primaryKey().notNull(),
+    id: bigserial({ mode: "number" }).primaryKey().notNull(),
     studentId: uuid("student_id").notNull(),
     policyId: smallint("policy_id").notNull(),
     semesterId: smallint("semester_id").notNull(),
@@ -51,7 +52,7 @@ export const studentScholarship = pgTable(
   (table) => [
     index("idx_student_scholarship_student_id_semester_id").using(
       "btree",
-      table.studentId.asc().nullsLast().op("int2_ops"),
+      table.studentId.asc().nullsLast().op("uuid_ops"),
       table.semesterId.asc().nullsLast().op("int2_ops"),
     ),
     foreignKey({
@@ -72,7 +73,7 @@ export const studentScholarship = pgTable(
   ],
 );
 
-export const tuitionFeeConfig = pgTable(
+export const tuitionFeeConfig = financeSchema.table(
   "tuition_fee_config",
   {
     id: serial().primaryKey().notNull(),
@@ -93,7 +94,7 @@ export const tuitionFeeConfig = pgTable(
   ],
 );
 
-export const invoice = pgTable(
+export const invoice = financeSchema.table(
   "invoice",
   {
     id: uuid().primaryKey().notNull(),
@@ -130,10 +131,10 @@ export const invoice = pgTable(
   ],
 );
 
-export const invoiceDetail = pgTable(
+export const invoiceDetail = financeSchema.table(
   "invoice_detail",
   {
-    id: bigserial({ mode: "bigint" }).primaryKey().notNull(),
+    id: bigserial({ mode: "number" }).primaryKey().notNull(),
     invoiceId: uuid("invoice_id").notNull(),
     enrollmentId: bigint("enrollment_id", { mode: "number" }).notNull(),
     creditPrice: numeric("credit_price", { precision: 10, scale: 2 }).notNull(),
@@ -156,7 +157,7 @@ export const invoiceDetail = pgTable(
   ],
 );
 
-export const transaction = pgTable(
+export const transaction = financeSchema.table(
   "transaction",
   {
     id: uuid().primaryKey().notNull(),

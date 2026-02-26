@@ -1,6 +1,13 @@
 import { db } from "@/db";
-import { account, userSystemRole } from "@/db/schema";
+import { account, userSystemRole, accountAudit } from "@/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
+import { hash } from "bcryptjs";
+import { randomUUID } from "crypto";
+
+export const createAccountAudit = async (data: typeof accountAudit.$inferInsert) => {
+  const [newAudit] = await db.insert(accountAudit).values(data).returning();
+  return newAudit;
+};
 
 export const isAdmin = async (userId: string) => {
   const role = await db.query.userSystemRole.findFirst({
@@ -59,4 +66,111 @@ export const deleteAccount = async (id: string) => {
     .where(eq(account.id, id))
     .returning();
   return deleted;
+};
+
+// --- Workflow Services ---
+
+export interface AccountWorkflowContext {
+  performedBy?: string;
+  userAgent?: string | null;
+  ipAddress?: string | null;
+}
+
+export const createAccountWorkflow = async (
+  data: Omit<typeof account.$inferInsert, "id" | "pwdHash"> & { password?: string },
+  ctx: AccountWorkflowContext
+) => {
+  const { password, ...accountData } = data;
+  const id = randomUUID();
+  const pwdHash = password ? await hash(password, 10) : "system-generated-placeholder";
+
+  const newAccount = await createAccount({
+    ...accountData,
+    id,
+    pwdHash,
+  });
+
+  await createAccountAudit({
+    accountId: newAccount.id,
+    performedBy: ctx.performedBy,
+    action: "create_account",
+    newValue: {
+      username: newAccount.username,
+      email: newAccount.email,
+      type: newAccount.type,
+      status: newAccount.status,
+    },
+    userAgent: ctx.userAgent,
+    ipAddress: ctx.ipAddress,
+  });
+
+  return newAccount;
+};
+
+export const updateAccountWorkflow = async (
+  id: string,
+  data: Partial<Omit<typeof account.$inferInsert, "id" | "pwdHash"> & { password?: string }>,
+  ctx: AccountWorkflowContext
+) => {
+  const oldAccount = await getUserById(id);
+  if (!oldAccount) throw new Error("Account not found");
+
+  const { password, ...otherData } = data;
+  const dataToUpdate: Partial<typeof account.$inferInsert> = { ...otherData };
+
+  if (password) {
+    dataToUpdate.pwdHash = await hash(password, 10);
+  }
+
+  const updatedAccount = await updateAccount(id, dataToUpdate);
+
+  if (updatedAccount) {
+    await createAccountAudit({
+      accountId: id,
+      performedBy: ctx.performedBy,
+      action: "update_account",
+      oldValue: {
+        username: oldAccount.username,
+        email: oldAccount.email,
+        phone: oldAccount.phone,
+        type: oldAccount.type,
+        status: oldAccount.status,
+      },
+      newValue: {
+        username: updatedAccount.username,
+        email: updatedAccount.email,
+        phone: updatedAccount.phone,
+        type: updatedAccount.type,
+        status: updatedAccount.status,
+      },
+      userAgent: ctx.userAgent,
+      ipAddress: ctx.ipAddress,
+    });
+  }
+
+  return updatedAccount;
+};
+
+export const deleteAccountWorkflow = async (id: string, ctx: AccountWorkflowContext) => {
+  const oldAccount = await getUserById(id);
+  if (!oldAccount) throw new Error("Account not found");
+
+  const deletedAccount = await deleteAccount(id);
+
+  await createAccountAudit({
+    accountId: id,
+    performedBy: ctx.performedBy,
+    action: "delete_account",
+    oldValue: {
+      username: oldAccount.username,
+      email: oldAccount.email,
+      phone: oldAccount.phone,
+      type: oldAccount.type,
+      status: oldAccount.status,
+    },
+    userAgent: ctx.userAgent,
+    ipAddress: ctx.ipAddress,
+  });
+
+  return deletedAccount;
 };

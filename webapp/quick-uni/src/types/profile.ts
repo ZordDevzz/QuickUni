@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { selectProfileSchema } from "@/db/schemas/user";
+import { selectProfile } from "@/db/schemas/user";
 import { selectAccountSchema } from "@/db/schemas/auth";
 
-export const ProfileBaseSchema = selectProfileSchema;
+export const ProfileBaseSchema = selectProfile;
 export const AccountBaseSchema = selectAccountSchema;
 
 export type Profile = z.infer<typeof ProfileBaseSchema>;

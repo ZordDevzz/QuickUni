@@ -1,5 +1,5 @@
 import {
-  pgTable,
+  pgSchema,
   bigint,
   boolean,
   varchar,
@@ -10,15 +10,18 @@ import {
   unique,
   date,
   jsonb,
-  primaryKey
+  primaryKey,
+  bigserial
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { enumGender } from "./enums";
 import { account } from "./auth";
 
-export const profileSchema = pgTable("profile_schema", {
-  id: bigint({ mode: "number" }).primaryKey().notNull(),
+export const usersSchema = pgSchema("users");
+
+export const profileSchema = usersSchema.table("profile_schema", {
+  id: bigserial({ mode: "number" }).primaryKey().notNull(),
   effectiveDate: date("effective_date").notNull(),
   expiredDate: date("expired_date"),
   schemaCode: varchar("schema_code", { length: 255 }).notNull(),
@@ -30,7 +33,7 @@ export const profileSchema = pgTable("profile_schema", {
   des: text(),
 });
 
-export const profile = pgTable(
+export const profile = usersSchema.table(
   "profile",
   {
     id: uuid().primaryKey().notNull(),
@@ -66,10 +69,7 @@ export const profile = pgTable(
   ],
 );
 
-export const insertProfileSchema = createInsertSchema(profile);
-export const selectProfileSchema = createSelectSchema(profile);
-
-export const employee = pgTable(
+export const employee = usersSchema.table(
   "employee",
   {
     id: uuid().primaryKey().notNull(),
@@ -91,7 +91,7 @@ export const employee = pgTable(
   ],
 );
 
-export const student = pgTable(
+export const student = usersSchema.table(
   "student",
   {
     id: uuid().primaryKey().notNull(),
@@ -114,8 +114,8 @@ export const student = pgTable(
   ],
 );
 
-export const profileField = pgTable("profile_field", {
-  id: bigint({ mode: "number" }).primaryKey().notNull(),
+export const profileField = usersSchema.table("profile_field", {
+  id: bigserial({ mode: "number" }).primaryKey().notNull(),
   name: varchar({ length: 255 }),
   datatype: varchar({ length: 255 }),
   uiSection: varchar("ui_section", { length: 255 }).notNull(),
@@ -128,7 +128,7 @@ export const profileField = pgTable("profile_field", {
   des: text(),
 });
 
-export const profileSchemaField = pgTable(
+export const profileSchemaField = usersSchema.table(
   "profile_schema_field",
   {
     fieldId: bigint("field_id", { mode: "number" }).notNull(),
@@ -152,3 +152,12 @@ export const profileSchemaField = pgTable(
     }),
   ],
 );
+
+export const insertProfile = createInsertSchema(profile);
+export const selectProfile = createSelectSchema(profile);
+
+export const insertProfileSchema = createInsertSchema(profileSchema);
+export const selectProfileSchema = createSelectSchema(profileSchema);
+
+export const insertProfileField = createInsertSchema(profileField);
+export const selectProfileField = createSelectSchema(profileField);

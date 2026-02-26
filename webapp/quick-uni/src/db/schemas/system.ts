@@ -1,5 +1,5 @@
 import {
-  pgTable,
+  pgSchema,
   bigint,
   boolean,
   varchar,
@@ -8,17 +8,19 @@ import {
   timestamp,
   text,
   jsonb,
-  bigserial,
   json,
   date,
-  primaryKey
+  primaryKey,
+  bigserial
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { account } from "./auth";
 import { employee } from "./user";
 import { department } from "./academic";
 
-export const systemSetting = pgTable(
+export const systemSchema = pgSchema("system");
+
+export const systemSetting = systemSchema.table(
   "system_setting",
   {
     key: varchar({ length: 255 }).primaryKey().notNull(),
@@ -39,10 +41,10 @@ export const systemSetting = pgTable(
   ],
 );
 
-export const systemAuditLog = pgTable(
+export const systemAuditLog = systemSchema.table(
   "system_audit_log",
   {
-    id: bigserial({ mode: "bigint" }).primaryKey().notNull(),
+    id: bigserial({ mode: "number" }).primaryKey().notNull(),
     actorId: uuid("actor_id").notNull(),
     action: varchar({ length: 50 }).notNull(),
     targetResource: varchar("target_resource", { length: 100 }),
@@ -62,7 +64,7 @@ export const systemAuditLog = pgTable(
   ],
 );
 
-export const featureFlag = pgTable(
+export const featureFlag = systemSchema.table(
   "feature_flag",
   {
     id: varchar({ length: 255 }).primaryKey().notNull(),
@@ -89,7 +91,7 @@ export const featureFlag = pgTable(
   ],
 );
 
-export const featureFlagAudit = pgTable(
+export const featureFlagAudit = systemSchema.table(
   "feature_flag_audit",
   {
     id: bigint({ mode: "number" }).primaryKey().notNull(),
@@ -117,14 +119,14 @@ export const featureFlagAudit = pgTable(
   ],
 );
 
-export const archive = pgTable("archive", {
+export const archive = systemSchema.table("archive", {
   id: bigint({ mode: "number" }).primaryKey().notNull(),
   origin: varchar({ length: 255 }),
   data: json(),
   createAt: timestamp("create_at", { withTimezone: true, mode: "string" }),
 });
 
-export const departmentEmployment = pgTable(
+export const departmentEmployment = systemSchema.table(
   "department_employment",
   {
     employeeId: uuid("employee_id").notNull(),

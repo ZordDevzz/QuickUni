@@ -1,7 +1,6 @@
 import {
-  pgTable,
+  pgSchema,
   bigint,
-  boolean,
   varchar,
   foreignKey,
   uuid,
@@ -11,15 +10,17 @@ import {
   smallint,
   jsonb,
   smallserial,
-  bigserial,
   uniqueIndex,
-  primaryKey
+  primaryKey,
+  bigserial
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { semester, educationType, major, subject } from "./academic";
 import { employee, student } from "./user";
 
-export const courseClassType = pgTable(
+export const courseSchema = pgSchema("course");
+
+export const courseClassType = courseSchema.table(
   "course_class_type",
   {
     id: smallint().primaryKey().notNull(),
@@ -30,7 +31,7 @@ export const courseClassType = pgTable(
   (table) => [unique("course_class_type_code_key").on(table.code)],
 );
 
-export const courseClass = pgTable(
+export const courseClass = courseSchema.table(
   "course_class",
   {
     id: uuid().primaryKey().notNull(),
@@ -74,7 +75,7 @@ export const courseClass = pgTable(
   ],
 );
 
-export const mainClass = pgTable(
+export const mainClass = courseSchema.table(
   "main_class",
   {
     id: uuid().primaryKey().notNull(),
@@ -104,14 +105,14 @@ export const mainClass = pgTable(
   ],
 );
 
-export const classRole = pgTable("class_role", {
+export const classRole = courseSchema.table("class_role", {
   id: smallserial().primaryKey().notNull(),
   code: varchar({ length: 30 }).notNull(),
   name: varchar({ length: 255 }),
   des: varchar({ length: 255 }),
 });
 
-export const mainClassMember = pgTable(
+export const mainClassMember = courseSchema.table(
   "main_class_member",
   {
     studentId: uuid("student_id").notNull(),
@@ -141,10 +142,10 @@ export const mainClassMember = pgTable(
   ],
 );
 
-export const courseMaterial = pgTable(
+export const courseMaterial = courseSchema.table(
   "course_material",
   {
-    id: bigserial({ mode: "bigint" }).primaryKey().notNull(),
+    id: bigserial({ mode: "number" }).primaryKey().notNull(),
     courseClassId: uuid("course_class_id").notNull(),
     title: varchar({ length: 255 }).notNull(),
     fileUrl: text("file_url").notNull(),
@@ -168,7 +169,7 @@ export const courseMaterial = pgTable(
   ],
 );
 
-export const assignment = pgTable(
+export const assignment = courseSchema.table(
   "assignment",
   {
     id: bigint({ mode: "number" }).primaryKey().notNull(),
@@ -185,16 +186,16 @@ export const assignment = pgTable(
   ],
 );
 
-export const enrollStatus = pgTable("enroll_status", {
+export const enrollStatus = courseSchema.table("enroll_status", {
   id: smallint().primaryKey().notNull(),
   code: varchar({ length: 30 }),
   name: varchar({ length: 255 }),
 });
 
-export const enrollment = pgTable(
+export const enrollment = courseSchema.table(
   "enrollment",
   {
-    id: bigserial({ mode: "bigint" }).primaryKey().notNull(),
+    id: bigserial({ mode: "number" }).primaryKey().notNull(),
     status: smallint(),
     studentId: uuid("student_id").notNull(),
     courseClassId: uuid("course_class_id").notNull(),

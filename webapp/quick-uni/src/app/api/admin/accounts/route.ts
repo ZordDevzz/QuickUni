@@ -1,9 +1,7 @@
 import { getAuthSession } from "@/services/auth";
-import { isAdmin, getAccounts, createAccount } from "@/services/user";
+import { isAdmin, getAccounts, createAccountWorkflow } from "@/services/user";
 import { createAccountSchema } from "@/lib/validators/account";
 import { NextResponse } from "next/server";
-import { hash } from "bcryptjs";
-import { randomUUID } from "crypto";
 
 export async function GET(req: Request) {
   const session = await getAuthSession(req);
@@ -26,15 +24,12 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const validatedData = createAccountSchema.parse(body);
+    const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0] || null;
 
-    const hashedPassword = await hash(validatedData.password, 10);
-    
-    const { password, ...accountData } = validatedData;
-    
-    const newAccount = await createAccount({
-      ...accountData,
-      id: randomUUID(),
-      pwdHash: hashedPassword,
+    const newAccount = await createAccountWorkflow(validatedData, {
+      performedBy: session.user.id,
+      userAgent: req.headers.get("user-agent"),
+      ipAddress,
     });
 
     const { pwdHash, ...safeAccount } = newAccount;

@@ -2,24 +2,30 @@
 
 import { revalidatePath } from "next/cache";
 import { 
-  createAccount, 
-  updateAccount, 
-  deleteAccount, 
+  updateAccountWorkflow,
+  deleteAccountWorkflow,
 } from "@/services/user";
 import { 
   updateProfile, 
 } from "@/services/profile";
+import { 
+  createProfileWorkflow,
+  issueAccountWorkflow,
+  linkProfileToEntity,
+} from "@/services/onboarding";
 import { createAccountSchema, updateAccountAdminSchema } from "@/lib/validators/account";
-import { updateProfileSchema } from "@/lib/validators/profile";
-import { hash } from "bcryptjs";
-import { randomUUID } from "crypto";
+import { updateProfileSchema, createProfileSchema } from "@/lib/validators/profile";
 import { z } from "zod";
-import { account as accountTable } from "@/db/schemas/auth";
 import { profile as profileTable } from "@/db/schemas/user";
+import { nullifyEmptyStrings } from "@/lib/utils";
+import { getAuthSession } from "@/services/auth";
+import { headers } from "next/headers";
+import { randomUUID } from "crypto";
 
 type CreateAccountInput = z.infer<typeof createAccountSchema>;
 type UpdateAccountInput = z.infer<typeof updateAccountAdminSchema>;
 type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+type CreateProfileInput = z.infer<typeof createProfileSchema>;
 
 /**
  * Result type for all admin actions
@@ -30,23 +36,18 @@ export type ActionResponse = {
 };
 
 // Account Actions
-export async function createAccountAction(formData: CreateAccountInput): Promise<ActionResponse> {
+export async function createAccountAction(formData: CreateAccountInput, profileId?: string): Promise<ActionResponse> {
   try {
-    const validatedData = createAccountSchema.parse(formData);
-    const hashedPassword = await hash(validatedData.password, 10);
+    const session = await getAuthSession();
+    const headerList = await headers();
+    const ipAddress = headerList.get("x-forwarded-for")?.split(",")[0] || null;
+    const validatedData = nullifyEmptyStrings(createAccountSchema.parse(formData));
     
-    // Transform DTO to DB Insert Type
-    const dbData: typeof accountTable.$inferInsert = {
-      id: randomUUID(),
-      username: validatedData.username,
-      email: validatedData.email,
-      phone: validatedData.phone,
-      type: validatedData.type,
-      status: validatedData.status,
-      pwdHash: hashedPassword,
-    };
-    
-    await createAccount(dbData);
+    await issueAccountWorkflow(validatedData, profileId, {
+      performedBy: session?.user?.id,
+      userAgent: headerList.get("user-agent"),
+      ipAddress,
+    });
 
     revalidatePath("/admin/accounts");
     return { success: true };
@@ -58,24 +59,50 @@ export async function createAccountAction(formData: CreateAccountInput): Promise
   }
 }
 
+export async function createProfileAction(formData: CreateProfileInput): Promise<ActionResponse> {
+  try {
+    const validatedData = nullifyEmptyStrings(createProfileSchema.parse(formData));
+    await createProfileWorkflow({
+      ...validatedData,
+      id: randomUUID(),
+      dob: new Date(validatedData.dob).toISOString().split('T')[0],
+    });
+    revalidatePath("/admin/profiles");
+    return { success: true };
+  } catch (error: unknown) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Failed to create profile" 
+    };
+  }
+}
+
+export async function linkProfileToEntityAction(profileId: string, type: "student" | "employee", code: string): Promise<ActionResponse> {
+  try {
+    await linkProfileToEntity(profileId, type, { code });
+    revalidatePath("/admin/profiles");
+    return { success: true };
+  } catch (error: unknown) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Failed to link profile" 
+    };
+  }
+}
+
 export async function updateAccountAction(id: string, formData: UpdateAccountInput): Promise<ActionResponse> {
   try {
-    const validatedData = updateAccountAdminSchema.parse(formData);
+    const session = await getAuthSession();
+    const headerList = await headers();
+    const ipAddress = headerList.get("x-forwarded-for")?.split(",")[0] || null;
+    const validatedData = nullifyEmptyStrings(updateAccountAdminSchema.parse(formData));
     
-    // Map DTO fields to DB Update Type
-    const dataToUpdate: Partial<typeof accountTable.$inferInsert> = {};
-    
-    if (validatedData.username) dataToUpdate.username = validatedData.username;
-    if (validatedData.email) dataToUpdate.email = validatedData.email;
-    if (validatedData.phone) dataToUpdate.phone = validatedData.phone;
-    if (validatedData.type) dataToUpdate.type = validatedData.type;
-    if (validatedData.status) dataToUpdate.status = validatedData.status;
-    
-    if (validatedData.password) {
-      dataToUpdate.pwdHash = await hash(validatedData.password, 10);
-    }
+    await updateAccountWorkflow(id, validatedData, {
+      performedBy: session?.user?.id,
+      userAgent: headerList.get("user-agent"),
+      ipAddress,
+    });
 
-    await updateAccount(id, dataToUpdate);
     revalidatePath("/admin/accounts");
     return { success: true };
   } catch (error: unknown) {
@@ -88,7 +115,16 @@ export async function updateAccountAction(id: string, formData: UpdateAccountInp
 
 export async function deleteAccountAction(id: string): Promise<ActionResponse> {
   try {
-    await deleteAccount(id);
+    const session = await getAuthSession();
+    const headerList = await headers();
+    const ipAddress = headerList.get("x-forwarded-for")?.split(",")[0] || null;
+    
+    await deleteAccountWorkflow(id, {
+      performedBy: session?.user?.id,
+      userAgent: headerList.get("user-agent"),
+      ipAddress,
+    });
+
     revalidatePath("/admin/accounts");
     return { success: true };
   } catch (error: unknown) {
@@ -102,7 +138,7 @@ export async function deleteAccountAction(id: string): Promise<ActionResponse> {
 // Profile Actions
 export async function updateProfileAction(id: string, formData: UpdateProfileInput): Promise<ActionResponse> {
   try {
-    const validatedData = updateProfileSchema.parse(formData);
+    const validatedData = nullifyEmptyStrings(updateProfileSchema.parse(formData));
     
     // Map DTO to DB Update Type
     const dataToUpdate: Partial<typeof profileTable.$inferInsert> = {

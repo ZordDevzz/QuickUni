@@ -20,5 +20,28 @@ export function formatDate(date: string | Date | number) {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-  }).format(d);
-}
+    }).format(d);
+  }
+  
+  /**
+   * Recursively converts all empty strings in an object to null.
+   * Useful for processing form data before database insertion.
+   */
+  export function nullifyEmptyStrings<T>(obj: T): T {
+    if (obj === null || obj === undefined || typeof obj !== "object") {
+      return obj === "" ? (null as unknown as T) : obj;
+    }
+  
+      if (Array.isArray(obj)) {
+        return obj.map(nullifyEmptyStrings) as unknown as T;
+      }
+    
+      const result = {} as Record<string, unknown>;
+      for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          const value = (obj as Record<string, unknown>)[key];
+          result[key] = value === "" ? null : nullifyEmptyStrings(value);
+        }
+      }
+      return result as unknown as T;
+    }  

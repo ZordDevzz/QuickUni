@@ -1,5 +1,5 @@
 import { encode } from "next-auth/jwt";
-import { getUserByUsername } from "@/services/user";
+import { getUserByUsername, createAccountAudit } from "@/services/user";
 import { compare } from "bcryptjs";
 import { NextResponse } from "next/server";
 import { loginFormSchema } from "@/lib/validators/auth/form.schema";
@@ -24,6 +24,16 @@ export async function POST(req: Request) {
     if (!isValidPassword) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
+
+    // Audit log for login
+    const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0] || null;
+    await createAccountAudit({
+      accountId: user.id,
+      performedBy: user.id,
+      action: "login",
+      userAgent: req.headers.get("user-agent"),
+      ipAddress,
+    });
 
     // Generate JWT token that NextAuth can recognize
     const token = await encode({

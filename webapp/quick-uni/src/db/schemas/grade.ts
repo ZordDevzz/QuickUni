@@ -1,5 +1,5 @@
 import {
-  pgTable,
+  pgSchema,
   bigint,
   varchar,
   foreignKey,
@@ -7,27 +7,28 @@ import {
   numeric,
   timestamp,
   index,
-  bigserial,
   uniqueIndex,
   smallint,
   smallserial,
-  primaryKey
+  bigserial
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { employee } from "./user";
 import { enrollment, assignment } from "./course";
 
-export const gradeType = pgTable("grade_type", {
+export const gradeSchema = pgSchema("grade");
+
+export const gradeType = gradeSchema.table("grade_type", {
   id: bigint({ mode: "number" }).primaryKey().notNull(),
   code: varchar({ length: 30 }).notNull(),
   weight: smallint().notNull(),
   name: varchar({ length: 255 }),
 });
 
-export const grade = pgTable(
+export const grade = gradeSchema.table(
   "grade",
   {
-    id: bigserial({ mode: "bigint" }).primaryKey().notNull(),
+    id: bigserial({ mode: "number" }).primaryKey().notNull(),
     enrollmentId: bigint("enrollment_id", { mode: "number" }).notNull(),
     typeId: bigint("type_id", { mode: "number" }).notNull(),
     assignmentId: bigint("assignment_id", { mode: "number" }),
@@ -67,7 +68,7 @@ export const grade = pgTable(
   ],
 );
 
-export const gradeAudit = pgTable(
+export const gradeAudit = gradeSchema.table(
   "grade_audit",
   {
     id: bigint({ mode: "number" }).primaryKey().notNull(),
@@ -94,7 +95,7 @@ export const gradeAudit = pgTable(
   ],
 );
 
-export const gradeScale = pgTable("grade_scale", {
+export const gradeScale = gradeSchema.table("grade_scale", {
   id: smallserial().primaryKey().notNull(),
   minScore10: numeric("min_score_10", { precision: 4, scale: 2 }),
   letterGrade: varchar("letter_grade", { length: 5 }),

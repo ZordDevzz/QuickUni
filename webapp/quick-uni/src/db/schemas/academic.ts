@@ -1,6 +1,5 @@
 import {
-  pgTable,
-  bigint,
+  pgSchema,
   boolean,
   varchar,
   foreignKey,
@@ -17,7 +16,9 @@ import {
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
-export const semester = pgTable(
+export const academicSchema = pgSchema("academic");
+
+export const semester = academicSchema.table(
   "semester",
   {
     id: smallserial().primaryKey().notNull(),
@@ -31,7 +32,7 @@ export const semester = pgTable(
   (table) => [unique("semester_code_key").on(table.code)],
 );
 
-export const department = pgTable(
+export const department = academicSchema.table(
   "department",
   {
     id: uuid().primaryKey().notNull(),
@@ -47,7 +48,7 @@ export const department = pgTable(
   (table) => [unique("department_code_key").on(table.code)],
 );
 
-export const major = pgTable(
+export const major = academicSchema.table(
   "major",
   {
     id: uuid().primaryKey().notNull(),
@@ -70,7 +71,7 @@ export const major = pgTable(
   ],
 );
 
-export const curriculum = pgTable(
+export const curriculum = academicSchema.table(
   "curriculum",
   {
     id: serial().primaryKey().notNull(),
@@ -96,7 +97,7 @@ export const curriculum = pgTable(
   ],
 );
 
-export const subject = pgTable(
+export const subject = academicSchema.table(
   "subject",
   {
     id: uuid().primaryKey().notNull(),
@@ -114,7 +115,7 @@ export const subject = pgTable(
   (table) => [unique("subject_code_key").on(table.code)],
 );
 
-export const subjectPrerequisite = pgTable(
+export const subjectPrerequisite = academicSchema.table(
   "subject_prerequisite",
   {
     subjectId: uuid("subject_id").notNull(),
@@ -139,7 +140,7 @@ export const subjectPrerequisite = pgTable(
   ],
 );
 
-export const knowledgeBlock = pgTable(
+export const knowledgeBlock = academicSchema.table(
   "knowledge_block",
   {
     id: smallserial().primaryKey().notNull(),
@@ -158,7 +159,7 @@ export const knowledgeBlock = pgTable(
   ],
 );
 
-export const curriculumSubject = pgTable(
+export const curriculumSubject = academicSchema.table(
   "curriculum_subject",
   {
     subjectId: uuid("subject_id").notNull(),
@@ -190,7 +191,7 @@ export const curriculumSubject = pgTable(
   ],
 );
 
-export const educationType = pgTable("education_type", {
+export const educationType = academicSchema.table("education_type", {
   id: smallserial().primaryKey().notNull(),
   code: varchar({ length: 30 }).notNull(),
   name: varchar({ length: 255 }).notNull(),
@@ -198,7 +199,7 @@ export const educationType = pgTable("education_type", {
   length: smallint().notNull(),
 });
 
-export const registrationPeriod = pgTable(
+export const registrationPeriod = academicSchema.table(
   "registration_period",
   {
     id: serial().primaryKey().notNull(),

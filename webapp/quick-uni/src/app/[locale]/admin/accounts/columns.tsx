@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button"
 import { AccountRowActions } from "@/components/features/auth/AccountRowActions"
 import { Account } from "@/types/profile"
 import { FormattedDate } from "@/components/shared/FormattedDate"
+import { TranslationFunction } from "@/types/i18n"
 
-export const columns: ColumnDef<Account>[] = [
+export const getColumns = (t: TranslationFunction): ColumnDef<Account>[] => [
   {
     accessorKey: "username",
     header: ({ column }) => {
@@ -17,7 +18,7 @@ export const columns: ColumnDef<Account>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Username
+          {t("Username")}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
@@ -25,12 +26,12 @@ export const columns: ColumnDef<Account>[] = [
   },
   {
     accessorKey: "email",
-    header: "Email",
+    header: t("Email"),
     cell: ({ row }) => row.getValue("email") || "N/A",
   },
   {
     accessorKey: "type",
-    header: "Type",
+    header: t("Type"),
     cell: ({ row }) => {
       const type = row.getValue("type") as string
       return (
@@ -43,7 +44,7 @@ export const columns: ColumnDef<Account>[] = [
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: t("Status"),
     cell: ({ row }) => {
       const status = row.getValue("status") as string
       return (
@@ -59,11 +60,12 @@ export const columns: ColumnDef<Account>[] = [
   },
   {
     accessorKey: "createAt",
-    header: "Created At",
+    header: t("CreatedAt"),
     cell: ({ row }) => <FormattedDate date={row.getValue("createAt")} />,
   },
   {
     id: "actions",
+    header: () => <div className="text-right">{t("Actions")}</div>,
     cell: ({ row }) => <div className="flex justify-end"><AccountRowActions account={row.original} /></div>,
   },
 ]

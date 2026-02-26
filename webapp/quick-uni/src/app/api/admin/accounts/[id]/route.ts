@@ -1,8 +1,12 @@
 import { getAuthSession } from "@/services/auth";
-import { isAdmin, getUserById, updateAccount, deleteAccount } from "@/services/user";
+import {
+  isAdmin,
+  getUserById,
+  updateAccountWorkflow,
+  deleteAccountWorkflow,
+} from "@/services/user";
 import { updateAccountAdminSchema } from "@/lib/validators/account";
 import { NextResponse } from "next/server";
-import { hash } from "bcryptjs";
 
 export async function GET(
   req: Request,
@@ -19,6 +23,7 @@ export async function GET(
     return NextResponse.json({ error: "Account not found" }, { status: 404 });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { pwdHash, ...safeAccount } = account;
   return NextResponse.json(safeAccount);
 }
@@ -33,30 +38,32 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  
+
   try {
     const body = await req.json();
     const validatedData = updateAccountAdminSchema.parse(body);
+    const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0] || null;
 
-    const { password, ...otherData } = validatedData;
-    const dataToUpdate: Record<string, unknown> = { ...otherData };
-    
-    if (password) {
-      dataToUpdate.pwdHash = await hash(password, 10);
-    }
+    const updated = await updateAccountWorkflow(id, validatedData, {
+      performedBy: session.user.id,
+      userAgent: req.headers.get("user-agent"),
+      ipAddress,
+    });
 
-    const updated = await updateAccount(id, dataToUpdate);
-    if (!updated) {
-      return NextResponse.json({ error: "Account not found" }, { status: 404 });
-    }
-
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { pwdHash, ...safeAccount } = updated;
     return NextResponse.json(safeAccount);
   } catch (error) {
     if (error instanceof Error) {
+      if (error.message === "Account not found") {
+        return NextResponse.json({ error: error.message }, { status: 404 });
+      }
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -70,11 +77,26 @@ export async function DELETE(
   }
 
   const { id } = await params;
-  const deleted = await deleteAccount(id);
-  
-  if (!deleted) {
-    return NextResponse.json({ error: "Account not found" }, { status: 404 });
-  }
+  const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0] || null;
 
-  return NextResponse.json({ message: "Account deleted successfully" });
+  try {
+    await deleteAccountWorkflow(id, {
+      performedBy: session.user.id,
+      userAgent: req.headers.get("user-agent"),
+      ipAddress,
+    });
+
+    return NextResponse.json({ message: "Account deleted successfully" });
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === "Account not found") {
+        return NextResponse.json({ error: error.message }, { status: 404 });
+      }
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
 }

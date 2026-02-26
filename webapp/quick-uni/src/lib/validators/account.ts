@@ -13,7 +13,7 @@ export const createAccountSchema = insertAccountSchema.extend({
 });
 
 export const updateAccountAdminSchema = insertAccountSchema.extend({
-  password: z.string().min(6).optional(),
+  password: z.string().min(6).optional().or(z.literal("")),
 }).omit({
   id: true,
   pwdHash: true,

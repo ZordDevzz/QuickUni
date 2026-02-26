@@ -56,7 +56,7 @@ export function AccountRowActions({ account }: AccountRowActionsProps) {
             <Pencil className="h-4 w-4" />
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-106.25">
           <DialogHeader>
             <DialogTitle>{t("EditTitle", { username: account.username })}</DialogTitle>
           </DialogHeader>

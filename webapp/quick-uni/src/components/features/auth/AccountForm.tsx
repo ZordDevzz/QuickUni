@@ -9,15 +9,16 @@ import { Field, FieldLabel, FieldError, FieldContent } from "@/components/ui/fie
 import { notify } from "@/lib/custom-toast";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
-import { Account } from "@/types/profile";
+import { Account, Profile } from "@/types/profile";
 import { useTranslations } from "next-intl";
 
 interface AccountFormProps {
   account?: Account; // If provided, we are in edit mode
   onSuccess?: () => void;
+  profiles?: Profile[]; // List of available profiles to link
 }
 
-export function AccountForm({ account, onSuccess }: AccountFormProps) {
+export function AccountForm({ account, onSuccess, profiles = [] }: AccountFormProps) {
   const router = useRouter();
   const isEdit = !!account;
   const t = useTranslations("Account");
@@ -31,6 +32,7 @@ export function AccountForm({ account, onSuccess }: AccountFormProps) {
       type: (account?.type as "student" | "employee" | "tech" | "dev") || "student",
       status: (account?.status as "active" | "suspended" | "banned" | "expired") || "active",
       password: "",
+      profileId: "",
     },
     onSubmit: async ({ value }) => {
       try {
@@ -45,11 +47,12 @@ export function AccountForm({ account, onSuccess }: AccountFormProps) {
 
         let result;
         if (isEdit && account) {
-          const { password, ...rest } = value;
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { password, profileId, ...rest } = value;
           const updateData = password ? value : rest;
           result = await updateAccountAction(account.id, updateData as z.infer<typeof updateAccountAdminSchema>);
         } else {
-          result = await createAccountAction(value as z.infer<typeof createAccountSchema>);
+          result = await createAccountAction(value as z.infer<typeof createAccountSchema>, value.profileId || undefined);
         }
 
         if (result.success) {
@@ -205,6 +208,39 @@ export function AccountForm({ account, onSuccess }: AccountFormProps) {
           )}
         </form.Field>
       </div>
+
+      {!isEdit && (
+        <form.Subscribe selector={(state) => state.values.type}>
+          {(type) => type !== "dev" && (
+            <form.Field name="profileId">
+              {(field) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name}>{t("LinkToProfile")}</FieldLabel>
+                  <FieldContent>
+                    <select
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30"
+                    >
+                      <option value="">{t("SelectProfile")}</option>
+                      {profiles
+                        .filter((p) => !p.accountId)
+                        .map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.fullname} ({p.nationalId})
+                          </option>
+                        ))}
+                    </select>
+                    <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
+                  </FieldContent>
+                </Field>
+              )}
+            </form.Field>
+          )}
+        </form.Subscribe>
+      )}
 
       <form.Field 
         name="password"

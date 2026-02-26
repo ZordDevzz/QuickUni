@@ -1,5 +1,5 @@
 import {
-  pgTable,
+  pgSchema,
   bigint,
   boolean,
   varchar,
@@ -7,14 +7,14 @@ import {
   uuid,
   timestamp,
   index,
-  bigserial,
   unique,
   uniqueIndex,
   text,
   serial,
   jsonb,
   integer,
-  primaryKey
+  primaryKey,
+  bigserial
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import {
@@ -25,7 +25,9 @@ import {
 } from "./enums";
 import { account } from "./auth";
 
-export const notificationTemplate = pgTable(
+export const communicationSchema = pgSchema("communication");
+
+export const notificationTemplate = communicationSchema.table(
   "notification_template",
   {
     id: serial().primaryKey().notNull(),
@@ -42,7 +44,7 @@ export const notificationTemplate = pgTable(
   (table) => [unique("notification_template_code_key").on(table.code)],
 );
 
-export const notification = pgTable(
+export const notification = communicationSchema.table(
   "notification",
   {
     id: uuid().primaryKey().notNull(),
@@ -69,10 +71,10 @@ export const notification = pgTable(
   ],
 );
 
-export const notificationRecipient = pgTable(
+export const notificationRecipient = communicationSchema.table(
   "notification_recipient",
   {
-    id: bigserial({ mode: "bigint" }).primaryKey().notNull(),
+    id: bigserial({ mode: "number" }).primaryKey().notNull(),
     notificationId: uuid("notification_id").notNull(),
     recipientId: uuid("recipient_id").notNull(),
     channel: notificationChannel().notNull(),
@@ -86,12 +88,12 @@ export const notificationRecipient = pgTable(
   (table) => [
     index("notification_recipient_idx_notif_feed").using(
       "btree",
-      table.recipientId.asc().nullsLast().op("timestamptz_ops"),
+      table.recipientId.asc().nullsLast().op("uuid_ops"),
       table.createAt.asc().nullsLast().op("timestamptz_ops"),
     ),
     index("notification_recipient_idx_notif_unread_count").using(
       "btree",
-      table.recipientId.asc().nullsLast().op("enum_ops"),
+      table.recipientId.asc().nullsLast().op("uuid_ops"),
       table.status.asc().nullsLast().op("enum_ops"),
     ),
     foreignKey({
@@ -107,7 +109,7 @@ export const notificationRecipient = pgTable(
   ],
 );
 
-export const userNotificationSetting = pgTable(
+export const userNotificationSetting = communicationSchema.table(
   "user_notification_setting",
   {
     userId: uuid("user_id").notNull(),
@@ -128,7 +130,7 @@ export const userNotificationSetting = pgTable(
   ],
 );
 
-export const systemBroadcast = pgTable("system_broadcast", {
+export const systemBroadcast = communicationSchema.table("system_broadcast", {
   id: serial().primaryKey().notNull(),
   title: varchar({ length: 255 }),
   body: text(),
@@ -140,7 +142,7 @@ export const systemBroadcast = pgTable("system_broadcast", {
   expireAt: timestamp("expire_at", { withTimezone: true, mode: "string" }),
 });
 
-export const systemBroadcastRead = pgTable(
+export const systemBroadcastRead = communicationSchema.table(
   "system_broadcast_read",
   {
     broadcastId: integer("broadcast_id").notNull(),
@@ -168,7 +170,7 @@ export const systemBroadcastRead = pgTable(
   ],
 );
 
-export const chatGroup = pgTable(
+export const chatGroup = communicationSchema.table(
   "chat_group",
   {
     id: uuid().primaryKey().notNull(),
@@ -187,10 +189,10 @@ export const chatGroup = pgTable(
   ],
 );
 
-export const chatGroupMember = pgTable(
+export const chatGroupMember = communicationSchema.table(
   "chat_group_member",
   {
-    id: bigserial({ mode: "bigint" }).primaryKey().notNull(),
+    id: bigserial({ mode: "number" }).primaryKey().notNull(),
     groupId: uuid("group_id").notNull(),
     uid: uuid().notNull(),
     createAt: timestamp("create_at", { withTimezone: true, mode: "string" }),
@@ -216,10 +218,10 @@ export const chatGroupMember = pgTable(
   ],
 );
 
-export const message = pgTable(
+export const message = communicationSchema.table(
   "message",
   {
-    id: bigserial({ mode: "bigint" }).primaryKey().notNull(),
+    id: bigserial({ mode: "number" }).primaryKey().notNull(),
     replyToId: bigint("reply_to_id", { mode: "number" }),
     type: varchar({ length: 255 }),
     groupId: uuid("group_id"),
@@ -251,7 +253,7 @@ export const message = pgTable(
   ],
 );
 
-export const messageRead = pgTable(
+export const messageRead = communicationSchema.table(
   "message_read",
   {
     messageId: bigint("message_id", { mode: "number" }).notNull(),
@@ -275,7 +277,7 @@ export const messageRead = pgTable(
   ],
 );
 
-export const groupRole = pgTable(
+export const groupRole = communicationSchema.table(
   "group_role",
   {
     id: bigint({ mode: "number" }).primaryKey().notNull(),
@@ -292,7 +294,7 @@ export const groupRole = pgTable(
   ],
 );
 
-export const memberRole = pgTable(
+export const memberRole = communicationSchema.table(
   "member_role",
   {
     roleId: bigint("role_id", { mode: "number" }).notNull(),
@@ -316,12 +318,15 @@ export const memberRole = pgTable(
   ],
 );
 
-export const groupAuthority = pgTable("group_authority", {
-  id: varchar({ length: 255 }).primaryKey().notNull(),
-  name: varchar({ length: 255 }).notNull(),
-});
+export const groupAuthority = communicationSchema.table(
+  "group_authority",
+  {
+    id: varchar({ length: 255 }).primaryKey().notNull(),
+    name: varchar({ length: 255 }).notNull(),
+  },
+);
 
-export const groupRoleAuthority = pgTable(
+export const groupRoleAuthority = communicationSchema.table(
   "group_role_authority",
   {
     authorityId: varchar("authority_id", { length: 255 }).notNull(),

@@ -1,24 +1,26 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import { updateProfileSchema } from "@/lib/validators/profile";
-import { updateProfileAction } from "@/actions/admin";
+import { createProfileSchema, updateProfileSchema } from "@/lib/validators/profile";
+import { createProfileAction, updateProfileAction } from "@/actions/admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldError, FieldContent } from "@/components/ui/field";
 import { notify } from "@/lib/custom-toast";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
-import { ProfileWithAccount } from "@/types/profile";
+import { ProfileWithAccount, Profile } from "@/types/profile";
 import { useTranslations } from "next-intl";
 
 interface ProfileFormProps {
-  profile: ProfileWithAccount;
+  profile?: ProfileWithAccount | Profile; // Optional for creation
   onSuccess?: () => void;
+  schemas?: { id: number; schemaCode: string }[];
 }
 
-export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
+export function ProfileForm({ profile, onSuccess, schemas = [] }: ProfileFormProps) {
   const router = useRouter();
+  const isEdit = !!profile;
   const t = useTranslations("Profile");
   const toastT = useTranslations("Toast");
 
@@ -32,20 +34,27 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
       nationalId: profile?.nationalId || "",
       ethnic: profile?.ethnic || "",
       religious: profile?.religious || "",
+      schemaId: profile?.schemaId || (schemas.length > 0 ? schemas[0].id : 0),
     },
     onSubmit: async ({ value }) => {
       try {
-        const validation = updateProfileSchema.safeParse(value);
+        const schema = isEdit ? updateProfileSchema : createProfileSchema;
+        const validation = schema.safeParse(value);
         if (!validation.success) {
            const firstError = validation.error.issues[0]?.message || toastT("ValidationFailed");
            notify(firstError, { type: "error" });
            return;
         }
 
-        const result = await updateProfileAction(profile.id, validation.data);
+        let result;
+        if (isEdit && profile) {
+          result = await updateProfileAction(profile.id, validation.data as z.infer<typeof updateProfileSchema>);
+        } else {
+          result = await createProfileAction(value as z.infer<typeof createProfileSchema>);
+        }
 
         if (result.success) {
-          notify(toastT("ProfileUpdated"), { type: "success" });
+          notify(isEdit ? toastT("AccountUpdated") : toastT("AccountCreated"), { type: "success" });
           onSuccess?.();
           router.refresh();
         } else {
@@ -59,9 +68,10 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
   });
 
   const getFieldError = (name: string) => {
-    const res = updateProfileSchema.safeParse(form.state.values);
+    const schema = isEdit ? updateProfileSchema : createProfileSchema;
+    const res = schema.safeParse(form.state.values);
     if (!res.success) {
-      const err = res.error.issues.find((e: z.ZodIssue) => e.path[0] === name);
+      const err = res.error.issues.find((e: z.core.$ZodIssue) => e.path[0] === name);
       return err?.message;
     }
     return undefined;
@@ -76,6 +86,36 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
       }}
       className="space-y-4"
     >
+      {!isEdit && (
+        <form.Field 
+          name="schemaId"
+          validators={{ onChange: () => getFieldError('schemaId') }}
+        >
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t("ProfileSchema")}</FieldLabel>
+              <FieldContent>
+                <select
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(Number(e.target.value))}
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30"
+                >
+                  <option value="">{t("SelectSchema")}</option>
+                  {schemas.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.schemaCode}
+                    </option>
+                  ))}
+                </select>
+                <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
+              </FieldContent>
+            </Field>
+          )}
+        </form.Field>
+      )}
+
       <form.Field 
         name="fullname"
         validators={{ onChange: () => getFieldError('fullname') }}
@@ -267,7 +307,7 @@ export function ProfileForm({ profile, onSuccess }: ProfileFormProps) {
       >
         {([canSubmit, isSubmitting]) => (
           <Button type="submit" className="w-full" disabled={!canSubmit || isSubmitting}>
-            {isSubmitting ? t("Saving") : t("UpdateButton")}
+            {isSubmitting ? t("Saving") : isEdit ? t("UpdateButton") : t("CreateButton")}
           </Button>
         )}
       </form.Subscribe>
