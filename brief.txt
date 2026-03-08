@@ -1,0 +1,52 @@
+Mục tiêu dự án:
+    Sản phẩm đích:
+        Hệ thống tương tự quản lý đào tạo và trao đổi thông tin giữa nhà trường và sinh viên.
+        Chức năng chính:
+            Phía nhà trường:
+                Quản lý thông tin sinh viên, giảng viên, ngành học, khóa học, lịch học.
+                Đăng tải thông báo, tài liệu học tập.
+                Theo dõi tiến độ học tập của sinh viên.
+                Trao đổi trực tiếp với nhà trường qua các kênh liên lạc build-in.
+            Phía sinh viên:
+                Xem thông tin cá nhân, lịch học, điểm số.
+                Nhận thông báo, tài liệu học tập từ nhà trường.
+                Trao đổi trực tiếp với nhà trường qua các kênh liên lạc build-in.
+                Đăng ký môn học, tín chỉ, ngành học bổ xung, xem tiến độ học tập.
+        Định hướng mở rộng nếu có thể:
+            Hệ thống tài chính:
+                Quản lý học phí, lệ phí, các khoản thu chi liên quan đến sinh viên.
+                Cung cấp các phương thức thanh toán trực tuyến.
+            Quản lý cơ sở vật chất:
+                Quản lý phòng học, thiết bị dạy học, thư viện.
+                Đặt lịch sử dụng cơ sở vật chất cho các hoạt động học tập và sự kiện.
+            Quản lý thủ tục hành chính liên quan đến sinh viên:
+                Quản lý hồ sơ sinh viên, các thủ tục nhập học, chuyển ngành, tốt nghiệp.
+                Cung cấp các biểu mẫu và hướng dẫn thực hiện các thủ tục hành chính.
+    WebApp:
+        Backend:
+            Cơ sở dữ liệu và API phục vụ cho Frontend của cả mobile app và web app.
+        Frontend:
+            Giao diện quản lý cho nhà trường với đầy đủ chức năng.
+            Giao diện thông tin và tương tác cho sinh viên với đầy đủ chức năng.
+    MobileApp:
+        Phía sinh viên:
+            Xem thông tin cá nhân, lịch học, điểm szố.
+            Nhận thông báo, tài liệu học tập từ nhà trường.
+            Trao đổi, giao tiếp trực tiếp với nhà trường, các sinh viên khác trong nhà trường, lớp học.
+            Đăng ký môn học, tín chỉ, ngành học bổ xung, xem tiến độ học tập.
+        Phía nhà trường:
+            Đăng tải thông báo, tài liệu học tập.
+            Theo dõi tiến độ học tập của sinh viên.
+            Trao đổi với sinh viên.
+Tech stack và định hướng phát triển:
+    WebApp:
+        Framework chính: Next.js để xây dựng cả frontend và backend, tận dụng khả năng server-side rendering và API routes.
+        Database: PostgreSQL phục vụ toàn bộ nhu cầu lưu trữ dữ liệu dài hạn, truy vấn dữ liệu trong toàn bộ hệ thống.
+        ORM: Prisma để tương tác với cơ sở dữ liệu PostgreSQL, giúp quản lý dữ liệu hiệu quả và dễ dàng.
+        API: Next.js Route Handlers để xây dựng API phục vụ cho frontend của cả mobile app và web app.
+        Schedule tasks: Sử dụng cron jobs để thực hiện các tác vụ định kỳ như gửi thông báo, cập nhật tiến độ học tập nếu có.
+        Form handling: Tanstack react form.
+        Validation: Zod để đảm bảo tính toàn vẹn của dữ liệu khi xử lý form và API requests.
+        UI/UX: Tailwind CSS và Shadcn UI để xây dựng giao diện người dùng hiện đại, dễ sử dụng và responsive.
+    MobileApp:
+        Framework: Flutter hoặc React Native để phát triển ứng dụng di động đa nền tảng, hỗ trợ cả iOS và Android.
