@@ -169,7 +169,7 @@ export const availability = scheduleSchema.table(
   "availability",
   {
     id: uuid().primaryKey().defaultRandom(),
-    entityId: uuid("entity_id").notNull(),
+    entityId: varchar("entity_id", { length: 50 }).notNull(),
     entityType: availabilityEntityType("entity_type").notNull(),
     dayOfWeek: smallint("day_of_week").notNull(), // 0-6
     occupiedMask: integer("occupied_mask").default(0).notNull(),
