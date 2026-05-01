@@ -30,7 +30,24 @@
     "Fri": "Thứ 6",
     "Sat": "Thứ 7",
     "Sun": "Chủ Nhật",
-    "SelectEntityToView": "Chọn một đối tượng để xem thời khóa biểu"
+    "SelectEntityToView": "Chọn một đối tượng để xem thời khóa biểu",
+    "Schedule": {
+      "AddSchedule": "Thêm lịch học",
+      "EditSchedule": "Sửa lịch học",
+      "CourseClass": "Lớp học phần",
+      "Room": "Phòng học",
+      "Teacher": "Giảng viên",
+      "DayOfWeek": "Thứ",
+      "StartPeriod": "Tiết bắt đầu",
+      "EndPeriod": "Tiết kết thúc",
+      "Delete": "Xóa",
+      "Save": "Lưu",
+      "Cancelling": "Hủy",
+      "Validating": "Đang kiểm tra...",
+      "Saving": "Đang lưu...",
+      "ConflictDetected": "Phát hiện xung đột",
+      "Occupied": "Đã có lịch"
+    }
   },
   "UserMenu": {
     "Profile": "Trang cá nhân",

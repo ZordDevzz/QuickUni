@@ -30,7 +30,24 @@
     "Fri": "Fri",
     "Sat": "Sat",
     "Sun": "Sun",
-    "SelectEntityToView": "Select an entity to view schedule"
+    "SelectEntityToView": "Select an entity to view schedule",
+    "Schedule": {
+      "AddSchedule": "Add Schedule",
+      "EditSchedule": "Edit Schedule",
+      "CourseClass": "Course Class",
+      "Room": "Room",
+      "Teacher": "Teacher",
+      "DayOfWeek": "Day of Week",
+      "StartPeriod": "Start Period",
+      "EndPeriod": "End Period",
+      "Delete": "Delete",
+      "Save": "Save",
+      "Cancelling": "Cancel",
+      "Validating": "Validating...",
+      "Saving": "Saving...",
+      "ConflictDetected": "Conflict Detected",
+      "Occupied": "Occupied"
+    }
   },
   "UserMenu": {
     "Profile": "Profile",
