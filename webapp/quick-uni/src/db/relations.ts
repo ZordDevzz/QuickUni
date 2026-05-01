@@ -32,6 +32,7 @@ import {
   tuitionFeeConfig,
   schedule,
   room,
+  weeklyTemplate,
   scheduleStatus,
   scheduleType,
   systemAuditLog,
@@ -227,6 +228,7 @@ export const courseClassRelations = relations(courseClass, ({ one, many }) => ({
   assignments: many(assignment),
   schedules: many(schedule),
   courseMaterials: many(courseMaterial),
+  weeklyTemplates: many(weeklyTemplate),
 }));
 
 export const enrollStatusRelations = relations(enrollStatus, ({ many }) => ({
@@ -436,6 +438,18 @@ export const roomRelations = relations(room, ({ one, many }) => ({
   building: one(building, {
     fields: [room.buildingId],
     references: [building.id],
+  }),
+  weeklyTemplates: many(weeklyTemplate),
+}));
+
+export const weeklyTemplateRelations = relations(weeklyTemplate, ({ one }) => ({
+  courseClass: one(courseClass, {
+    fields: [weeklyTemplate.courseClassId],
+    references: [courseClass.id],
+  }),
+  room: one(room, {
+    fields: [weeklyTemplate.roomId],
+    references: [room.id],
   }),
 }));
 
