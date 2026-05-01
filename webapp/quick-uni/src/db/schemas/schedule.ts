@@ -165,23 +165,42 @@ export const availabilityEntityType = pgSchema("schedule").enum(
   ["teacher", "room", "subject", "global"],
 );
 
-export const availability = scheduleSchema.table("availability", {
-  id: uuid().primaryKey().defaultRandom(),
-  entityId: uuid("entity_id").notNull(),
-  entityType: availabilityEntityType("entity_type").notNull(),
-  dayOfWeek: smallint("day_of_week").notNull(), // 0-6
-  occupiedMask: integer("occupied_mask").default(0).notNull(),
-});
+export const availability = scheduleSchema.table(
+  "availability",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    entityId: uuid("entity_id").notNull(),
+    entityType: availabilityEntityType("entity_type").notNull(),
+    dayOfWeek: smallint("day_of_week").notNull(), // 0-6
+    occupiedMask: integer("occupied_mask").default(0).notNull(),
+  },
+  (table) => [index("availability_entity_idx").on(table.entityId, table.entityType)],
+);
 
-export const weeklyTemplate = scheduleSchema.table("weekly_template", {
-  id: uuid().primaryKey().defaultRandom(),
-  courseClassId: uuid("course_class_id").notNull(),
-  roomId: smallint("room_id").notNull(),
-  dayOfWeek: smallint("day_of_week").notNull(),
-  startPeriod: smallint("start_period").notNull(),
-  endPeriod: smallint("end_period").notNull(),
-  occupyMask: integer("occupy_mask").notNull(),
-});
+export const weeklyTemplate = scheduleSchema.table(
+  "weekly_template",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    courseClassId: uuid("course_class_id").notNull(),
+    roomId: smallint("room_id").notNull(),
+    dayOfWeek: smallint("day_of_week").notNull(),
+    startPeriod: smallint("start_period").notNull(),
+    endPeriod: smallint("end_period").notNull(),
+    occupyMask: integer("occupy_mask").notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.courseClassId],
+      foreignColumns: [courseClass.id],
+      name: "fk_weekly_template_course_class_id_course_class_id",
+    }),
+    foreignKey({
+      columns: [table.roomId],
+      foreignColumns: [room.id],
+      name: "fk_weekly_template_room_id_room_id",
+    }),
+  ],
+);
 
 export const holidayBlacklist = scheduleSchema.table("holiday_blacklist", {
   id: bigserial({ mode: "number" }).primaryKey(),
