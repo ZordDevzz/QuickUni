@@ -78,6 +78,7 @@ export const schedule = scheduleSchema.table(
     startTime: time("start_time").notNull(),
     endTime: time("end_time").notNull(),
     period: smallint().notNull(),
+    endPeriod: smallint("end_period"),
     mPerPeriod: integer("m_per_period").default(45),
     schDate: date("sch_date").notNull(),
     note: varchar({ length: 512 }),
