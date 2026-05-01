@@ -21,7 +21,16 @@
     "Settings": "Settings",
     "Loading": "Loading...",
     "NoEntitiesFound": "No entities found",
-    "SearchPlaceholder": "Search..."
+    "SearchPlaceholder": "Search...",
+    "Period": "Period",
+    "Mon": "Mon",
+    "Tue": "Tue",
+    "Wed": "Wed",
+    "Thu": "Thu",
+    "Fri": "Fri",
+    "Sat": "Sat",
+    "Sun": "Sun",
+    "SelectEntityToView": "Select an entity to view schedule"
   },
   "UserMenu": {
     "Profile": "Profile",
