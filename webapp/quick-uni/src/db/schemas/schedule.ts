@@ -159,3 +159,33 @@ export const attendanceStatus = scheduleSchema.table(
     }),
   ],
 );
+
+export const availabilityEntityType = pgSchema("schedule").enum(
+  "availability_entity_type",
+  ["teacher", "room", "subject", "global"],
+);
+
+export const availability = scheduleSchema.table("availability", {
+  id: uuid().primaryKey().defaultRandom(),
+  entityId: uuid("entity_id").notNull(),
+  entityType: availabilityEntityType("entity_type").notNull(),
+  dayOfWeek: smallint("day_of_week").notNull(), // 0-6
+  occupiedMask: integer("occupied_mask").default(0).notNull(),
+});
+
+export const weeklyTemplate = scheduleSchema.table("weekly_template", {
+  id: uuid().primaryKey().defaultRandom(),
+  courseClassId: uuid("course_class_id").notNull(),
+  roomId: smallint("room_id").notNull(),
+  dayOfWeek: smallint("day_of_week").notNull(),
+  startPeriod: smallint("start_period").notNull(),
+  endPeriod: smallint("end_period").notNull(),
+  occupyMask: integer("occupy_mask").notNull(),
+});
+
+export const holidayBlacklist = scheduleSchema.table("holiday_blacklist", {
+  id: bigserial({ mode: "number" }).primaryKey(),
+  date: date("date").notNull(),
+  name: varchar({ length: 255 }),
+  isGlobal: boolean("is_global").default(true),
+});
