@@ -17,4 +17,19 @@ describe('Bitmask Utils', () => {
     const occupied = createMask(1, 5); // 31
     expect(getAvailableSlots(occupied)).toBe(0x7FFF ^ 31);
   });
+
+  it('should throw error for invalid range', () => {
+    expect(() => createMask(0, 5)).toThrow('Start and end must be between 1 and 15');
+    expect(() => createMask(1, 16)).toThrow('Start and end must be between 1 and 15');
+    expect(() => createMask(5, 3)).toThrow('Start must be less than or equal to end');
+  });
+
+  it('should handle edge cases for single bits', () => {
+    expect(createMask(1, 1)).toBe(1); // 2^0
+    expect(createMask(15, 15)).toBe(0x4000); // 2^14
+  });
+
+  it('should create full mask for 1-15 range', () => {
+    expect(createMask(1, 15)).toBe(0x7FFF);
+  });
 });
