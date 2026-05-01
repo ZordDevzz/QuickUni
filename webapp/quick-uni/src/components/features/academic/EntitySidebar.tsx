@@ -1,11 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { EntityType } from "./ScheduleManager";
 import { getRooms, getTeachers, getCourseClasses } from "@/actions/scheduling-data";
 import { Search, MapPin, User, BookOpen } from "lucide-react";
+
+interface Entity {
+  id: string | number;
+  code: string;
+  name?: string;
+  profile?: {
+    fullname?: string | null;
+  } | null;
+  subject?: {
+    name: string;
+  } | null;
+}
 
 interface EntitySidebarProps {
   type: EntityType;
@@ -14,7 +27,8 @@ interface EntitySidebarProps {
 }
 
 export function EntitySidebar({ type, selectedId, onSelect }: EntitySidebarProps) {
-  const [entities, setEntities] = useState<any[]>([]);
+  const t = useTranslations("Admin");
+  const [entities, setEntities] = useState<Entity[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -22,10 +36,10 @@ export function EntitySidebar({ type, selectedId, onSelect }: EntitySidebarProps
     async function loadData() {
       setLoading(true);
       try {
-        let data: any[] = [];
-        if (type === "rooms") data = await getRooms();
-        else if (type === "teachers") data = await getTeachers();
-        else if (type === "classes") data = await getCourseClasses(1); // Hardcoded semester for now
+        let data: Entity[] = [];
+        if (type === "rooms") data = await getRooms() as Entity[];
+        else if (type === "teachers") data = await getTeachers() as Entity[];
+        else if (type === "classes") data = await getCourseClasses(1) as Entity[]; // Hardcoded semester for now
         setEntities(data);
       } catch (error) {
         console.error("Failed to load entities", error);
@@ -39,7 +53,7 @@ export function EntitySidebar({ type, selectedId, onSelect }: EntitySidebarProps
   const filteredEntities = entities.filter(e => {
     const term = search.toLowerCase();
     if (type === "rooms") return e.code.toLowerCase().includes(term);
-    if (type === "teachers") return e.profile?.name?.toLowerCase().includes(term);
+    if (type === "teachers") return e.profile?.fullname?.toLowerCase().includes(term);
     if (type === "classes") return e.code.toLowerCase().includes(term) || e.subject?.name?.toLowerCase().includes(term);
     return false;
   });
@@ -50,7 +64,7 @@ export function EntitySidebar({ type, selectedId, onSelect }: EntitySidebarProps
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Search..." 
+            placeholder={t("SearchPlaceholder")} 
             className="pl-8" 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -59,9 +73,9 @@ export function EntitySidebar({ type, selectedId, onSelect }: EntitySidebarProps
       </div>
       <div className="flex-1 overflow-y-auto p-2">
         {loading ? (
-          <div className="p-4 text-center text-sm text-muted-foreground">Loading...</div>
+          <div className="p-4 text-center text-sm text-muted-foreground">{t("Loading")}</div>
         ) : filteredEntities.length === 0 ? (
-          <div className="p-4 text-center text-sm text-muted-foreground">No entities found</div>
+          <div className="p-4 text-center text-sm text-muted-foreground">{t("NoEntitiesFound")}</div>
         ) : (
           <div className="space-y-1">
             {filteredEntities.map((entity) => (
@@ -78,7 +92,7 @@ export function EntitySidebar({ type, selectedId, onSelect }: EntitySidebarProps
                 {type === "classes" && <BookOpen className="h-4 w-4 shrink-0" />}
                 <div className="truncate">
                   <div className="font-semibold">
-                    {type === "rooms" ? entity.code : type === "teachers" ? entity.profile?.name : entity.code}
+                    {type === "rooms" ? entity.code : type === "teachers" ? entity.profile?.fullname : entity.code}
                   </div>
                   {type === "classes" && <div className="text-xs opacity-70">{entity.subject?.name}</div>}
                 </div>

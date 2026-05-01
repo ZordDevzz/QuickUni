@@ -15,8 +15,13 @@
     "Operations": "Operations",
     "Finance": "Finance",
     "Schedule": "Schedule",
+    "Rooms": "Rooms",
+    "Teachers": "Teachers",
     "System": "System",
-    "Settings": "Settings"
+    "Settings": "Settings",
+    "Loading": "Loading...",
+    "NoEntitiesFound": "No entities found",
+    "SearchPlaceholder": "Search..."
   },
   "UserMenu": {
     "Profile": "Profile",

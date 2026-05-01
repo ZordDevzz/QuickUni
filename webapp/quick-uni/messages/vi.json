@@ -15,8 +15,13 @@
     "Operations": "Vận hành",
     "Finance": "Tài chính",
     "Schedule": "Thời khóa biểu",
+    "Rooms": "Phòng học",
+    "Teachers": "Giảng viên",
     "System": "Hệ thống",
-    "Settings": "Cài đặt"
+    "Settings": "Cài đặt",
+    "Loading": "Đang tải...",
+    "NoEntitiesFound": "Không tìm thấy kết quả",
+    "SearchPlaceholder": "Tìm kiếm..."
   },
   "UserMenu": {
     "Profile": "Trang cá nhân",
