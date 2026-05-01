@@ -21,4 +21,19 @@ describe('Slot Finder', () => {
     const slots = findEmptySlots(occupied, 15);
     expect(slots).toEqual([1]);
   });
+
+  it('should return empty array for invalid duration (0)', () => {
+    const slots = findEmptySlots(0, 0);
+    expect(slots).toEqual([]);
+  });
+
+  it('should return empty array for duration > 15 (16)', () => {
+    const slots = findEmptySlots(0, 16);
+    expect(slots).toEqual([]);
+  });
+
+  it('should handle duration 15 when free', () => {
+    const slots = findEmptySlots(0, 15);
+    expect(slots).toEqual([1]);
+  });
 });
