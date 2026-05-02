@@ -6,7 +6,7 @@ import { semester as semesterTable } from '../db/schemas/academic';
 import { courseClass } from '../db/schemas/course';
 import { eq, and, or, isNull, exists, inArray } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
-import { isWithinInterval, parseISO, addDays } from 'date-fns';
+import { isWithinInterval, parseISO, addDays, format } from 'date-fns';
 
 /**
  * Publishes the weekly template to the actual schedule for a given semester.
@@ -56,7 +56,7 @@ export async function publishTemplateToSchedule(semesterId: number) {
       
       if (!isHoliday) {
         const dayOfWeek = currentDate.getDay(); // 0 (Sun) - 6 (Sat)
-        const dateStr = currentDate.toISOString().split('T')[0];
+        const dateStr = format(currentDate, 'yyyy-MM-dd');
         const dayTemplates = templates.filter(t => t.dayOfWeek === dayOfWeek);
         
         for (const t of dayTemplates) {

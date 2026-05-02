@@ -2,6 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { publishTemplateToSchedule } from './schedule-publish';
 import { db } from '../db';
 
+vi.mock('next/cache', () => ({
+  revalidatePath: vi.fn(),
+}));
+
 vi.mock('../db', () => ({
   db: {
     query: {
@@ -17,6 +21,14 @@ vi.mock('../db', () => ({
     },
     insert: vi.fn(() => ({
       values: vi.fn(),
+    })),
+    delete: vi.fn(() => ({
+      where: vi.fn(),
+    })),
+    select: vi.fn(() => ({
+      from: vi.fn(() => ({
+        where: vi.fn(),
+      })),
     })),
   },
 }));
@@ -41,7 +53,7 @@ describe('publishTemplateToSchedule', () => {
     };
 
     const holidays = [
-      { date: '2024-01-01' }, // Monday
+      { startDate: '2024-01-01', endDate: '2024-01-01', name: 'New Year' }, // Monday
     ];
 
     const templates = [
@@ -50,12 +62,14 @@ describe('publishTemplateToSchedule', () => {
         roomId: 101,
         dayOfWeek: 1, // Monday (should be skipped due to holiday)
         startPeriod: 1,
+        endPeriod: 2,
       },
       {
         courseClassId: 'class-2',
         roomId: 102,
         dayOfWeek: 2, // Tuesday
         startPeriod: 3,
+        endPeriod: 4,
       },
     ];
 
@@ -65,6 +79,7 @@ describe('publishTemplateToSchedule', () => {
 
     const mockValues = vi.fn();
     (db.insert as any).mockReturnValue({ values: mockValues });
+    (db.delete as any).mockReturnValue({ where: vi.fn() });
 
     await publishTemplateToSchedule(1);
 
