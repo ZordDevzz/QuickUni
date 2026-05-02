@@ -164,7 +164,7 @@ export const attendanceStatus = scheduleSchema.table(
 
 export const availabilityEntityType = pgSchema("schedule").enum(
   "availability_entity_type",
-  ["teacher", "room", "subject", "global"],
+  ["teacher", "room", "subject", "class", "global"],
 );
 
 export const availability = scheduleSchema.table(

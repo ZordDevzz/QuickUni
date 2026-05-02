@@ -47,12 +47,6 @@ export function ScheduleSlotDialog({
   const [courseClasses, setCourseClasses] = useState<CourseClassOption[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      loadOptions();
-    }
-  }, [isOpen]);
-
   async function loadOptions() {
     setLoading(true);
     try {
@@ -69,6 +63,12 @@ export function ScheduleSlotDialog({
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (isOpen) {
+      loadOptions();
+    }
+  }, [isOpen, semesterId]);
 
   const form = useForm({
     defaultValues: {

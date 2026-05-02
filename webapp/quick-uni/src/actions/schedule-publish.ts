@@ -6,7 +6,7 @@ import { semester as semesterTable } from '../db/schemas/academic';
 import { courseClass } from '../db/schemas/course';
 import { eq, and, or, isNull, exists, inArray } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
-import { isWithinInterval, parseISO } from 'date-fns';
+import { isWithinInterval, parseISO, addDays } from 'date-fns';
 
 /**
  * Publishes the weekly template to the actual schedule for a given semester.
@@ -44,7 +44,7 @@ export async function publishTemplateToSchedule(semesterId: number) {
 
     // 4. Iterate through each day in semester
     const scheduleEntries = [];
-    let currentDate = new Date(startDate);
+    let currentDate = startDate;
 
     while (currentDate <= endDate) {
       // Check if current date is a holiday
@@ -74,7 +74,7 @@ export async function publishTemplateToSchedule(semesterId: number) {
           });
         }
       }
-      currentDate.setDate(currentDate.getDate() + 1);
+      currentDate = addDays(currentDate, 1);
     }
 
     // 5. Clear old schedule for this semester first

@@ -119,7 +119,7 @@ export async function deleteWeeklyTemplate(id: string) {
 
 export async function toggleAvailabilityAction(params: {
   entityId: string,
-  entityType: 'teacher' | 'room' | 'subject' | 'global',
+  entityType: 'teacher' | 'room' | 'subject' | 'class' | 'global',
   dayOfWeek: number,
   slotMask: number
 }) {
@@ -238,7 +238,7 @@ export async function validateWeeklyTemplateEdit(params: {
   return { valid: true };
 }
 
-export async function getAvailability(entityId: string, type: 'teacher' | 'room' | 'subject' | 'global') {
+export async function getAvailability(entityId: string, type: 'teacher' | 'room' | 'subject' | 'class' | 'global') {
   try {
     return await db.query.availability.findMany({
       where: (a, { and, eq }) => and(eq(a.entityId, entityId), eq(a.entityType, type))

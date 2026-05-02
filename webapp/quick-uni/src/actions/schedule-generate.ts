@@ -3,8 +3,9 @@ import { solveWeekly } from "@/services/scheduler";
 import { getRooms, getTeachers, getCourseClasses } from "./scheduling-data";
 import { db } from "@/db";
 import { weeklyTemplate } from "@/db/schemas/schedule";
+import { courseClass } from "@/db/schemas/course";
 import { revalidatePath } from "next/cache";
-import { inArray } from "drizzle-orm";
+import { inArray, eq } from "drizzle-orm";
 
 export async function autoGenerateWeeklyAction(semesterId: number) {
   try {
