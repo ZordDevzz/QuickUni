@@ -1,0 +1,72 @@
+<h2>Dự án QuickUni - Tổng quan hệ thống</h2>
+<p class="subtitle">Phân tích cấu trúc và các thành phần chính của hệ thống quản lý đại học</p>
+
+<div class="mockup">
+  <div class="mockup-header">Kiến trúc kỹ thuật (Tech Stack)</div>
+  <div class="mockup-body">
+    <ul>
+      <li><strong>Frontend:</strong> Next.js 15 (App Router), TypeScript, Tailwind CSS, Shadcn UI</li>
+      <li><strong>Backend:</strong> Next.js Server Actions, NextAuth.js v4</li>
+      <li><strong>Database:</strong> PostgreSQL, Drizzle ORM</li>
+      <li><strong>Internationalization:</strong> next-intl (Tiếng Anh & Tiếng Việt)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Các phân hệ cốt lõi đã xác định:</h3>
+  <div class="cards">
+    <div class="card">
+      <div class="card-body">
+        <h4>Auth & Security</h4>
+        <p>RBAC (Role Based Access Control), Audit Log cho tài khoản.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h4>User & Profile</h4>
+        <p>Hồ sơ động (Dynamic Profiles) với Profile Schema và Profile Fields.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h4>Academic</h4>
+        <p>Quản lý Học kỳ, Khoa, Chuyên ngành, Chương trình đào tạo (Curriculum), Môn học.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Mục tiêu phân tích tiếp theo:</h3>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="db_docs" onclick="toggleSelect(this)">
+      <div class="letter">1</div>
+      <div class="content">
+        <h3>Tài liệu DB Chi tiết</h3>
+        <p>Tạo doc về các bảng, quan hệ và kiểu dữ liệu.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="workflow_docs" onclick="toggleSelect(this)">
+      <div class="letter">2</div>
+      <div class="content">
+        <h3>Tài liệu Workflow</h3>
+        <p>Mô tả quy trình nghiệp vụ (ví dụ: Onboarding sinh viên).</p>
+      </div>
+    </div>
+    <div class="option" data-choice="api_actions" onclick="toggleSelect(this)">
+      <div class="letter">3</div>
+      <div class="content">
+        <h3>Danh mục API & Actions</h3>
+        <p>Liệt kê các Server Actions và API routes hiện có.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="tech_conventions" onclick="toggleSelect(this)">
+      <div class="letter">4</div>
+      <div class="content">
+        <h3>Quy ước Kỹ thuật</h3>
+        <p>Ghi chú về coding style, validators, và structure.</p>
+      </div>
+    </div>
+  </div>
+</div>

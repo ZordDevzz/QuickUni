@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kế hoạch Hoàn thiện Khóa luận Tốt nghiệp - QuickUni</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.125rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stat-title {
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-icon {
+            color: var(--primary);
+            background: #eff6ff;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .progress-container {
+            height: 8px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease-out;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* Features List */
+        .features-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-group {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .group-header {
+            background: #f8fafc;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .feature-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+
+        .feature-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .feature-name {
+            font-weight: 500;
+        }
+
+        .pillar-tags {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .pillar {
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #f1f5f9;
+            color: var(--text-muted);
+        }
+
+        .pillar.done {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        /* Timeline */
+        .timeline-section {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .timeline-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.75rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-event {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-event:last-child {
+            margin-bottom: 0;
+        }
+
+        .event-dot {
+            position: absolute;
+            left: -1.65rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid var(--primary);
+            z-index: 1;
+        }
+
+        .event-dot.active {
+            background: var(--primary);
+            box-shadow: 0 0 0 4px #dbeafe;
+        }
+
+        .event-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .event-info h4 {
+            margin: 0 0 0.25rem 0;
+            font-weight: 700;
+        }
+
+        .event-info p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .event-date {
+            font-weight: 700;
+            color: var(--primary);
+            background: #eff6ff;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+        }
+
+        .bg-success { background-color: var(--success); }
+        .bg-primary { background-color: var(--primary); }
+        .bg-warning { background-color: var(--warning); }
+
+        @media (max-width: 768px) {
+            .features-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-graduation-cap"></i> Kế hoạch Hoàn thiện Khóa luận</h1>
+            <p class="subtitle">QuickUni - Hệ thống quản lý Đại học số</p>
+        </header>
+
+        <!-- Overall Progress -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title"><div class="stat-icon"><i class="fas fa-user-shield"></i></div> Cán bộ Quản trị</div>
+                    <span class="badge">75%</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar bg-success" style="width: 75%"></div>
+                </div>
+                <div class="progress-text"><span>Hoàn thành 1.5/2 module</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title"><div class="stat-icon"><i class="fas fa-university"></i></div> Phòng Đào tạo</div>
+                    <span class="badge">61%</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar bg-primary" style="width: 61%"></div>
+                </div>
+                <div class="progress-text"><span>Hoàn thành 2.4/4 module</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title"><div class="stat-icon"><i class="fas fa-chalkboard-teacher"></i></div> Giảng viên</div>
+                    <span class="badge">50%</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar bg-warning" style="width: 50%"></div>
+                </div>
+                <div class="progress-text"><span>Hoàn thành 1.5/3 module</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title"><div class="stat-icon"><i class="fas fa-user-graduate"></i></div> Sinh viên</div>
+                    <span class="badge">50%</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar bg-warning" style="width: 50%"></div>
+                </div>
+                <div class="progress-text"><span>Hoàn thành 2/4 module</span></div>
+            </div>
+        </div>
+
+        <!-- Detailed Features -->
+        <div class="features-section">
+            <!-- Quản trị -->
+            <div class="feature-group">
+                <div class="group-header"><i class="fas fa-user-shield"></i> Cán bộ Quản trị</div>
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Quản trị người dùng</span>
+                        <div class="pillar-tags">
+                            <span class="pillar done">DB</span>
+                            <span class="pillar done">ORM</span>
+                            <span class="pillar done">UI</span>
+                            <span class="pillar done">Logic</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Audit Log</span>
+                        <div class="pillar-tags">
+                            <span class="pillar done">DB</span>
+                            <span class="pillar done">ORM</span>
+                            <span class="pillar">UI</span>
+                            <span class="pillar">Logic</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phòng Đào tạo -->
+            <div class="feature-group">
+                <div class="group-header"><i class="fas fa-university"></i> Cán bộ Phòng Đào tạo</div>
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Quản lý DS Giảng viên, Sinh viên</span>
+                        <div class="pillar-tags">
+                            <span class="pillar done">DB</span>
+                            <span class="pillar done">ORM</span>
+                            <span class="pillar done" style="background:#fef08a; color:#854d0e">UI (90%)</span>
+                            <span class="pillar done">Logic</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Tạo/Quản lý Lớp học phần</span>
+                        <div class="pillar-tags">
+                            <span class="pillar done">DB</span>
+                            <span class="pillar done">ORM</span>
+                            <span class="pillar">UI</span>
+                            <span class="pillar">Logic</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Tạo/Quản lý Thời khóa biểu</span>
+                        <div class="pillar-tags">
+                            <span class="pillar done">DB</span>
+                            <span class="pillar done">ORM</span>
+                            <span class="pillar">UI</span>
+                            <span class="pillar">Logic</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Tạo/Quản lý Phòng học</span>
+                        <div class="pillar-tags">
+                            <span class="pillar done">DB</span>
+                            <span class="pillar done">ORM</span>
+                            <span class="pillar">UI</span>
+                            <span class="pillar">Logic</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Giảng viên -->
+            <div class="feature-group">
+                <div class="group-header"><i class="fas fa-chalkboard-teacher"></i> Giảng viên</div>
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Xem/Đăng ký sửa đổi TKB</span>
+                        <div class="pillar-tags">
+                            <span class="pillar done">DB</span>
+                            <span class="pillar done">ORM</span>
+                            <span class="pillar">UI</span>
+                            <span class="pillar">Logic</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Xem DS Lớp học phần giảng dạy</span>
+                        <div class="pillar-tags">
+                            <span class="pillar done">DB</span>
+                            <span class="pillar done">ORM</span>
+                            <span class="pillar">UI</span>
+                            <span class="pillar">Logic</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Xem DS Sinh viên trong lớp</span>
+                        <div class="pillar-tags">
+                            <span class="pillar done">DB</span>
+                            <span class="pillar done">ORM</span>
+                            <span class="pillar">UI</span>
+                            <span class="pillar">Logic</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sinh viên -->
+            <div class="feature-group">
+                <div class="group-header"><i class="fas fa-user-graduate"></i> Sinh viên</div>
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Xem DS Lớp học phần tham gia</span>
+                        <div class="pillar-tags">
+                            <span class="pillar done">DB</span>
+                            <span class="pillar done">ORM</span>
+                            <span class="pillar">UI</span>
+                            <span class="pillar">Logic</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Xem TKB cá nhân</span>
+                        <div class="pillar-tags">
+                            <span class="pillar done">DB</span>
+                            <span class="pillar done">ORM</span>
+                            <span class="pillar">UI</span>
+                            <span class="pillar">Logic</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Đăng ký xin vắng buổi học</span>
+                        <div class="pillar-tags">
+                            <span class="pillar done">DB</span>
+                            <span class="pillar done">ORM</span>
+                            <span class="pillar">UI</span>
+                            <span class="pillar">Logic</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Đăng ký xin hủy lớp học phần</span>
+                        <div class="pillar-tags">
+                            <span class="pillar done">DB</span>
+                            <span class="pillar done">ORM</span>
+                            <span class="pillar">UI</span>
+                            <span class="pillar">Logic</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline-section">
+            <div class="timeline-title"><i class="fas fa-calendar-alt"></i> Lộ trình Hoàn thiện</div>
+            <div class="timeline">
+                <div class="timeline-event">
+                    <div class="event-dot active"></div>
+                    <div class="event-content">
+                        <div class="event-info">
+                            <h4>Hoàn thiện chức năng Phòng đào tạo</h4>
+                            <p>Tập trung vào UX/UI cho DS SV/GV và các module quản lý lớp, TKB, phòng học.</p>
+                        </div>
+                        <div class="event-date">05/05</div>
+                    </div>
+                </div>
+                <div class="timeline-event">
+                    <div class="event-dot"></div>
+                    <div class="event-content">
+                        <div class="event-info">
+                            <h4>Hoàn thiện chức năng Giảng viên</h4>
+                            <p>Phát triển UI và Logic cho việc xem TKB, đăng ký sửa đổi và quản lý danh sách lớp.</p>
+                        </div>
+                        <div class="event-date">10/05</div>
+                    </div>
+                </div>
+                <div class="timeline-event">
+                    <div class="event-dot"></div>
+                    <div class="event-content">
+                        <div class="event-info">
+                            <h4>Hoàn thiện chức năng Sinh viên</h4>
+                            <p>Hoàn thiện giao diện xem TKB và các tính năng đăng ký vắng, hủy học phần.</p>
+                        </div>
+                        <div class="event-date">15/05</div>
+                    </div>
+                </div>
+                <div class="timeline-event">
+                    <div class="event-dot"></div>
+                    <div class="event-content">
+                        <div class="event-info">
+                            <h4>Quản trị viên & Sửa lỗi</h4>
+                            <p>Hoàn thiện module Audit Log và tối ưu hóa hệ thống, fix bugs toàn diện.</p>
+                        </div>
+                        <div class="event-date">20/05</div>
+                    </div>
+                </div>
+                <div class="timeline-event">
+                    <div class="event-dot"></div>
+                    <div class="event-content">
+                        <div class="event-info">
+                            <h4>Hoàn thiện Báo cáo</h4>
+                            <p>Viết thuyết minh, đóng gói sản phẩm và tài liệu hướng dẫn.</p>
+                        </div>
+                        <div class="event-date">28/05</div>
+                    </div>
+                </div>
+                <div class="timeline-event">
+                    <div class="event-dot" style="background:var(--success); border-color:var(--success)"></div>
+                    <div class="event-content">
+                        <div class="event-info">
+                            <h4 style="color:var(--success)">Bảo vệ Khóa luận</h4>
+                            <p>Dự kiến bảo vệ trước hội đồng chấm khóa luận tốt nghiệp.</p>
+                        </div>
+                        <div class="event-date" style="background:#dcfce7; color:#166534">15/06 - 19/06</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Smooth reveal of progress bars
+        document.addEventListener('DOMContentLoaded', () => {
+            const bars = document.querySelectorAll('.progress-bar');
+            bars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<h2>Cấu trúc Tài liệu Kỹ thuật Dự kiến</h2>
+<p class="subtitle">Đề xuất cấu trúc cho bộ tài liệu phát triển dự án QuickUni</p>
+
+<div class="mockup">
+  <div class="mockup-header">Tệp: docs/TECH_DETAILS.md</div>
+  <div class="mockup-body">
+    <ol>
+      <li><strong>Kiến trúc & Công nghệ:</strong> Next.js 15, Drizzle, NextAuth, ShadcnUI.</li>
+      <li><strong>Quy tắc Code (Conventions):</strong> 
+        <ul>
+          <li>Sử dụng Server Actions cho Mutations.</li>
+          <li>Workflow Services cho logic nghiệp vụ phức tạp.</li>
+          <li>Zod cho validation (trong <code>src/lib/validators</code>).</li>
+        </ul>
+      </li>
+      <li><strong>Mô hình Dữ liệu:</strong> Giải thích về Dynamic Profile (Schema, Field, dynamic_data).</li>
+      <li><strong>Quy trình Nghiệp vụ (Workflows):</strong> 
+        <ul>
+          <li>Onboarding: Create Profile -> Link Entity -> Issue Account.</li>
+          <li>Batch Provisioning: Cấp tài khoản hàng loạt.</li>
+        </ul>
+      </li>
+      <li><strong>Danh mục API & Actions:</strong> Phân nhóm theo phân hệ (Admin, Academic, Auth).</li>
+    </ol>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Bạn có muốn bổ sung thêm mục nào không?</h3>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="ui_patterns" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>UI Patterns</h3>
+        <p>Quy định về Data Table, Form handling, Modal/Dialog.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="i18n_guide" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>i18n Guide</h3>
+        <p>Cách thêm ngôn ngữ mới và sử dụng translation trong Client/Server components.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="testing" onclick="toggleSelect(this)">
+      <div class="letter">C</div>
+      <div class="content">
+        <h3>Testing Strategy</h3>
+        <p>Hướng dẫn viết test cho Services và Actions (nếu có).</p>
+      </div>
+    </div>
+  </div>
+</div>
