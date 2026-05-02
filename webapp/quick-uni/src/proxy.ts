@@ -10,16 +10,23 @@ export async function proxy(req: NextRequest) {
   const response = handleI18nRouting(req);
   
   // 2. Auth logic
-  const token = await getToken({ req });
+  const token = await getToken({ 
+    req, 
+    secret: process.env.NEXTAUTH_SECRET 
+  });
   const isAuth = !!token;
   
-  // Extract pathname without locale for easier checking
-  // req.nextUrl.pathname might be "/vi/admin" or "/admin"
-  const pathname = req.nextUrl.pathname;
+  // Extract pathname and normalize it (remove trailing slash except for root)
+  let pathname = req.nextUrl.pathname;
+  if (pathname.length > 1 && pathname.endsWith('/')) {
+    pathname = pathname.slice(0, -1);
+  }
   
   // Helper to check if pathname matches ignoring locale
   const isPath = (path: string) => {
-    return pathname === path || routing.locales.some(locale => pathname === `/${locale}${path === '/' ? '' : path}`);
+    // Normalize target path
+    const target = (path.length > 1 && path.endsWith('/')) ? path.slice(0, -1) : path;
+    return pathname === target || routing.locales.some(locale => pathname === `/${locale}${target === '/' ? '' : target}`);
   };
 
   const isAuthPage = isPath("/login");
@@ -29,17 +36,12 @@ export async function proxy(req: NextRequest) {
       const userType = token.type as string;
       const targetPath = (userType === "dev" || userType === "tech") ? "/admin" : "/";
       
-      // We should redirect to the locale-prefixed version if necessary
-      // But usually NextResponse.redirect to a relative path works fine with middleware
       return NextResponse.redirect(new URL(targetPath, req.url));
     }
     return response;
   }
 
   if (!isAuth) {
-    // If it's a public asset or something we don't want to protect, let it pass
-    // The matcher already handles most of this, but just in case
-    
     let from = req.nextUrl.pathname;
     if (req.nextUrl.search) {
       from += req.nextUrl.search;
