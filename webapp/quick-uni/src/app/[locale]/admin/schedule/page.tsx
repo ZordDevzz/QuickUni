@@ -1,5 +1,9 @@
-import AdminSkeleton from "@/components/shared/AdminSkeleton";
+import { ScheduleManager } from "@/components/features/academic/ScheduleManager";
 
 export default function SchedulePage() {
-  return <AdminSkeleton title="Schedule" />;
+  return (
+    <div className="container mx-auto py-6">
+      <ScheduleManager />
+    </div>
+  );
 }

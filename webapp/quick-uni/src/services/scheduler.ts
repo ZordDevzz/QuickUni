@@ -18,6 +18,8 @@ export interface ScheduleRequest {
   availability: Map<string, number[]>; // entityId -> 7-day masks (teacher, room, subject)
 }
 
+const DAYS_IN_WEEK = 7;
+
 export interface Assignment {
   courseClassId: string;
   roomId: number;
@@ -37,14 +39,14 @@ export function solveWeekly(request: ScheduleRequest): Assignment[] | null {
   // Initialize with zeros for each entity across 7 days
   request.classes.forEach(c => {
     if (!teacherOccupancy.has(c.teacherId)) {
-      teacherOccupancy.set(c.teacherId, (request.availability.get(c.teacherId) || new Array(7).fill(0)).slice());
+      teacherOccupancy.set(c.teacherId, (request.availability.get(c.teacherId) || new Array(DAYS_IN_WEEK).fill(0)).slice());
     }
   });
   request.rooms.forEach(r => {
-    roomOccupancy.set(r.id, (request.availability.get(r.id.toString()) || new Array(7).fill(0)).slice());
+    roomOccupancy.set(r.id, (request.availability.get(r.id.toString()) || new Array(DAYS_IN_WEEK).fill(0)).slice());
   });
 
-  const globalAvailability = request.availability.get('global') || new Array(7).fill(0);
+  const globalAvailability = request.availability.get('global') || new Array(DAYS_IN_WEEK).fill(0);
 
   function backtrack(classIndex: number): boolean {
     if (classIndex === sortedClasses.length) return true;
@@ -54,7 +56,7 @@ export function solveWeekly(request: ScheduleRequest): Assignment[] | null {
     const periods = currentClass.periods;
     
     // Heuristic: Iterate through days and rooms
-    for (let day = 0; day < 7; day++) {
+    for (let day = 0; day < DAYS_IN_WEEK; day++) {
       for (const room of request.rooms) {
         const roomId = room.id;
         
