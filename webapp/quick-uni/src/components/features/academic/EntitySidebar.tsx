@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { EntityType } from "./ScheduleManager";
 import { getRooms, getTeachers, getCourseClasses } from "@/actions/scheduling-data";
@@ -24,9 +25,10 @@ interface EntitySidebarProps {
   type: EntityType;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  semesterId: number | null;
 }
 
-export function EntitySidebar({ type, selectedId, onSelect }: EntitySidebarProps) {
+export function EntitySidebar({ type, selectedId, onSelect, semesterId }: EntitySidebarProps) {
   const t = useTranslations("Admin");
   const [entities, setEntities] = useState<Entity[]>([]);
   const [search, setSearch] = useState("");
@@ -34,12 +36,17 @@ export function EntitySidebar({ type, selectedId, onSelect }: EntitySidebarProps
 
   useEffect(() => {
     async function loadData() {
+      if (type === "classes" && !semesterId) {
+        setEntities([]);
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
         let data: Entity[] = [];
         if (type === "rooms") data = await getRooms() as Entity[];
         else if (type === "teachers") data = await getTeachers() as Entity[];
-        else if (type === "classes") data = await getCourseClasses(1) as Entity[]; // Hardcoded semester for now
+        else if (type === "classes" && semesterId) data = await getCourseClasses(semesterId) as Entity[];
         setEntities(data);
       } catch (error) {
         console.error("Failed to load entities", error);
@@ -48,7 +55,7 @@ export function EntitySidebar({ type, selectedId, onSelect }: EntitySidebarProps
       }
     }
     loadData();
-  }, [type]);
+  }, [type, semesterId]);
 
   const filteredEntities = entities.filter(e => {
     const term = search.toLowerCase();
@@ -71,7 +78,7 @@ export function EntitySidebar({ type, selectedId, onSelect }: EntitySidebarProps
           />
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-2">
+      <ScrollArea className="flex-1 p-2">
         {loading ? (
           <div className="p-4 text-center text-sm text-muted-foreground">{t("Loading")}</div>
         ) : filteredEntities.length === 0 ? (
@@ -100,7 +107,7 @@ export function EntitySidebar({ type, selectedId, onSelect }: EntitySidebarProps
             ))}
           </div>
         )}
-      </div>
+      </ScrollArea>
     </div>
   );
 }

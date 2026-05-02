@@ -45,30 +45,30 @@ describe('scheduling-data actions', () => {
     await getCourseClasses(1);
     expect(db.query.courseClass.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.any(Object),
+        where: expect.any(Function),
       })
     );
   });
 
   it('getWeeklyTemplateByEntity should call findMany for room', async () => {
-    await getWeeklyTemplateByEntity('101', 'room');
+    await getWeeklyTemplateByEntity('101', 'room', 1);
     expect(db.query.weeklyTemplate.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.any(Object),
+        where: expect.any(Function),
       })
     );
   });
 
   it('getWeeklyTemplateByEntity should call findMany for teacher', async () => {
-    await getWeeklyTemplateByEntity('teacher-uuid', 'teacher');
+    await getWeeklyTemplateByEntity('teacher-uuid', 'teacher', 1);
     expect(db.query.weeklyTemplate.findMany).toHaveBeenCalled();
   });
 
   it('getWeeklyTemplateByEntity should call findMany for class', async () => {
-    await getWeeklyTemplateByEntity('class-uuid', 'class');
+    await getWeeklyTemplateByEntity('class-uuid', 'class', 1);
     expect(db.query.weeklyTemplate.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.any(Object),
+        where: expect.any(Function),
       })
     );
   });

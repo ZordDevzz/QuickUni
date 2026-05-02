@@ -2,13 +2,20 @@
 
 import { useState, useEffect } from "react";
 import { EntityType } from "./ScheduleManager";
-import { getWeeklyTemplateByEntity } from "@/actions/scheduling-data";
+import { getWeeklyTemplateByEntity, getAvailability } from "@/actions/scheduling-data";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
+import { hasCollision, createMask } from "@/lib/scheduling/bitmask";
+import { cn, stringToHslColor } from "@/lib/utils";
 
 interface TimeGridProps {
   type: EntityType;
   entityId: string | null;
+  semesterId: number | null;
+  isEditMode?: boolean;
+  onCellClick?: (dayIndex: number, period: number) => void;
+  onAssignmentClick?: (assignment: AssignmentWithRelations) => void;
+  onToggleBlock?: (dayIndex: number, period: number) => void;
 }
 
 type AssignmentWithRelations = Awaited<ReturnType<typeof getWeeklyTemplateByEntity>>[number];
@@ -17,32 +24,52 @@ const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const PERIODS = Array.from({ length: 15 }, (_, i) => i + 1);
 const PERIOD_HEIGHT = 60;
 
-export function TimeGrid({ type, entityId }: TimeGridProps) {
+export function TimeGrid({ 
+  type, 
+  entityId, 
+  semesterId, 
+  isEditMode,
+  onCellClick, 
+  onAssignmentClick,
+  onToggleBlock 
+}: TimeGridProps) {
   const t = useTranslations("Admin");
   const [assignments, setAssignments] = useState<AssignmentWithRelations[]>([]);
+  const [availability, setAvailability] = useState<number[]>(new Array(7).fill(0));
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function loadAssignments() {
+    async function loadData() {
       if (!entityId) {
         setAssignments([]);
+        setAvailability(new Array(7).fill(0));
         return;
       }
 
       setLoading(true);
       try {
         const mappedType = type === "rooms" ? "room" : type === "teachers" ? "teacher" : "class";
-        const data = await getWeeklyTemplateByEntity(entityId, mappedType);
-        setAssignments(data || []);
+        const [templates, availData] = await Promise.all([
+          getWeeklyTemplateByEntity(entityId, mappedType, semesterId),
+          getAvailability(entityId, mappedType)
+        ]);
+        
+        setAssignments(templates || []);
+        
+        const availMasks = new Array(7).fill(0);
+        availData.forEach(a => {
+          availMasks[a.dayOfWeek] = a.occupiedMask;
+        });
+        setAvailability(availMasks);
       } catch (error) {
-        console.error("Failed to load assignments", error);
+        console.error("Failed to load data", error);
         setAssignments([]);
       } finally {
         setLoading(false);
       }
     }
-    loadAssignments();
-  }, [entityId, type]);
+    loadData();
+  }, [entityId, type, semesterId]);
 
   if (!entityId) {
     return (
@@ -85,13 +112,34 @@ export function TimeGrid({ type, entityId }: TimeGridProps) {
                 >
                   {p}
                 </div>
-                {DAYS.map((_, dayIndex) => (
-                  <div 
-                    key={dayIndex} 
-                    className="border-r border-b last:border-r-0 relative" 
-                    style={{ height: `${PERIOD_HEIGHT}px` }}
-                  />
-                ))}
+                {DAYS.map((_, dayIndex) => {
+                  const dbDayOfWeek = (dayIndex + 1) % 7;
+                  const isBlocked = hasCollision(availability[dbDayOfWeek], createMask(p, p));
+                  
+                  return (
+                    <div 
+                      key={dayIndex} 
+                      className={cn(
+                        "border-r border-b last:border-r-0 relative hover:bg-muted/50 cursor-pointer transition-colors",
+                        isBlocked && "diagonal-stripes"
+                      )} 
+                      style={{ height: `${PERIOD_HEIGHT}px` }}
+                      onClick={() => {
+                        if (isEditMode) {
+                          onToggleBlock?.(dayIndex, p);
+                        } else {
+                          onCellClick?.(dayIndex, p);
+                        }
+                      }}
+                    >
+                      {isBlocked && !isEditMode && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+                          <span className="text-[8px] font-bold uppercase rotate-45">{t("Occupied")}</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             ))}
 
@@ -103,6 +151,11 @@ export function TimeGrid({ type, entityId }: TimeGridProps) {
               const end = assignment.endPeriod;
               const duration = end - start + 1;
 
+              const subjectId = assignment.courseClass?.subject?.id;
+              const bgColor = subjectId ? stringToHslColor(subjectId, 70, 90) : "hsl(var(--muted))";
+              const borderColor = subjectId ? stringToHslColor(subjectId, 70, 60) : "hsl(var(--primary))";
+              const textColor = subjectId ? stringToHslColor(subjectId, 80, 20) : "hsl(var(--primary))";
+
               return (
                 <div
                   key={assignment.id}
@@ -113,21 +166,32 @@ export function TimeGrid({ type, entityId }: TimeGridProps) {
                     width: "12.5%",
                     height: `${(duration * PERIOD_HEIGHT)}px`,
                   }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAssignmentClick?.(assignment);
+                  }}
                 >
-                  <div className="h-full w-full rounded-md border-2 border-primary bg-primary/10 p-2 overflow-hidden shadow-sm transition-all hover:bg-primary/20 cursor-pointer group">
-                    <div className="text-[10px] font-bold text-primary truncate uppercase">
+                  <div 
+                    className="h-full w-full rounded-md border-2 p-2 overflow-hidden shadow-sm transition-all cursor-pointer group hover:brightness-95"
+                    style={{
+                      backgroundColor: bgColor,
+                      borderColor: borderColor,
+                      color: textColor,
+                    }}
+                  >
+                    <div className="text-[10px] font-bold truncate uppercase" style={{ color: borderColor }}>
                         {assignment.courseClass?.code}
                     </div>
                     <div className="text-[9px] font-medium leading-tight line-clamp-2 mt-1">
                         {assignment.courseClass?.subject?.name}
                     </div>
                     {type !== 'rooms' && (
-                      <div className="text-[9px] text-muted-foreground mt-1 truncate">
+                      <div className="text-[9px] mt-1 truncate opacity-80">
                         📍 {assignment.room?.code}
                       </div>
                     )}
                     {type !== 'teachers' && (
-                      <div className="text-[9px] text-muted-foreground mt-1 truncate">
+                      <div className="text-[9px] mt-1 truncate opacity-80">
                         👤 {assignment.courseClass?.employee?.profile?.fullname}
                       </div>
                     )}

@@ -4,6 +4,7 @@ import { getRooms, getTeachers, getCourseClasses } from "./scheduling-data";
 import { db } from "@/db";
 import { weeklyTemplate } from "@/db/schemas/schedule";
 import { revalidatePath } from "next/cache";
+import { inArray } from "drizzle-orm";
 
 export async function autoGenerateWeeklyAction(semesterId: number) {
   try {
@@ -38,12 +39,17 @@ export async function autoGenerateWeeklyAction(semesterId: number) {
     });
 
     if (result) {
-      // 4. Save to weeklyTemplate table (clear old first)
+      // 4. Save to weeklyTemplate table (clear old first for this semester)
       await db.transaction(async (tx) => {
-        const classIds = classes.map(c => c.id);
-        if (classIds.length > 0) {
-           await tx.delete(weeklyTemplate);
-           await tx.insert(weeklyTemplate).values(result);
+        await tx.delete(weeklyTemplate).where(
+          inArray(
+            weeklyTemplate.courseClassId,
+            db.select({ id: courseClass.id }).from(courseClass).where(eq(courseClass.semesterId, semesterId))
+          )
+        );
+        
+        if (result.length > 0) {
+          await tx.insert(weeklyTemplate).values(result);
         }
       });
       

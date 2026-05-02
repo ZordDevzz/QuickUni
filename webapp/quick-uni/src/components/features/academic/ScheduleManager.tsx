@@ -5,6 +5,7 @@ import { TimeGrid } from "./TimeGrid";
 import { useState, useEffect, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { ScheduleSlotDialog } from "./ScheduleSlotDialog";
+import { HolidayDialog } from "./HolidayDialog";
 import { WeeklyTemplateInput } from "@/lib/validators/scheduling";
 import { Button } from "@/components/ui/button";
 import { 
@@ -18,31 +19,51 @@ import {
   AlertDialogTitle, 
   AlertDialogTrigger 
 } from "@/components/ui/alert-dialog";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 import { autoGenerateWeeklyAction } from "@/actions/schedule-generate";
 import { publishTemplateToSchedule } from "@/actions/schedule-publish";
-import { getCurrentSemester } from "@/actions/scheduling-data";
+import { getSemesters, toggleAvailabilityAction } from "@/actions/scheduling-data";
 import { toast } from "sonner";
-import { Loader2, Play, Send } from "lucide-react";
+import { Loader2, Play, Send, Calendar, ChevronDown, Lock, Unlock } from "lucide-react";
+import { useSemester } from "@/components/providers/semester-provider";
+import { createMask } from "@/lib/scheduling/bitmask";
 
 export type EntityType = "rooms" | "teachers" | "classes";
 
 export function ScheduleManager() {
   const t = useTranslations("Admin");
+  const { selectedSemesterId } = useSemester();
   const [activeTab, setActiveTab] = useState<EntityType>("rooms");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isHolidayDialogOpen, setIsHolidayDialogOpen] = useState(false);
   const [dialogData, setDialogData] = useState<Partial<WeeklyTemplateInput> | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const [semesterId, setSemesterId] = useState<number | null>(null);
+  const [semesterId, setSemesterId] = useState<number | null>(selectedSemesterId);
+  const [semesters, setSemesters] = useState<any[]>([]);
   const [isPending, startTransition] = useTransition();
+  const [isEditAvailabilityMode, setIsEditAvailabilityMode] = useState(false);
 
   useEffect(() => {
-    getCurrentSemester().then(s => {
-      if (s) setSemesterId(s.id);
-    });
+    getSemesters().then(setSemesters);
   }, []);
+
+  useEffect(() => {
+    if (selectedSemesterId) {
+      setSemesterId(selectedSemesterId);
+    }
+  }, [selectedSemesterId]);
+
+  useEffect(() => {
+    setSelectedId(null);
+  }, [semesterId]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value as EntityType);
@@ -50,6 +71,8 @@ export function ScheduleManager() {
   };
 
   const handleCellClick = (dayIndex: number, period: number) => {
+    if (isEditAvailabilityMode) return;
+    
     // dayIndex is 0-6 (Mon-Sun), we need to map to DB Sunday-start (0=Sun, 1=Mon...)
     const dbDayOfWeek = (dayIndex + 1) % 7;
     
@@ -63,7 +86,30 @@ export function ScheduleManager() {
     setIsDialogOpen(true);
   };
 
+  const handleToggleBlock = async (dayIndex: number, period: number) => {
+    if (!selectedId) return;
+    
+    const dbDayOfWeek = (dayIndex + 1) % 7;
+    const slotMask = createMask(period, period);
+    const mappedType = activeTab === "rooms" ? "room" : activeTab === "teachers" ? "teacher" : "class";
+    
+    const result = await toggleAvailabilityAction({
+      entityId: selectedId,
+      entityType: mappedType as any,
+      dayOfWeek: dbDayOfWeek,
+      slotMask
+    });
+    
+    if (result.success) {
+      setRefreshKey(prev => prev + 1);
+    } else {
+      toast.error(result.error || "Failed to toggle availability");
+    }
+  };
+
   const handleAssignmentClick = (assignment: any) => {
+    if (isEditAvailabilityMode) return;
+    
     setDialogData({
       id: assignment.id,
       courseClassId: assignment.courseClassId,
@@ -104,11 +150,58 @@ export function ScheduleManager() {
     });
   };
 
+  const selectedSemester = semesters.find(s => s.id === semesterId);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold tracking-tight">{t("Schedule")}</h1>
         <div className="flex gap-2">
+          <Button 
+            variant={isEditAvailabilityMode ? "secondary" : "outline"} 
+            size="sm"
+            onClick={() => setIsEditAvailabilityMode(!isEditAvailabilityMode)}
+            className="gap-2"
+          >
+            {isEditAvailabilityMode ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+            <span className="hidden sm:inline-block">
+              {isEditAvailabilityMode ? t("EditingAvailability") : t("EditAvailability")}
+            </span>
+          </Button>
+
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setIsHolidayDialogOpen(true)}
+            className="gap-2"
+          >
+            <Calendar className="h-4 w-4" />
+            <span className="hidden sm:inline-block">{t("Holidays")}</span>
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9 gap-1 pr-2">
+                <Calendar className="h-4 w-4" />
+                <span className="text-xs">
+                  {selectedSemester?.name || t("SelectSemester")}
+                </span>
+                <ChevronDown className="h-4 w-4 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="max-h-[300px] overflow-y-auto">
+              {semesters.map((s) => (
+                <DropdownMenuItem 
+                  key={s.id} 
+                  onClick={() => setSemesterId(s.id)}
+                  className={s.id === semesterId ? "bg-accent" : ""}
+                >
+                  {s.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" size="sm" disabled={!semesterId || isPending}>
@@ -165,25 +258,36 @@ export function ScheduleManager() {
             <EntitySidebar 
                 type={activeTab} 
                 onSelect={setSelectedId} 
-                selectedId={selectedId} 
+                selectedId={selectedId}
+                semesterId={semesterId}
             />
           </div>
           <div className="flex-1">
             <TimeGrid 
-                key={`${activeTab}-${selectedId}-${refreshKey}`}
+                key={`${activeTab}-${selectedId}-${refreshKey}-${semesterId}`}
                 type={activeTab} 
                 entityId={selectedId} 
+                semesterId={semesterId}
+                isEditMode={isEditAvailabilityMode}
                 onCellClick={handleCellClick}
                 onAssignmentClick={handleAssignmentClick}
+                onToggleBlock={handleToggleBlock}
             />
           </div>
         </div>
       </Tabs>
 
+      <HolidayDialog 
+        isOpen={isHolidayDialogOpen}
+        onClose={() => setIsHolidayDialogOpen(false)}
+        semesterId={semesterId}
+      />
+
       <ScheduleSlotDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         initialData={dialogData}
+        semesterId={semesterId}
         onSuccess={handleSuccess}
       />
     </div>

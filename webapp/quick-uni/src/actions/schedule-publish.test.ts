@@ -26,10 +26,11 @@ describe('publishTemplateToSchedule', () => {
     vi.clearAllMocks();
   });
 
-  it('should throw an error if semester is not found', async () => {
+  it('should return success: false if semester is not found', async () => {
     (db.query.semester.findFirst as any).mockResolvedValue(null);
 
-    await expect(publishTemplateToSchedule(1)).rejects.toThrow('Semester not found');
+    const result = await publishTemplateToSchedule(1);
+    expect(result).toEqual({ success: false, error: 'Semester not found' });
   });
 
   it('should publish templates to schedule, excluding holidays', async () => {

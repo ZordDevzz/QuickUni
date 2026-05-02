@@ -3,6 +3,7 @@
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "./UserMenu";
+import { SemesterSelector } from "./SemesterSelector";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -53,7 +54,8 @@ export function AdminHeader({ setIsMobileOpen }: { setIsMobileOpen: (open: boole
         <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
+        <SemesterSelector />
         <UserMenu />
       </div>
     </header>

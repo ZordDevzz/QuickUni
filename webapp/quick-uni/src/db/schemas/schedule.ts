@@ -21,6 +21,7 @@ import { sql } from "drizzle-orm";
 import { enumAttendanceState } from "./enums";
 import { employee } from "./user";
 import { courseClass, enrollment } from "./course";
+import { semester } from "./academic";
 
 export const scheduleSchema = pgSchema("schedule");
 
@@ -205,7 +206,15 @@ export const weeklyTemplate = scheduleSchema.table(
 
 export const holidayBlacklist = scheduleSchema.table("holiday_blacklist", {
   id: bigserial({ mode: "number" }).primaryKey(),
-  date: date("date").notNull(),
   name: varchar({ length: 255 }),
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date").notNull(),
   isGlobal: boolean("is_global").default(true),
-});
+  semesterId: integer("semester_id"),
+}, (table) => [
+  foreignKey({
+    columns: [table.semesterId],
+    foreignColumns: [semester.id],
+    name: "fk_holiday_blacklist_semester_id",
+  }),
+]);
