@@ -8,23 +8,24 @@ import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldContent } from "@/components/ui/field";
 import { notify } from "@/lib/custom-toast";
 import { useRouter } from "next/navigation";
+import { building, room } from "@/db/schemas/schedule";
 
 interface RoomFormProps {
-  room?: any;
-  buildings: any[];
+  room?: typeof room.$inferSelect;
+  buildings: (typeof building.$inferSelect)[];
   onSuccess?: () => void;
 }
 
-export function RoomForm({ room, buildings, onSuccess }: RoomFormProps) {
+export function RoomForm({ room: roomData, buildings, onSuccess }: RoomFormProps) {
   const router = useRouter();
-  const isEdit = !!room;
+  const isEdit = !!roomData;
 
   const form = useForm({
     defaultValues: {
-      code: room?.code || "",
-      buildingId: room?.buildingId || (buildings.length > 0 ? buildings[0].id : ""),
-      capacity: room?.capacity || "",
-      type: room?.type || "",
+      code: roomData?.code || "",
+      buildingId: roomData?.buildingId || (buildings.length > 0 ? buildings[0].id : ""),
+      capacity: roomData?.capacity || 0,
+      type: roomData?.type || "",
     },
     onSubmit: async ({ value }) => {
       try {
@@ -36,8 +37,8 @@ export function RoomForm({ room, buildings, onSuccess }: RoomFormProps) {
         }
 
         let result;
-        if (isEdit && room) {
-          result = await updateRoomAction(room.id, validation.data as RoomUpdateInput);
+        if (isEdit && roomData) {
+          result = await updateRoomAction(roomData.id, validation.data as RoomUpdateInput);
         } else {
           result = await createRoomAction(validation.data as RoomInsertInput);
         }
@@ -49,8 +50,9 @@ export function RoomForm({ room, buildings, onSuccess }: RoomFormProps) {
         } else {
           notify(result.error || "Failed", { type: "error" });
         }
-      } catch (error: any) {
-        notify(error.message || "Failed", { type: "error" });
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "An unexpected error occurred";
+        notify(message, { type: "error" });
       }
     },
   });

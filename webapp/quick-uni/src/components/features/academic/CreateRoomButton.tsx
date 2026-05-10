@@ -11,8 +11,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { RoomForm } from "./RoomForm";
+import { building } from "@/db/schemas/schedule";
 
-export function CreateRoomButton({ buildings }: { buildings: any[] }) {
+export function CreateRoomButton({ buildings }: { buildings: (typeof building.$inferSelect)[] }) {
   const [open, setOpen] = useState(false);
 
   return (
