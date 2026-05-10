@@ -51,6 +51,8 @@ const navItems: NavItem[] = [
   },
   { key: "Semesters", href: "/admin/academic/semesters", icon: Calendar, category: "Academic" },
   { key: "Departments", href: "/admin/academic/departments", icon: Building },
+  { key: "Buildings", href: "/admin/academic/buildings", icon: Building },
+  { key: "Rooms", href: "/admin/academic/rooms", icon: Building },
   { key: "CourseClasses", href: "/admin/courses/classes", icon: BookOpen, category: "Curriculum" },
   { key: "Finance", href: "/admin/finance/invoices", icon: CreditCard, category: "Operations" },
   { key: "Schedule", href: "/admin/schedule", icon: Clock },
