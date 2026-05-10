@@ -1,0 +1,38 @@
+,,,,,,,,,
+,Tên chức năng,Nhóm chức năng,Độ ưu tiên,Dữ liệu đầu vào (Input),Kết quả đầu ra (Output),Ràng buộc (Constraints),Yêu cầu nghiệp vụ (Business Requirements),Giải pháp kỹ thuật (Technical Solution),Trạng thái (Status)
+,Quản lý tài khoản cá nhân,Chức năng Chung,Medium,"- Thông tin cá nhân cập nhật, mật khẩu mới",- Hồ sơ cá nhân được lưu,- Mật khẩu phải được băm (hashing),"- Cho phép cập nhật thông tin đăng nhập, hồ sơ tài khoản cá nhân.","- Update API
+- Bcrypt hashing",- Đang phát triển
+,Phân quyền,Chức năng Chung,Medium,"- Người dùng, vai trò (Role)",- Quyền truy cập được cập nhật,- Chỉ Cán bộ quản trị/Phòng đào tạo mới được phân quyền,- Thiết lập vai trò người dùng và giới hạn quyền truy cập tài nguyên.,"- RBAC
+- Middleware authorization",- Đang phát triển
+,Xem lớp và sinh viên,Chức năng Giảng viên,Medium,- Mã lớp học phần,- Danh sách sinh viên trong lớp,- Chỉ giảng viên của lớp mới được xem,- Cho phép xem danh sách các lớp học phần và danh sách sinh viên được phân công giảng dạy.,"- GET API
+- RBAC",- Đang phát triển
+,Đăng ký sửa đổi Thời khóa biểu,Chức năng Giảng viên,Medium,"- Yêu cầu thay đổi lịch (thời gian mới, lý do)",- Yêu cầu được gửi tới phòng đào tạo,- Lịch mới không được trùng lặp,- Cho phép xem thời khóa biểu và gửi yêu cầu sửa đổi tới phòng đào tạo.,- Workflow approval system,- Đang phát triển
+,Tạo thời khóa biểu tự động,Chức năng Phòng Đào tạo,High,"- Danh sách lớp học phần phụ trách bởi giảng viên
+- Danh sách phòng học
+- Khung thời gian cụ thể
+- Ràng buộc khung thời gian cho giảng viên
+- Ràng buộc khác về cơ sở vật chất, lịch nghỉ lễ, công tác, etc...",- Thời khóa biểu chi tiết,"- Không được sắp xếp chồng chéo lớp học phần, giảng viên và phòng học","- Hỗ trợ xếp lịch tự động với tính năng loại trừ (blacklist) các khoảng thời gian cụ thể.
+- Hỗ trợ lịch học lặp lại/tuần hoàn theo tuần học.
+- Tìm kiếm nhanh các khung thời gian trống (chưa có thời khóa biểu) trong một khoảng thời gian xác định.
+- Cho phép xếp lịch thủ công: ghi đè lịch hiện tại, tự động sắp xếp lại (tôn trọng blacklist) hoặc xóa lịch để xếp lại từ đầu.","- Auto-schedule: Backtracking
+- Search blank: Bitmask + Sliding Window
+- Check duplicate and Blacklist: Bitmask
+- Override and Reschedule: Backtracking
+- Datetime management: Interval Tree","- Hoàn thiện sơ bộ (02/05/2026)
+- Đã test mockup qua Vitest (02/05/2026)"
+,Quản lý Giảng viên và Nhân sự,Chức năng Phòng Đào tạo,Medium,"- Thông tin giảng viên (Tên, email, khoa...)",- Hồ sơ giảng viên được cập nhật,- Email không được trùng lặp,"- Cho phép nhập, tạo, thêm, đọc, sửa, xóa thông tin cán bộ giảng viên.",- CRUD API,- Đang phát triển
+,Quản lý Sinh viên,Chức năng Phòng Đào tạo,Medium,"- Thông tin sinh viên (MSSV, Tên, lớp...)",- Hồ sơ sinh viên được cập nhật,- MSSV không được trùng lặp,"- Cho phép nhập, tạo, thêm, đọc, sửa, xóa thông tin sinh viên.",- CRUD API,- Đang phát triển
+,Quản lý Phòng học,Chức năng Phòng Đào tạo,Medium,"- Thông tin phòng học (Tên phòng, sức chứa, trang thiết bị)",- Danh sách phòng học được cập nhật,- Tên phòng không trùng lặp,"- Cho phép tạo, quản lý (thêm, đọc, sửa, xóa) dữ liệu về phòng học.",- CRUD API,- Đang phát triển
+,Quản lý Lớp học phần,Chức năng Phòng Đào tạo,Medium,"- Mã học phần, giảng viên, số lượng SV tối đa",- Lớp học phần được tạo/cập nhật,- Phải gắn với giảng viên và môn học hợp lệ,"- Cho phép tạo, quản lý (thêm, đọc, sửa, xóa) các lớp học phần.",- CRUD API,- Đang phát triển
+,Quản lý Thời khóa biểu,Chức năng Phòng Đào tạo,Medium,"- Lớp học phần, phòng học, thời gian",- Lịch học được phân bổ,"- Không trùng lịch giảng viên, phòng học","- Cho phép tạo, quản lý (thêm, đọc, sửa, xóa) thời khóa biểu cho các lớp học phần.","- CRUD API
+- Constraint checking",- Đang phát triển
+,Quản lý tài khoản hệ thống,Chức năng Quản trị,Medium,- Thông tin tài khoản mới/cập nhật,- Tài khoản được tạo/cập nhật/xóa thành công,- Chỉ Cán bộ quản trị mới có quyền thực hiện,"- Cho phép thêm, đọc, sửa, xóa tất cả tài khoản trong hệ thống.","- CRUD API
+- Role-based Access Control (RBAC)",- Đang phát triển
+,Xem nhật ký hệ thống,Chức năng Quản trị,Medium,"- Bộ lọc thời gian, loại hành động",- Danh sách các log hệ thống,- Chỉ Cán bộ quản trị mới có quyền thực hiện,- Cho phép xem và theo dõi nhật ký hoạt động (logs) của toàn hệ thống.,"- Log parsing
+- Elasticsearch / Kibana",- Đang phát triển
+,Xem thông tin lớp học phần,Chức năng Sinh viên,Medium,- MSSV,- Danh sách lớp học phần đã đăng ký,- Sinh viên chỉ xem được lớp của mình,- Cho phép xem danh sách các lớp học phần đã đăng ký tham gia.,- GET API,- Đang phát triển
+,Xem Thời khóa biểu cá nhân,Chức năng Sinh viên,Medium,"- MSSV, tuần học",- Lịch học chi tiết trong tuần,- Sinh viên chỉ xem được lịch của mình,- Cho phép xem thời khóa biểu của các lớp học phần đã đăng ký.,- GET API,- Đang phát triển
+,Đăng ký Xin vắng buổi học,Chức năng Sinh viên,Medium,"- Lớp học phần, ngày vắng, lý do",- Đơn xin vắng mặt được ghi nhận,- Phải đăng ký trước thời gian học quy định,- Cho phép sinh viên đăng ký xin vắng mặt trong buổi học.,"- Form submission
+- Notification",- Đang phát triển
+,Đăng ký Hủy lớp học phần,Chức năng Sinh viên,Medium,- Lớp học phần cần hủy,- Lớp học phần được gỡ khỏi danh sách đăng ký,- Chỉ được hủy trong thời gian cho phép,- Cho phép sinh viên đăng ký hủy một lớp học phần đã tham gia.,"- API update
+- Transaction",- Đang phát triển

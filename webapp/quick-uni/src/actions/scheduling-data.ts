@@ -4,6 +4,7 @@ import { weeklyTemplate, availability, holidayBlacklist } from "../db/schemas/sc
 import { courseClass } from "../db/schemas/course";
 import { eq, and, ne, asc, exists } from "drizzle-orm";
 import { createMask, hasCollision } from "../lib/scheduling/bitmask";
+import { weeklyTemplateValidator, holidayValidator } from "../lib/validators/scheduling";
 
 const WEEKLY_TEMPLATE_WITH_RELATIONS = {
   room: true,
@@ -87,22 +88,26 @@ export async function getCurrentSemester() {
   }
 }
 
-export async function upsertWeeklyTemplate(data: Omit<typeof weeklyTemplate.$inferInsert, 'occupyMask'>) {
+export async function upsertWeeklyTemplate(data: any) {
   try {
-    const mask = createMask(data.startPeriod, data.endPeriod);
-    const finalData = { ...data, occupyMask: mask } as typeof weeklyTemplate.$inferInsert;
+    const validated = weeklyTemplateValidator.parse(data);
+    const mask = createMask(validated.startPeriod, validated.endPeriod);
+    const finalData = { ...validated, occupyMask: mask } as typeof weeklyTemplate.$inferInsert;
 
-    if (data.id) {
+    if (validated.id) {
       await db.update(weeklyTemplate)
         .set(finalData)
-        .where(eq(weeklyTemplate.id, data.id));
-      return { success: true, id: data.id };
+        .where(eq(weeklyTemplate.id, validated.id));
+      return { success: true, id: validated.id };
     } else {
       const result = await db.insert(weeklyTemplate).values(finalData).returning({ id: weeklyTemplate.id });
       return { success: true, id: result[0].id };
     }
   } catch (error) {
     console.error("Error in upsertWeeklyTemplate:", error);
+    if (error instanceof Error && 'issues' in error) {
+      return { success: false, error: "Validation failed" };
+    }
     throw new Error("Failed to save weekly template");
   }
 }
@@ -260,18 +265,22 @@ export async function getHolidays() {
   }
 }
 
-export async function addHolidayAction(params: { startDate: string, endDate: string, name?: string, semesterId?: number }) {
+export async function addHolidayAction(data: any) {
   try {
+    const validated = holidayValidator.parse(data);
     await db.insert(holidayBlacklist).values({
-      startDate: params.startDate,
-      endDate: params.endDate,
-      name: params.name,
-      semesterId: params.semesterId,
-      isGlobal: !params.semesterId
+      startDate: validated.startDate,
+      endDate: validated.endDate,
+      name: validated.name,
+      semesterId: validated.semesterId,
+      isGlobal: validated.isGlobal || !validated.semesterId
     });
     return { success: true };
   } catch (error) {
     console.error("Error in addHolidayAction:", error);
+    if (error instanceof Error && 'issues' in error) {
+      return { success: false, error: "Validation failed" };
+    }
     return { success: false, error: "Failed to add holiday" };
   }
 }
