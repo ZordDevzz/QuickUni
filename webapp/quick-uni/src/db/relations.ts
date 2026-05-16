@@ -57,6 +57,7 @@ import {
   memberRole,
   profileField,
   profileSchemaField,
+  profileSection,
   subjectPrerequisite,
   systemBroadcastRead,
   systemBroadcast,
@@ -509,6 +510,15 @@ export const profileRelations = relations(profile, ({ one, many }) => ({
 export const profileSchemaRelations = relations(profileSchema, ({ many }) => ({
   profiles: many(profile),
   profileSchemaFields: many(profileSchemaField),
+  profileSections: many(profileSection),
+}));
+
+export const profileSectionRelations = relations(profileSection, ({ one, many }) => ({
+  profileSchema: one(profileSchema, {
+    fields: [profileSection.schemaId],
+    references: [profileSchema.id],
+  }),
+  profileSchemaFields: many(profileSchemaField),
 }));
 
 export const messageRelations = relations(message, ({ one, many }) => ({
@@ -668,6 +678,10 @@ export const profileSchemaFieldRelations = relations(
     profileSchema: one(profileSchema, {
       fields: [profileSchemaField.schemaId],
       references: [profileSchema.id],
+    }),
+    profileSection: one(profileSection, {
+      fields: [profileSchemaField.sectionId],
+      references: [profileSection.id],
     }),
   }),
 );
