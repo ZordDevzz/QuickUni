@@ -324,6 +324,17 @@
     "AddField": "Add Field",
     "AvailableFields": "Available Fields",
     "Required": "Required",
-    "NoFieldsInSection": "No fields in this section. Drag fields here or add from the menu."
+    "NoFieldsInSection": "No fields in this section. Drag fields here or add from the menu.",
+    "FieldProperties": "Field Properties",
+    "SectionProperties": "Section Properties",
+    "EditFieldPropertiesDescription": "Configure behavior for field: {name}",
+    "EditSectionPropertiesDescription": "Manage settings for section: {name}",
+    "RequiredField": "Mandatory Field",
+    "RequiredFieldHint": "Force users to fill this field before saving the profile.",
+    "SectionName": "Section Display Name",
+    "SectionPropertiesHint": "This section will be displayed as a group in the user profile form.",
+    "RemoveFieldFromSchema": "Remove Field from Layout",
+    "DeleteSection": "Delete Section",
+    "Close": "Close"
     }
     }

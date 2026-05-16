@@ -25,6 +25,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { SectionCard } from "./SectionCard";
+import { PropertyDrawer } from "./PropertyDrawer";
 import { updateProfileStructureAction } from "@/actions/profile-structure";
 import { toast } from "sonner";
 
@@ -80,6 +81,11 @@ export function StructureWorkspace({ initialSchemas, allFields }: StructureWorks
     return data;
   });
 
+  const [selectedItem, setSelectedItem] = useState<{
+    type: "field" | "section";
+    data: ProfileSchemaField | ProfileSection;
+  } | null>(null);
+
   const [isSaving, setIsSaving] = useState(false);
   const t = useTranslations("ProfileStructure");
 
@@ -97,6 +103,30 @@ export function StructureWorkspace({ initialSchemas, allFields }: StructureWorks
 
   const activeSchema = initialSchemas.find((s) => s.id === activeSchemaId);
   const activeSections = activeSchemaId ? schemasData[activeSchemaId] || [] : [];
+
+  // Update selected item data if schemasData changes
+  useEffect(() => {
+    if (selectedItem && activeSchemaId) {
+      const sections = schemasData[activeSchemaId];
+      if (selectedItem.type === "section") {
+        const section = sections.find(s => s.id === selectedItem.data.id);
+        if (section) {
+          setSelectedItem({ type: "section", data: section });
+        } else {
+          setSelectedItem(null);
+        }
+      } else {
+        const fieldData = selectedItem.data as ProfileSchemaField;
+        const section = sections.find(s => s.id === fieldData.sectionId);
+        const field = section?.profileSchemaFields.find(f => f.fieldId === fieldData.fieldId);
+        if (field) {
+          setSelectedItem({ type: "field", data: field });
+        } else {
+          setSelectedItem(null);
+        }
+      }
+    }
+  }, [schemasData, activeSchemaId]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -453,6 +483,10 @@ export function StructureWorkspace({ initialSchemas, allFields }: StructureWorks
                             onAddField={handleAddField}
                             onRemoveField={handleRemoveField}
                             onToggleRequired={handleToggleRequired}
+                            onSelectSection={() => setSelectedItem({ type: "section", data: section })}
+                            onSelectField={(field) => setSelectedItem({ type: "field", data: field })}
+                            selectedId={selectedItem?.data.id}
+                            selectedFieldId={selectedItem?.type === "field" ? (selectedItem.data as ProfileSchemaField).fieldId : undefined}
                           />
                         ))}
                       </div>
@@ -490,6 +524,16 @@ export function StructureWorkspace({ initialSchemas, allFields }: StructureWorks
           )}
         </div>
       </Card>
+
+      <PropertyDrawer 
+        isOpen={!!selectedItem}
+        selectedItem={selectedItem}
+        onClose={() => setSelectedItem(null)}
+        onUpdateField={handleToggleRequired}
+        onUpdateSection={handleUpdateSectionName}
+        onDeleteField={handleRemoveField}
+        onDeleteSection={handleRemoveSection}
+      />
     </div>
   );
 }

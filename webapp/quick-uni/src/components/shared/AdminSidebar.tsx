@@ -51,6 +51,7 @@ const navItems: NavItem[] = [
     icon: User,
     items: [
       { key: "Profiles", href: "/admin/profiles" },
+      { key: "Structure", href: "/admin/profiles/structure" },
       { key: "ProfileSchema", href: "/admin/profiles/schemas" },
       { key: "ProfileField", href: "/admin/profiles/fields" },
     ]
