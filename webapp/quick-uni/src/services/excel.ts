@@ -82,3 +82,24 @@ export async function parseAndValidateOnboardingExcel(buffer: Buffer, fields: { 
     };
   });
 }
+
+/**
+ * Generates an Excel report of the onboarding execution.
+ */
+export async function generateOnboardingReport(results: any[]) {
+  const data = results.map(r => ({
+    "Full Name": r.data["Full Name"],
+    "Entity Code": r.data["Entity Code"],
+    "Status": r.processed ? "SUCCESS" : "FAILED",
+    "Error Message": r.error || "",
+    "Username": r.data["Entity Code"],
+    "Password": r.data["National ID"] || r.data["Entity Code"],
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Results");
+
+  const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+  return buffer as Buffer;
+}

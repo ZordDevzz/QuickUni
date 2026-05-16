@@ -70,7 +70,7 @@ export const profile = usersSchema.table(
     foreignKey({
       columns: [table.sessionId],
       foreignColumns: [onboardingSession.id],
-      name: "fk_profile_onboarding_session_id",
+      name: "fk_profile_session_id_onboarding_session_id",
     }),
     unique("profile_national_id_key").on(table.nationalId),
   ],

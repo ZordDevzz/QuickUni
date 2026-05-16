@@ -25,6 +25,8 @@ CREATE TYPE "public"."enum_payment_status" AS ENUM('pending', 'paid', 'cancelled
 CREATE TYPE "public"."notification_channel" AS ENUM('in_app', 'email', 'push', 'sms');--> statement-breakpoint
 CREATE TYPE "public"."notification_status" AS ENUM('queued', 'sent', 'failed', 'read', 'unread');--> statement-breakpoint
 CREATE TYPE "public"."notification_type" AS ENUM('system', 'academic', 'finance', 'social');--> statement-breakpoint
+CREATE TYPE "schedule"."availability_entity_type" AS ENUM('teacher', 'room', 'subject', 'class', 'global');--> statement-breakpoint
+CREATE TYPE "public"."onboarding_session_status" AS ENUM('draft', 'validating', 'ready', 'processing', 'completed', 'failed');--> statement-breakpoint
 CREATE TABLE "auth"."account" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"username" varchar(255) NOT NULL,
@@ -110,6 +112,7 @@ CREATE TABLE "users"."profile" (
 	"religious" varchar(255),
 	"schema_id" bigint NOT NULL,
 	"dynamic_data" jsonb,
+	"session_id" uuid,
 	"create_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"update_at" timestamp with time zone,
 	"deleted_at" timestamp with time zone,
@@ -346,12 +349,29 @@ CREATE TABLE "schedule"."attendance_status" (
 	CONSTRAINT "attendance_status_pkey" PRIMARY KEY("enroll_id","schedule_id")
 );
 --> statement-breakpoint
+CREATE TABLE "schedule"."availability" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"entity_id" varchar(50) NOT NULL,
+	"entity_type" "schedule"."availability_entity_type" NOT NULL,
+	"day_of_week" smallint NOT NULL,
+	"occupied_mask" integer DEFAULT 0 NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "schedule"."building" (
 	"id" "smallserial" PRIMARY KEY NOT NULL,
 	"code" varchar(30) NOT NULL,
 	"name" varchar(255),
 	"des" text,
 	CONSTRAINT "building_code_key" UNIQUE("code")
+);
+--> statement-breakpoint
+CREATE TABLE "schedule"."holiday_blacklist" (
+	"id" bigserial PRIMARY KEY NOT NULL,
+	"name" varchar(255),
+	"start_date" date NOT NULL,
+	"end_date" date NOT NULL,
+	"is_global" boolean DEFAULT true,
+	"semester_id" integer
 );
 --> statement-breakpoint
 CREATE TABLE "schedule"."room" (
@@ -370,6 +390,7 @@ CREATE TABLE "schedule"."schedule" (
 	"start_time" time NOT NULL,
 	"end_time" time NOT NULL,
 	"period" smallint NOT NULL,
+	"end_period" smallint,
 	"m_per_period" integer DEFAULT 45,
 	"sch_date" date NOT NULL,
 	"note" varchar(512),
@@ -394,6 +415,16 @@ CREATE TABLE "schedule"."schedule_type" (
 	"code" varchar(30) NOT NULL,
 	"name" varchar(255),
 	"des" text
+);
+--> statement-breakpoint
+CREATE TABLE "schedule"."weekly_template" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"course_class_id" uuid NOT NULL,
+	"room_id" smallint NOT NULL,
+	"day_of_week" smallint NOT NULL,
+	"start_period" smallint NOT NULL,
+	"end_period" smallint NOT NULL,
+	"occupy_mask" integer NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "grade"."grade" (
@@ -646,6 +677,21 @@ CREATE TABLE "system"."feature_flag_audit" (
 	"reason" text
 );
 --> statement-breakpoint
+CREATE TABLE "system"."onboarding_session" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"entity_type" varchar(20) NOT NULL,
+	"schema_id" bigint NOT NULL,
+	"status" "onboarding_session_status" DEFAULT 'draft' NOT NULL,
+	"config" jsonb,
+	"summary" jsonb,
+	"create_by" uuid,
+	"update_by" uuid,
+	"create_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	"update_at" timestamp with time zone,
+	"deleted_at" timestamp with time zone
+);
+--> statement-breakpoint
 CREATE TABLE "system"."system_audit_log" (
 	"id" bigserial PRIMARY KEY NOT NULL,
 	"actor_id" uuid NOT NULL,
@@ -677,6 +723,7 @@ ALTER TABLE "auth"."user_system_role" ADD CONSTRAINT "fk_user_system_role_system
 ALTER TABLE "users"."employee" ADD CONSTRAINT "fk_employee_profile_id_profile_id" FOREIGN KEY ("profile_id") REFERENCES "users"."profile"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "users"."profile" ADD CONSTRAINT "fk_profile_account_id_account_id" FOREIGN KEY ("account_id") REFERENCES "auth"."account"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "users"."profile" ADD CONSTRAINT "fk_profile_schema_id_profile_schema_id" FOREIGN KEY ("schema_id") REFERENCES "users"."profile_schema"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "users"."profile" ADD CONSTRAINT "fk_profile_session_id_onboarding_session_id" FOREIGN KEY ("session_id") REFERENCES "system"."onboarding_session"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "users"."profile_schema_field" ADD CONSTRAINT "fk_profile_schema_field_field_id_profile_field_id" FOREIGN KEY ("field_id") REFERENCES "users"."profile_field"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "users"."profile_schema_field" ADD CONSTRAINT "fk_profile_schema_field_schema_id_profile_schema_id" FOREIGN KEY ("schema_id") REFERENCES "users"."profile_schema"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "users"."student" ADD CONSTRAINT "fk_student_profile_id_profile_id" FOREIGN KEY ("profile_id") REFERENCES "users"."profile"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -707,12 +754,15 @@ ALTER TABLE "course"."main_class_member" ADD CONSTRAINT "fk_main_class_member_ro
 ALTER TABLE "course"."main_class_member" ADD CONSTRAINT "fk_main_class_member_student_id_student_id" FOREIGN KEY ("student_id") REFERENCES "users"."student"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "schedule"."attendance_status" ADD CONSTRAINT "fk_attendance_status_enroll_id_enrollment_id" FOREIGN KEY ("enroll_id") REFERENCES "course"."enrollment"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "schedule"."attendance_status" ADD CONSTRAINT "fk_attendance_status_schedule_id_schedule_id" FOREIGN KEY ("schedule_id") REFERENCES "schedule"."schedule"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "schedule"."holiday_blacklist" ADD CONSTRAINT "fk_holiday_blacklist_semester_id" FOREIGN KEY ("semester_id") REFERENCES "academic"."semester"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "schedule"."room" ADD CONSTRAINT "fk_room_building_id_building_id" FOREIGN KEY ("building_id") REFERENCES "schedule"."building"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "schedule"."schedule" ADD CONSTRAINT "fk_schedule_course_class_id_course_class_id" FOREIGN KEY ("course_class_id") REFERENCES "course"."course_class"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "schedule"."schedule" ADD CONSTRAINT "fk_schedule_conductor_id_employee_id" FOREIGN KEY ("conductor_id") REFERENCES "users"."employee"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "schedule"."schedule" ADD CONSTRAINT "fk_schedule_room_id_room_id" FOREIGN KEY ("room_id") REFERENCES "schedule"."room"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "schedule"."schedule" ADD CONSTRAINT "fk_schedule_status_id_schedule_status_id" FOREIGN KEY ("status_id") REFERENCES "schedule"."schedule_status"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "schedule"."schedule" ADD CONSTRAINT "fk_schedule_type_schedule_type_id" FOREIGN KEY ("type") REFERENCES "schedule"."schedule_type"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "schedule"."weekly_template" ADD CONSTRAINT "fk_weekly_template_course_class_id_course_class_id" FOREIGN KEY ("course_class_id") REFERENCES "course"."course_class"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "schedule"."weekly_template" ADD CONSTRAINT "fk_weekly_template_room_id_room_id" FOREIGN KEY ("room_id") REFERENCES "schedule"."room"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "grade"."grade" ADD CONSTRAINT "fk_grade_assignment_id_assignment_id" FOREIGN KEY ("assignment_id") REFERENCES "course"."assignment"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "grade"."grade" ADD CONSTRAINT "fk_grade_enrollment_id_enrollment_id" FOREIGN KEY ("enrollment_id") REFERENCES "course"."enrollment"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "grade"."grade" ADD CONSTRAINT "fk_grade_type_id_grade_type_id" FOREIGN KEY ("type_id") REFERENCES "grade"."grade_type"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -752,6 +802,8 @@ ALTER TABLE "system"."department_employment" ADD CONSTRAINT "fk_department_emplo
 ALTER TABLE "system"."feature_flag" ADD CONSTRAINT "fk_feature_flag_update_by_account_id" FOREIGN KEY ("update_by") REFERENCES "auth"."account"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "system"."feature_flag_audit" ADD CONSTRAINT "fk_feature_flag_audit_change_by_account_id" FOREIGN KEY ("change_by") REFERENCES "auth"."account"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "system"."feature_flag_audit" ADD CONSTRAINT "fk_feature_flag_audit_flag_id_feature_flag_id" FOREIGN KEY ("flag_id") REFERENCES "system"."feature_flag"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "system"."onboarding_session" ADD CONSTRAINT "fk_onboarding_session_schema_id_profile_schema_id" FOREIGN KEY ("schema_id") REFERENCES "users"."profile_schema"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "system"."onboarding_session" ADD CONSTRAINT "fk_onboarding_session_update_by_account_id" FOREIGN KEY ("update_by") REFERENCES "auth"."account"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "system"."system_audit_log" ADD CONSTRAINT "fk_system_audit_log_actor_id_account_id" FOREIGN KEY ("actor_id") REFERENCES "auth"."account"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "system"."system_setting" ADD CONSTRAINT "fk_system_setting_update_by_account_id" FOREIGN KEY ("update_by") REFERENCES "auth"."account"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "account_idx_acc_usrname" ON "auth"."account" USING btree ("username" text_ops);--> statement-breakpoint
@@ -759,6 +811,7 @@ CREATE INDEX "account_audit_idx_account_id" ON "auth"."account_audit" USING btre
 CREATE INDEX "account_audit_idx_performed_by" ON "auth"."account_audit" USING btree ("performed_by");--> statement-breakpoint
 CREATE UNIQUE INDEX "user_device_token_idx_user_device_token_user_id_device_token" ON "auth"."user_device_token" USING btree ("user_id" uuid_ops,"device_token" text_ops);--> statement-breakpoint
 CREATE UNIQUE INDEX "enrollment_enrollment_index_0" ON "course"."enrollment" USING btree ("student_id" uuid_ops,"course_class_id" uuid_ops);--> statement-breakpoint
+CREATE INDEX "availability_entity_idx" ON "schedule"."availability" USING btree ("entity_id","entity_type");--> statement-breakpoint
 CREATE INDEX "schedule_idx_schedule_c_class" ON "schedule"."schedule" USING btree ("course_class_id" uuid_ops);--> statement-breakpoint
 CREATE INDEX "schedule_idx_schedule_conductor" ON "schedule"."schedule" USING btree ("conductor_id" uuid_ops,"sch_date" date_ops);--> statement-breakpoint
 CREATE INDEX "grade_idx_grade_enrollment_id" ON "grade"."grade" USING btree ("enrollment_id" int8_ops);--> statement-breakpoint

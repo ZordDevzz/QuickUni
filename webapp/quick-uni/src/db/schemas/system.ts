@@ -16,7 +16,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { account } from "./auth";
-import { employee } from "./user";
+import { employee, profileSchema } from "./user";
 import { department } from "./academic";
 
 export const systemSchema = pgSchema("system");
@@ -30,23 +30,40 @@ export const onboardingSessionStatus = pgEnum("onboarding_session_status", [
   "failed",
 ]);
 
-export const onboardingSession = systemSchema.table("onboarding_session", {
-  id: uuid().primaryKey().notNull(),
-  name: varchar({ length: 255 }).notNull(),
-  entityType: varchar("entity_type", { length: 20 }).notNull(),
-  schemaId: bigint("schema_id", { mode: "number" }).notNull(),
-  status: onboardingSessionStatus("status").default("draft").notNull(),
-  config: jsonb("config"),
-  summary: jsonb("summary"),
-  createdBy: uuid("created_by"),
-  createdAt: timestamp("create_at", {
-    withTimezone: true,
-    mode: "string",
-  })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("update_at", { withTimezone: true, mode: "string" }),
-});
+export const onboardingSession = systemSchema.table(
+  "onboarding_session",
+  {
+    id: uuid().primaryKey().notNull(),
+    name: varchar({ length: 255 }).notNull(),
+    entityType: varchar("entity_type", { length: 20 }).notNull(),
+    schemaId: bigint("schema_id", { mode: "number" }).notNull(),
+    status: onboardingSessionStatus("status").default("draft").notNull(),
+    config: jsonb("config"),
+    summary: jsonb("summary"),
+    createBy: uuid("create_by"),
+    updateBy: uuid("update_by"),
+    createAt: timestamp("create_at", {
+      withTimezone: true,
+      mode: "string",
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updateAt: timestamp("update_at", { withTimezone: true, mode: "string" }),
+    deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "string" }),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.schemaId],
+      foreignColumns: [profileSchema.id],
+      name: "fk_onboarding_session_schema_id_profile_schema_id",
+    }),
+    foreignKey({
+      columns: [table.updateBy],
+      foreignColumns: [account.id],
+      name: "fk_onboarding_session_update_by_account_id",
+    }),
+  ],
+);
 
 export const systemSetting = systemSchema.table(
   "system_setting",

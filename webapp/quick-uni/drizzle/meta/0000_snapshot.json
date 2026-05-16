@@ -1,5 +1,5 @@
 {
-  "id": "b5a099be-f474-42e1-b775-1b0d35d86bc1",
+  "id": "fc098045-2643-43d6-8aed-2fb95a14c454",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -679,6 +679,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "session_id": {
+          "name": "session_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "create_at": {
           "name": "create_at",
           "type": "timestamp with time zone",
@@ -722,6 +728,20 @@
           "schemaTo": "users",
           "columnsFrom": [
             "schema_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "fk_profile_session_id_onboarding_session_id": {
+          "name": "fk_profile_session_id_onboarding_session_id",
+          "tableFrom": "profile",
+          "tableTo": "onboarding_session",
+          "schemaTo": "system",
+          "columnsFrom": [
+            "session_id"
           ],
           "columnsTo": [
             "id"
@@ -2511,6 +2531,74 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "schedule.availability": {
+      "name": "availability",
+      "schema": "schedule",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "entity_id": {
+          "name": "entity_id",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entity_type": {
+          "name": "entity_type",
+          "type": "availability_entity_type",
+          "typeSchema": "schedule",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "day_of_week": {
+          "name": "day_of_week",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "occupied_mask": {
+          "name": "occupied_mask",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "availability_entity_idx": {
+          "name": "availability_entity_idx",
+          "columns": [
+            {
+              "expression": "entity_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "entity_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "schedule.building": {
       "name": "building",
       "schema": "schedule",
@@ -2552,6 +2640,71 @@
           ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "schedule.holiday_blacklist": {
+      "name": "holiday_blacklist",
+      "schema": "schedule",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_global": {
+          "name": "is_global",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "semester_id": {
+          "name": "semester_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fk_holiday_blacklist_semester_id": {
+          "name": "fk_holiday_blacklist_semester_id",
+          "tableFrom": "holiday_blacklist",
+          "tableTo": "semester",
+          "schemaTo": "academic",
+          "columnsFrom": [
+            "semester_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -2661,6 +2814,12 @@
           "type": "smallint",
           "primaryKey": false,
           "notNull": true
+        },
+        "end_period": {
+          "name": "end_period",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
         },
         "m_per_period": {
           "name": "m_per_period",
@@ -2913,6 +3072,91 @@
       },
       "indexes": {},
       "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "schedule.weekly_template": {
+      "name": "weekly_template",
+      "schema": "schedule",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "course_class_id": {
+          "name": "course_class_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "room_id": {
+          "name": "room_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "day_of_week": {
+          "name": "day_of_week",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_period": {
+          "name": "start_period",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_period": {
+          "name": "end_period",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "occupy_mask": {
+          "name": "occupy_mask",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fk_weekly_template_course_class_id_course_class_id": {
+          "name": "fk_weekly_template_course_class_id_course_class_id",
+          "tableFrom": "weekly_template",
+          "tableTo": "course_class",
+          "schemaTo": "course",
+          "columnsFrom": [
+            "course_class_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "fk_weekly_template_room_id_room_id": {
+          "name": "fk_weekly_template_room_id_room_id",
+          "tableFrom": "weekly_template",
+          "tableTo": "room",
+          "schemaTo": "schedule",
+          "columnsFrom": [
+            "room_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -5030,6 +5274,123 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "system.onboarding_session": {
+      "name": "onboarding_session",
+      "schema": "system",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entity_type": {
+          "name": "entity_type",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "schema_id": {
+          "name": "schema_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "onboarding_session_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'draft'"
+        },
+        "config": {
+          "name": "config",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "summary": {
+          "name": "summary",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "create_by": {
+          "name": "create_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "update_by": {
+          "name": "update_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "create_at": {
+          "name": "create_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "update_at": {
+          "name": "update_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fk_onboarding_session_schema_id_profile_schema_id": {
+          "name": "fk_onboarding_session_schema_id_profile_schema_id",
+          "tableFrom": "onboarding_session",
+          "tableTo": "profile_schema",
+          "schemaTo": "users",
+          "columnsFrom": [
+            "schema_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "fk_onboarding_session_update_by_account_id": {
+          "name": "fk_onboarding_session_update_by_account_id",
+          "tableFrom": "onboarding_session",
+          "tableTo": "account",
+          "schemaTo": "auth",
+          "columnsFrom": [
+            "update_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "system.system_audit_log": {
       "name": "system_audit_log",
       "schema": "system",
@@ -5265,6 +5626,29 @@
         "academic",
         "finance",
         "social"
+      ]
+    },
+    "schedule.availability_entity_type": {
+      "name": "availability_entity_type",
+      "schema": "schedule",
+      "values": [
+        "teacher",
+        "room",
+        "subject",
+        "class",
+        "global"
+      ]
+    },
+    "public.onboarding_session_status": {
+      "name": "onboarding_session_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "validating",
+        "ready",
+        "processing",
+        "completed",
+        "failed"
       ]
     }
   },

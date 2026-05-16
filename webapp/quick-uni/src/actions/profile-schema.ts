@@ -75,10 +75,24 @@ export async function deleteProfileSchemaAction(id: number): Promise<ActionRespo
     await db.delete(profileSchema).where(eq(profileSchema.id, id));
     revalidatePath("/admin/profiles/schemas");
     return { success: true };
-  } catch (error: unknown) {
+    } catch (error: unknown) {
     return { 
       success: false, 
       error: error instanceof Error ? error.message : "Failed to delete profile schema" 
     };
-  }
-}
+    }
+    }
+
+    export async function getProfileSchemasAction() {
+    try {
+    const schemas = await db.query.profileSchema.findMany({
+      orderBy: (schemas, { desc }) => [desc(schemas.createAt)],
+    });
+    return { success: true, data: schemas };
+    } catch (error: unknown) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Failed to fetch profile schemas" 
+    };
+    }
+    }

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { 
   User, 
   Users, 
+  UserPlus,
   LayoutDashboard, 
   Settings, 
   Calendar,
@@ -38,6 +39,11 @@ const navItems: NavItem[] = [
     href: "/admin/accounts", 
     icon: Users, 
     category: "UserManagement" 
+  },
+  { 
+    key: "Onboarding", 
+    href: "/admin/onboarding", 
+    icon: UserPlus 
   },
   { 
     key: "Profiles", 
