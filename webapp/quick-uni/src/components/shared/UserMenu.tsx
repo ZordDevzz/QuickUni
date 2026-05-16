@@ -28,7 +28,7 @@ import {
   Monitor
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
-import { usePathname, useRouter } from "@/i18n/routing";
+import { usePathname, useRouter, Link } from "@/i18n/routing";
 
 export function UserMenu() {
   const { data: session } = useSession();
@@ -72,13 +72,17 @@ export function UserMenu() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" />
-            <span>{t("Profile")}</span>
+          <DropdownMenuItem asChild>
+            <Link href="/account" className="flex w-full items-center">
+              <User className="mr-2 h-4 w-4" />
+              <span>{t("Profile")}</span>
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>{t("Settings")}</span>
+          <DropdownMenuItem asChild>
+            <Link href="/account?tab=preferences" className="flex w-full items-center">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>{t("Settings")}</span>
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
