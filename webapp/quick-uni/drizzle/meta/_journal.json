@@ -8,6 +8,13 @@
       "when": 1778897599220,
       "tag": "0000_futuristic_old_lace",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778946009226,
+      "tag": "0001_daily_lilandra",
+      "breakpoints": true
     }
   ]
 }

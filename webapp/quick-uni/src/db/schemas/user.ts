@@ -11,7 +11,8 @@ import {
   date,
   jsonb,
   primaryKey,
-  bigserial
+  bigserial,
+  integer
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
@@ -140,6 +141,8 @@ export const profileSchemaField = usersSchema.table(
   {
     fieldId: bigint("field_id", { mode: "number" }).notNull(),
     schemaId: bigint("schema_id", { mode: "number" }).notNull(),
+    sectionId: bigint("section_id", { mode: "number" }), // Nullable initially for migration
+    order: integer().default(0).notNull(),
     isRequired: boolean("is_required").default(false).notNull(),
   },
   (table) => [
@@ -152,6 +155,11 @@ export const profileSchemaField = usersSchema.table(
       columns: [table.schemaId],
       foreignColumns: [profileSchema.id],
       name: "fk_profile_schema_field_schema_id_profile_schema_id",
+    }),
+    foreignKey({
+      columns: [table.sectionId],
+      foreignColumns: [profileSection.id],
+      name: "fk_profile_schema_field_section_id",
     }),
     primaryKey({
       columns: [table.fieldId, table.schemaId],
@@ -168,3 +176,27 @@ export const selectProfileSchema = createSelectSchema(profileSchema);
 
 export const insertProfileField = createInsertSchema(profileField);
 export const selectProfileField = createSelectSchema(profileField);
+
+export const profileSection = usersSchema.table(
+  "profile_section",
+  {
+    id: bigserial({ mode: "number" }).primaryKey().notNull(),
+    schemaId: bigint("schema_id", { mode: "number" }).notNull(),
+    name: varchar({ length: 255 }).notNull(),
+    order: integer().default(0).notNull(),
+    createAt: timestamp("create_at", { withTimezone: true, mode: "string" })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updateAt: timestamp("update_at", { withTimezone: true, mode: "string" }),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.schemaId],
+      foreignColumns: [profileSchema.id],
+      name: "fk_profile_section_schema_id",
+    }),
+  ],
+);
+
+export const insertProfileSection = createInsertSchema(profileSection);
+export const selectProfileSection = createSelectSchema(profileSection);
