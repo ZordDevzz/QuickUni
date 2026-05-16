@@ -185,6 +185,7 @@ export async function executeOnboardingSession(sessionId: string): Promise<Actio
 
         // 1. Create Profile
         const profile = await createProfileWorkflow({
+          id: randomUUID(),
           fullname: rowData["Full Name"],
           gender: genderValue,
           dob: dobValue,

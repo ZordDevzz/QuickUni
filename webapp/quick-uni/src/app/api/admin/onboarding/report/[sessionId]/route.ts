@@ -7,8 +7,8 @@ import { isAdmin } from "@/services/user";
 import { getAuthSession } from "@/services/auth";
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  _request: NextRequest,
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
     const { sessionId } = await params;
@@ -38,7 +38,7 @@ export async function GET(
 
     const buffer = await generateOnboardingReport(summary.executionResults);
 
-    return new NextResponse(buffer, {
+    return new NextResponse(buffer as any, {
       status: 200,
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

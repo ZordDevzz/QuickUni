@@ -16,30 +16,7 @@ import { Trash2, Info } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-
-interface ProfileField {
-  id: number;
-  fieldName: string;
-  fieldCode: string;
-  fieldType: string;
-}
-
-interface ProfileSchemaField {
-  schemaId: number;
-  fieldId: number;
-  sectionId: number;
-  order: number;
-  isRequired: boolean;
-  profileField: ProfileField;
-}
-
-interface ProfileSection {
-  id: number;
-  schemaId: number;
-  name: string;
-  order: number;
-  profileSchemaFields: ProfileSchemaField[];
-}
+import { ProfileSchemaField, ProfileSection } from "./StructureWorkspace";
 
 interface PropertyDrawerProps {
   selectedItem: {
@@ -72,7 +49,7 @@ export function PropertyDrawer({
   const section = !isField ? (selectedItem.data as ProfileSection) : null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
@@ -80,8 +57,8 @@ export function PropertyDrawer({
           </DialogTitle>
           <DialogDescription>
             {isField 
-              ? t("EditFieldPropertiesDescription", { name: field?.profileField.fieldName })
-              : t("EditSectionPropertiesDescription", { name: section?.name })}
+              ? t("EditFieldPropertiesDescription", { name: field?.profileField.label || field?.profileField.name || "" })
+              : t("EditSectionPropertiesDescription", { name: section?.name || "" })}
           </DialogDescription>
         </DialogHeader>
 
@@ -90,10 +67,10 @@ export function PropertyDrawer({
             <>
               <div className="flex flex-col gap-2 p-3 bg-muted/30 rounded-lg border">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold">{field.profileField.fieldName}</span>
-                  <Badge variant="outline">{field.profileField.fieldType}</Badge>
+                  <span className="text-sm font-semibold">{field.profileField.label || field.profileField.name}</span>
+                  <Badge variant="outline">{field.profileField.datatype}</Badge>
                 </div>
-                <span className="text-xs text-muted-foreground">{field.profileField.fieldCode}</span>
+                <span className="text-xs text-muted-foreground">{field.profileField.name}</span>
               </div>
 
               <div className="flex items-center space-x-3 p-1">
@@ -101,7 +78,7 @@ export function PropertyDrawer({
                   id="drawer-required" 
                   checked={field.isRequired}
                   onCheckedChange={(checked) => 
-                    onUpdateField(field.sectionId, field.fieldId, { isRequired: !!checked })
+                    onUpdateField(field.sectionId!, field.fieldId, { isRequired: !!checked })
                   }
                 />
                 <div className="grid gap-1.5 leading-none">
@@ -144,7 +121,7 @@ export function PropertyDrawer({
               className="w-full justify-start"
               onClick={() => {
                 if (isField && field) {
-                  onDeleteField(field.sectionId, field.fieldId);
+                  onDeleteField(field.sectionId!, field.fieldId);
                 } else if (section) {
                   onDeleteSection(section.id);
                 }

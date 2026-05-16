@@ -16,6 +16,8 @@ import {
 import { validateOnboardingExcel } from "@/actions/onboarding";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { 
   Table, 
   TableBody, 

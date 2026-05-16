@@ -26,26 +26,27 @@ import {
 } from "@dnd-kit/sortable";
 import { SectionCard } from "./SectionCard";
 import { PropertyDrawer } from "./PropertyDrawer";
-import { updateProfileStructureAction } from "@/actions/profile-structure";
+import { updateProfileStructureAction, ActionResponse } from "@/actions/profile-structure";
 import { toast } from "sonner";
 
-interface ProfileField {
+export interface ProfileField {
   id: number;
-  fieldName: string;
-  fieldCode: string;
-  fieldType: string;
+  name: string | null;
+  datatype: string | null;
+  label: string | null;
+  uiSection: string;
 }
 
-interface ProfileSchemaField {
+export interface ProfileSchemaField {
   schemaId: number;
   fieldId: number;
-  sectionId: number;
+  sectionId: number | null;
   order: number;
   isRequired: boolean;
   profileField: ProfileField;
 }
 
-interface ProfileSection {
+export interface ProfileSection {
   id: number;
   schemaId: number;
   name: string;
@@ -53,7 +54,7 @@ interface ProfileSection {
   profileSchemaFields: ProfileSchemaField[];
 }
 
-interface ProfileSchema {
+export interface ProfileSchema {
   id: number;
   schemaCode: string;
   des: string | null;
@@ -73,9 +74,9 @@ export function StructureWorkspace({ initialSchemas, allFields }: StructureWorks
   const [schemasData, setSchemasData] = useState<Record<number, ProfileSection[]>>(() => {
     const data: Record<number, ProfileSection[]> = {};
     initialSchemas.forEach(schema => {
-      data[schema.id] = schema.profileSections.map(section => ({
+      data[schema.id] = (schema.profileSections || []).map(section => ({
         ...section,
-        profileSchemaFields: [...section.profileSchemaFields].sort((a, b) => a.order - b.order)
+        profileSchemaFields: [...(section.profileSchemaFields || [])].sort((a, b) => a.order - b.order)
       })).sort((a, b) => a.order - b.order);
     });
     return data;
@@ -93,9 +94,9 @@ export function StructureWorkspace({ initialSchemas, allFields }: StructureWorks
   useEffect(() => {
     const data: Record<number, ProfileSection[]> = {};
     initialSchemas.forEach(schema => {
-      data[schema.id] = schema.profileSections.map(section => ({
+      data[schema.id] = (schema.profileSections || []).map(section => ({
         ...section,
-        profileSchemaFields: [...section.profileSchemaFields].sort((a, b) => a.order - b.order)
+        profileSchemaFields: [...(section.profileSchemaFields || [])].sort((a, b) => a.order - b.order)
       })).sort((a, b) => a.order - b.order);
     });
     setSchemasData(data);
@@ -109,7 +110,8 @@ export function StructureWorkspace({ initialSchemas, allFields }: StructureWorks
     if (selectedItem && activeSchemaId) {
       const sections = schemasData[activeSchemaId];
       if (selectedItem.type === "section") {
-        const section = sections.find(s => s.id === selectedItem.data.id);
+        const sectionData = selectedItem.data as ProfileSection;
+        const section = sections.find(s => s.id === sectionData.id);
         if (section) {
           setSelectedItem({ type: "section", data: section });
         } else {
@@ -126,7 +128,7 @@ export function StructureWorkspace({ initialSchemas, allFields }: StructureWorks
         }
       }
     }
-  }, [schemasData, activeSchemaId]);
+  }, [schemasData, activeSchemaId, selectedItem]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -154,6 +156,8 @@ export function StructureWorkspace({ initialSchemas, allFields }: StructureWorks
           const oldIndex = sections.findIndex(s => `section-${s.id}` === activeId);
           const newIndex = sections.findIndex(s => `section-${s.id}` === overId);
           
+          if (oldIndex === -1 || newIndex === -1) return prev;
+
           const newSections = arrayMove(sections, oldIndex, newIndex).map((s, idx) => ({
             ...s,
             order: idx + 1
@@ -368,17 +372,23 @@ export function StructureWorkspace({ initialSchemas, allFields }: StructureWorks
         }))
       };
 
-      const result = await updateProfileStructureAction(payload);
+      const result = await updateProfileStructureAction(payload) as ActionResponse;
       if (result.success) {
         toast.success(t("SaveSuccess"));
       } else {
-        toast.error(result.error || t("SaveError"));
+        toast.error((result as any).error || t("SaveError"));
       }
     } catch (e) {
       toast.error(t("SaveError"));
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const getSelectedId = () => {
+    if (!selectedItem) return undefined;
+    if (selectedItem.type === "section") return (selectedItem.data as ProfileSection).id;
+    return undefined;
   };
 
   return (
@@ -485,7 +495,7 @@ export function StructureWorkspace({ initialSchemas, allFields }: StructureWorks
                             onToggleRequired={handleToggleRequired}
                             onSelectSection={() => setSelectedItem({ type: "section", data: section })}
                             onSelectField={(field) => setSelectedItem({ type: "field", data: field })}
-                            selectedId={selectedItem?.data.id}
+                            selectedId={getSelectedId()}
                             selectedFieldId={selectedItem?.type === "field" ? (selectedItem.data as ProfileSchemaField).fieldId : undefined}
                           />
                         ))}

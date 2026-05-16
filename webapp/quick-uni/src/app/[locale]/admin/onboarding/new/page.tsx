@@ -10,13 +10,12 @@ export default async function NewOnboardingPage() {
   const schemas = result.success ? result.data : [];
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <AdminHeader
-        title={t("NewOnboardingTitle")}
-        description={t("NewOnboardingDescription")}
-      />
-      <div className="py-4">
-        <OnboardingWizard schemas={schemas || []} />
+    <div className="flex flex-col h-full overflow-hidden">
+      <AdminHeader setIsMobileOpen={() => {}} />
+      <div className="py-4 flex-1 overflow-auto">
+        <div className="container mx-auto">
+          <OnboardingWizard schemas={schemas || []} />
+        </div>
       </div>
     </div>
   );

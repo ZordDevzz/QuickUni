@@ -5,7 +5,9 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { structureBatchUpdateValidator } from "../lib/validators/profile-structure";
 
-export async function updateProfileStructureAction(data: any) {
+export type ActionResponse = { success: true } | { success: false; error: string };
+
+export async function updateProfileStructureAction(data: any): Promise<ActionResponse> {
   try {
     const validated = structureBatchUpdateValidator.parse(data);
     
