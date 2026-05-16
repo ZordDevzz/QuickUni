@@ -136,6 +136,30 @@ export const profileField = usersSchema.table("profile_field", {
   des: text(),
 });
 
+export const profileSection = usersSchema.table(
+  "profile_section",
+  {
+    id: bigserial({ mode: "number" }).primaryKey().notNull(),
+    schemaId: bigint("schema_id", { mode: "number" }).notNull(),
+    name: varchar({ length: 255 }).notNull(),
+    order: integer().default(0).notNull(),
+    createAt: timestamp("create_at", { withTimezone: true, mode: "string" })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updateAt: timestamp("update_at", { withTimezone: true, mode: "string" }),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.schemaId],
+      foreignColumns: [profileSchema.id],
+      name: "fk_profile_section_schema_id",
+    }),
+  ],
+);
+
+export const insertProfileSection = createInsertSchema(profileSection);
+export const selectProfileSection = createSelectSchema(profileSection);
+
 export const profileSchemaField = usersSchema.table(
   "profile_schema_field",
   {
@@ -176,27 +200,3 @@ export const selectProfileSchema = createSelectSchema(profileSchema);
 
 export const insertProfileField = createInsertSchema(profileField);
 export const selectProfileField = createSelectSchema(profileField);
-
-export const profileSection = usersSchema.table(
-  "profile_section",
-  {
-    id: bigserial({ mode: "number" }).primaryKey().notNull(),
-    schemaId: bigint("schema_id", { mode: "number" }).notNull(),
-    name: varchar({ length: 255 }).notNull(),
-    order: integer().default(0).notNull(),
-    createAt: timestamp("create_at", { withTimezone: true, mode: "string" })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updateAt: timestamp("update_at", { withTimezone: true, mode: "string" }),
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.schemaId],
-      foreignColumns: [profileSchema.id],
-      name: "fk_profile_section_schema_id",
-    }),
-  ],
-);
-
-export const insertProfileSection = createInsertSchema(profileSection);
-export const selectProfileSection = createSelectSchema(profileSection);
