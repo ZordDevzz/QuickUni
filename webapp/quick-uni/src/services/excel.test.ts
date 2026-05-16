@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generateOnboardingTemplate } from "./excel";
+import { generateOnboardingTemplate, parseAndValidateOnboardingExcel } from "./excel";
 import * as XLSX from "xlsx";
 
 describe("excel service", () => {
@@ -26,5 +26,36 @@ describe("excel service", () => {
     const expectedAllHeaders = [...expectedFixedHeaders, ...expectedDynamicHeaders];
 
     expect(headers).toEqual(expectedAllHeaders);
+  });
+
+  it("should correctly parse and validate onboarding excel data", async () => {
+    const dynamicFields = [
+      { label: "Phone Number", name: "phone", isRequired: true },
+      { label: "Major", name: "major", isRequired: false },
+    ];
+
+    // Create a mock excel buffer with valid and invalid data
+    const headers = ["Full Name", "Gender", "DOB", "National ID", "Address", "Ethnic", "Religious", "Entity Code", "Phone Number", "Major"];
+    const validRow = ["John Doe", "male", "2000-01-01", "123456789", "123 Street", "Kinh", "None", "STU001", "0987654321", "CS"];
+    const invalidRow = ["Jane Doe", "female", "2001-01-01", undefined, "456 Ave", "Kinh", "None", "STU002", undefined, "IT"]; // Missing National ID and Phone Number
+
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, validRow, invalidRow]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Template");
+    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }) as Buffer;
+
+    const result = await parseAndValidateOnboardingExcel(buffer, dynamicFields);
+
+    expect(result).toHaveLength(2);
+    
+    // Valid row
+    expect(result[0].isValid).toBe(true);
+    expect(result[0].errors).toHaveLength(0);
+    expect(result[0].data["Full Name"]).toBe("John Doe");
+
+    // Invalid row
+    expect(result[1].isValid).toBe(false);
+    expect(result[1].errors).toContain("Missing required field: National ID");
+    expect(result[1].errors).toContain("Missing required field: Phone Number");
   });
 });

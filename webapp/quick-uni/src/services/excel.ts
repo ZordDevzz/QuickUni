@@ -51,3 +51,34 @@ export async function generateOnboardingTemplate(fields: { label: string, name: 
   const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
   return buffer as Buffer;
 }
+
+/**
+ * Parses an uploaded onboarding Excel file and validates its content.
+ */
+export async function parseAndValidateOnboardingExcel(buffer: Buffer, fields: { label: string, name: string, isRequired: boolean }[]) {
+  const workbook = XLSX.read(buffer, { type: "buffer" });
+  const sheet = workbook.Sheets["Template"] || workbook.Sheets[workbook.SheetNames[0]];
+  const rawData = XLSX.utils.sheet_to_json(sheet);
+  
+  return rawData.map((row: any) => {
+    const errors: string[] = [];
+    
+    // Fixed validations
+    if (!row["Full Name"]) errors.push("Missing required field: Full Name");
+    if (!row["National ID"]) errors.push("Missing required field: National ID");
+    if (!row["Entity Code"]) errors.push("Missing required field: Entity Code");
+    
+    // Dynamic validations
+    fields.forEach(f => {
+      if (f.isRequired && !row[f.label]) {
+        errors.push(`Missing required field: ${f.label}`);
+      }
+    });
+
+    return {
+      data: row,
+      errors,
+      isValid: errors.length === 0
+    };
+  });
+}
