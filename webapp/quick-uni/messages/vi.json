@@ -178,6 +178,25 @@
     "SystemFields": "Các trường hồ sơ hệ thống",
     "DeleteFieldWarning": "Bạn có chắc chắn muốn xóa trường {name}? Hành động này không thể hoàn tác."
   },
+  "Role": {
+    "Roles": "Vai trò hệ thống",
+    "AddRole": "Thêm vai trò",
+    "EditRole": "Chỉnh sửa vai trò",
+    "RoleName": "Tên vai trò",
+    "RoleID": "ID vai trò",
+    "IsDefault": "Vai trò mặc định",
+    "Authorities": "Quyền hạn",
+    "AssignedAuthorities": "Quyền hạn đã gán",
+    "AvailableAuthorities": "Quyền hạn có sẵn",
+    "UpdateAuthorities": "Cập nhật quyền hạn",
+    "DeleteTitle": "Xác nhận xóa",
+    "DeleteDescription": "Bạn có chắc chắn muốn xóa vai trò {name}? Hành động này không thể hoàn tác.",
+    "Saving": "Đang lưu...",
+    "DeleteSuccess": "Xóa vai trò thành công",
+    "UpdateSuccess": "Cập nhật vai trò thành công",
+    "CreateSuccess": "Tạo vai trò thành công",
+    "UpdateAuthoritiesSuccess": "Cập nhật quyền hạn thành công"
+  },
   "Table": {
     "NoResults": "Không có kết quả.",
     "FilterPlaceholder": "Lọc...",
@@ -204,5 +223,26 @@
     "DeleteFailed": "Xóa tài khoản thất bại",
     "SubmitFailed": "Gửi biểu mẫu thất bại",
     "ValidationFailed": "Xác thực không thành công"
+  },
+  "AccountSettings": {
+    "Title": "Cài đặt tài khoản",
+    "Description": "Quản lý hồ sơ, bảo mật và các tùy chỉnh cá nhân.",
+    "Profile": "Hồ sơ",
+    "Security": "Bảo mật",
+    "Preferences": "Tùy chỉnh",
+    "ChangePassword": "Đổi mật khẩu",
+    "PasswordDescription": "Đảm bảo tài khoản của bạn sử dụng mật khẩu dài và ngẫu nhiên để luôn an toàn.",
+    "CurrentPassword": "Mật khẩu hiện tại",
+    "NewPassword": "Mật khẩu mới",
+    "ConfirmNewPassword": "Xác nhận mật khẩu mới",
+    "UpdatePassword": "Cập nhật mật khẩu",
+    "PasswordSuccess": "Đổi mật khẩu thành công",
+    "Appearance": "Giao diện",
+    "Language": "Ngôn ngữ",
+    "SelectTheme": "Chọn giao diện",
+    "SelectLanguage": "Chọn ngôn ngữ",
+    "SaveChanges": "Lưu thay đổi",
+    "ProfileSuccess": "Cập nhật hồ sơ thành công",
+    "ProfileNotFound": "Không tìm thấy hồ sơ. Vui lòng liên hệ bộ phận hỗ trợ."
   }
 }

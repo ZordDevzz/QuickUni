@@ -176,6 +176,25 @@
     "SystemFields": "System Profile Fields",
     "DeleteFieldWarning": "Are you sure you want to delete field {name}? This action cannot be undone."
   },
+  "Role": {
+    "Roles": "System Roles",
+    "AddRole": "Add Role",
+    "EditRole": "Edit Role",
+    "RoleName": "Role Name",
+    "RoleID": "Role ID",
+    "IsDefault": "Default Role",
+    "Authorities": "Authorities",
+    "AssignedAuthorities": "Assigned Authorities",
+    "AvailableAuthorities": "Available Authorities",
+    "UpdateAuthorities": "Update Authorities",
+    "DeleteTitle": "Confirm Delete",
+    "DeleteDescription": "Are you sure you want to delete role {name}? This action cannot be undone.",
+    "Saving": "Saving...",
+    "DeleteSuccess": "Role deleted successfully",
+    "UpdateSuccess": "Role updated successfully",
+    "CreateSuccess": "Role created successfully",
+    "UpdateAuthoritiesSuccess": "Authorities updated successfully"
+  },
   "Table": {
     "NoResults": "No results.",
     "FilterPlaceholder": "Filter...",
@@ -202,5 +221,26 @@
     "DeleteFailed": "Failed to delete account",
     "SubmitFailed": "Failed to submit form",
     "ValidationFailed": "Validation failed"
+  },
+  "AccountSettings": {
+    "Title": "Account Settings",
+    "Description": "Manage your profile, security, and preferences.",
+    "Profile": "Profile",
+    "Security": "Security",
+    "Preferences": "Preferences",
+    "ChangePassword": "Change Password",
+    "PasswordDescription": "Ensure your account is using a long, random password to stay secure.",
+    "CurrentPassword": "Current Password",
+    "NewPassword": "New Password",
+    "ConfirmNewPassword": "Confirm New Password",
+    "UpdatePassword": "Update Password",
+    "PasswordSuccess": "Password changed successfully",
+    "Appearance": "Appearance",
+    "Language": "Language",
+    "SelectTheme": "Select theme",
+    "SelectLanguage": "Select language",
+    "SaveChanges": "Save Changes",
+    "ProfileSuccess": "Profile updated successfully",
+    "ProfileNotFound": "Profile not found. Please contact support."
   }
 }

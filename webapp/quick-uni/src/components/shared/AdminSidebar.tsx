@@ -57,6 +57,7 @@ const navItems: NavItem[] = [
   { key: "Finance", href: "/admin/finance/invoices", icon: CreditCard, category: "Operations" },
   { key: "Schedule", href: "/admin/schedule", icon: Clock },
   { key: "Settings", href: "/admin/system/settings", icon: Settings, category: "System" },
+  { key: "Roles", href: "/admin/system/roles", icon: Users },
 ];
 
 interface AdminSidebarProps {

@@ -29,8 +29,17 @@ export const getUserByUsername = async (username: string) => {
 export const getUserById = async (id: string) => {
   const user = await db.query.account.findFirst({
     where: eq(account.id, id),
+    with: {
+      userSystemRoles: true,
+    },
   });
   return user;
+};
+
+export const getUserRoles = async (userId: string) => {
+  return await db.query.userSystemRole.findMany({
+    where: eq(userSystemRole.userId, userId),
+  });
 };
 
 export const getAccounts = async () => {
