@@ -11,7 +11,8 @@ import {
   json,
   date,
   primaryKey,
-  bigserial
+  bigserial,
+  pgEnum
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { account } from "./auth";
@@ -19,6 +20,33 @@ import { employee } from "./user";
 import { department } from "./academic";
 
 export const systemSchema = pgSchema("system");
+
+export const onboardingSessionStatus = pgEnum("onboarding_session_status", [
+  "draft",
+  "validating",
+  "ready",
+  "processing",
+  "completed",
+  "failed",
+]);
+
+export const onboardingSession = systemSchema.table("onboarding_session", {
+  id: uuid().primaryKey().notNull(),
+  name: varchar({ length: 255 }).notNull(),
+  entityType: varchar("entity_type", { length: 20 }).notNull(),
+  schemaId: bigint("schema_id", { mode: "number" }).notNull(),
+  status: onboardingSessionStatus("status").default("draft").notNull(),
+  config: jsonb("config"),
+  summary: jsonb("summary"),
+  createdBy: uuid("created_by"),
+  createdAt: timestamp("create_at", {
+    withTimezone: true,
+    mode: "string",
+  })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("update_at", { withTimezone: true, mode: "string" }),
+});
 
 export const systemSetting = systemSchema.table(
   "system_setting",

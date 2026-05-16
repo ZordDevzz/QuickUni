@@ -17,6 +17,7 @@ import { sql } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { enumGender } from "./enums";
 import { account } from "./auth";
+import { onboardingSession } from "./system";
 
 export const usersSchema = pgSchema("users");
 
@@ -48,6 +49,7 @@ export const profile = usersSchema.table(
     religious: varchar({ length: 255 }),
     schemaId: bigint("schema_id", { mode: "number" }).notNull(),
     dynamicData: jsonb("dynamic_data"),
+    sessionId: uuid("session_id"),
     createAt: timestamp("create_at", { withTimezone: true, mode: "string" })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
@@ -64,6 +66,11 @@ export const profile = usersSchema.table(
       columns: [table.schemaId],
       foreignColumns: [profileSchema.id],
       name: "fk_profile_schema_id_profile_schema_id",
+    }),
+    foreignKey({
+      columns: [table.sessionId],
+      foreignColumns: [onboardingSession.id],
+      name: "fk_profile_onboarding_session_id",
     }),
     unique("profile_national_id_key").on(table.nationalId),
   ],
