@@ -11,7 +11,8 @@
     "Departments": "Khoa/Phòng",
     "Curriculum": "Chương trình đào tạo",
     "CourseClasses": "Lớp học phần",
-    "ProfileField": "Trường dữ liệu hồ sơ",
+    "ProfileField": "Trường dữ liệu",
+    "Structure": "Không gian cấu trúc",
     "Operations": "Vận hành",
     "Finance": "Tài chính",
     "SelectSemester": "Chọn học kỳ",
@@ -313,6 +314,15 @@
     "SelectSchema": "Chọn một cấu trúc",
     "SelectSchemaHint": "Chọn một cấu trúc hồ sơ từ thanh bên để bắt đầu quản lý bố cục.",
     "EmptyWorkspace": "Chưa có bố cục nào được cấu hình",
-    "EmptyWorkspaceHint": "Cấu trúc này chưa có bất kỳ phần hoặc trường dữ liệu nào được cấu hình."
+    "EmptyWorkspaceHint": "Cấu trúc này chưa có bất kỳ phần hoặc trường dữ liệu nào được cấu hình.",
+    "AddSection": "Thêm phần",
+    "SaveChanges": "Lưu thay đổi",
+    "SaveSuccess": "Lưu cấu trúc thành công",
+    "SaveError": "Lỗi khi lưu cấu trúc",
+    "FieldAlreadyExists": "Trường này đã tồn tại trong cấu trúc",
+    "AddField": "Thêm trường",
+    "AvailableFields": "Các trường có sẵn",
+    "Required": "Bắt buộc",
+    "NoFieldsInSection": "Chưa có trường nào trong phần này. Kéo các trường vào đây hoặc thêm từ trình đơn."
     }
     }

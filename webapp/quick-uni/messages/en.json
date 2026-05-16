@@ -12,6 +12,7 @@
     "Curriculum": "Curriculum",
     "CourseClasses": "Course Classes",
     "ProfileField": "Profile Fields",
+    "Structure": "Structure Workspace",
     "Operations": "Operations",
     "Finance": "Finance",
     "SelectSemester": "Select Semester",
@@ -314,6 +315,15 @@
     "SelectSchema": "Select a Structure",
     "SelectSchemaHint": "Choose a profile structure from the sidebar to start managing its layout.",
     "EmptyWorkspace": "No Layout Configured",
-    "EmptyWorkspaceHint": "This structure doesn't have any sections or fields configured yet."
+    "EmptyWorkspaceHint": "This structure doesn't have any sections or fields configured yet.",
+    "AddSection": "Add Section",
+    "SaveChanges": "Save Changes",
+    "SaveSuccess": "Structure saved successfully",
+    "SaveError": "Failed to save structure",
+    "FieldAlreadyExists": "This field is already present in the structure",
+    "AddField": "Add Field",
+    "AvailableFields": "Available Fields",
+    "Required": "Required",
+    "NoFieldsInSection": "No fields in this section. Drag fields here or add from the menu."
     }
     }
