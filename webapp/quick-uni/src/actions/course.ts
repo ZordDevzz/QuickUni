@@ -1,9 +1,7 @@
 "use server";
 
-import { db } from "@/db";
-import { courseClass, courseClassType } from "@/db/schemas/course";
-import { employee } from "@/db/schemas/user";
-import { subject, semester } from "@/db/schemas/academic";
+import { db } from "../db";
+import { courseClass, courseClassType, employee, subject, semester } from "../db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { 
@@ -11,7 +9,7 @@ import {
   CourseClassUpdateInput,
   courseClassInsertSchema,
   courseClassUpdateSchema
-} from "@/lib/validators/course";
+} from "../lib/validators/course";
 import { randomUUID } from "crypto";
 
 export type ActionResponse = {

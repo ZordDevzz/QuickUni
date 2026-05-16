@@ -1,7 +1,7 @@
 "use server";
 
-import { db } from "@/db";
-import { building, room } from "@/db/schemas/schedule";
+import { db } from "../db";
+import { building, room } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { 
@@ -13,7 +13,7 @@ import {
   buildingUpdateSchema,
   roomInsertSchema,
   roomUpdateSchema
-} from "@/lib/validators/facility";
+} from "../lib/validators/facility";
 
 export type ActionResponse = {
   success: boolean;

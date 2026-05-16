@@ -118,7 +118,7 @@ export function RoomForm({ room: roomData, buildings, onSuccess }: RoomFormProps
                 type="number"
                 value={field.state.value}
                 onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value ? Number(e.target.value) : "")}
+                onChange={(e) => field.handleChange(e.target.value ? Number(e.target.value) : 0)}
               />
             </FieldContent>
           </Field>

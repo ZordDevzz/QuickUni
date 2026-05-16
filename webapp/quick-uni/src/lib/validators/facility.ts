@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { building, room } from "@/db/schemas/schedule";
+import { building, room } from "../../db/schema";
 
 // Building Validators
 export const buildingInsertSchema = createInsertSchema(building, {

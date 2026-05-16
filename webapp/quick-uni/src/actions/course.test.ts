@@ -6,10 +6,10 @@ import {
   updateCourseClassAction,
   deleteCourseClassAction
 } from './course';
-import { db } from '@/db';
+import { db } from '../db';
 import { revalidatePath } from 'next/cache';
 
-vi.mock('@/db', () => ({
+vi.mock('../db', () => ({
   db: {
     query: {
       employee: { findMany: vi.fn() },
@@ -62,8 +62,8 @@ describe('course actions', () => {
   it('createCourseClassAction should insert new course class', async () => {
     const data = {
       code: 'CS101-L01',
-      teacherId: '00000000-0000-0000-0000-000000000001',
-      subjectId: '00000000-0000-0000-0000-000000000002',
+      teacherId: '550e8400-e29b-41d4-a716-446655440001',
+      subjectId: '550e8400-e29b-41d4-a716-446655440002',
       cap: 30,
       type: 1,
       semesterId: 1,

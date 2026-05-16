@@ -9,11 +9,11 @@ import {
   updateRoomAction,
   deleteRoomAction
 } from './facility';
-import { db } from '@/db';
-import { building, room } from '@/db/schemas/schedule';
+import { db } from '../db';
+import { building, room } from '../db/schema';
 import { revalidatePath } from 'next/cache';
 
-vi.mock('@/db', () => ({
+vi.mock('../db', () => ({
   db: {
     query: {
       building: {

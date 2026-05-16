@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createInsertSchema } from "drizzle-zod";
-import { courseClass } from "@/db/schemas/course";
+import { courseClass } from "../../db/schema";
 
 export const courseClassInsertSchema = createInsertSchema(courseClass, {
   code: z.string({ message: "Code is required" }).min(1, "Code is required").max(30, "Code is too long"),
