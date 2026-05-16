@@ -304,5 +304,15 @@
     "Delete": "Xóa",
     "ConfirmDelete": "Xác nhận xóa",
     "DeleteWarning": "Bạn có chắc chắn muốn xóa phiên onboarding này không? Hành động này không thể hoàn tác."
-  }
-}
+    },
+    "ProfileStructure": {
+    "WorkspaceTitle": "Không gian làm việc cấu trúc hồ sơ",
+    "WorkspaceDescription": "Quản lý các phần và trường dữ liệu cho các loại hồ sơ khác nhau.",
+    "Schemas": "Cấu trúc hồ sơ",
+    "NoSchemas": "Không tìm thấy cấu trúc nào",
+    "SelectSchema": "Chọn một cấu trúc",
+    "SelectSchemaHint": "Chọn một cấu trúc hồ sơ từ thanh bên để bắt đầu quản lý bố cục.",
+    "EmptyWorkspace": "Chưa có bố cục nào được cấu hình",
+    "EmptyWorkspaceHint": "Cấu trúc này chưa có bất kỳ phần hoặc trường dữ liệu nào được cấu hình."
+    }
+    }
