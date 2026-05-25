@@ -248,6 +248,15 @@
     "CreateSuccess": "Tạo vai trò thành công",
     "UpdateAuthoritiesSuccess": "Cập nhật quyền hạn thành công"
   },
+  "Teacher": {
+    "Classes": "Lớp học",
+    "ClassesTitle": "Lớp học của tôi",
+    "ClassesDescription": "Xem và quản lý các lớp học phần được phân công.",
+    "ClassCode": "Mã lớp",
+    "Subject": "Học phần",
+    "Capacity": "Sĩ số",
+    "Status": "Trạng thái"
+  },
   "Table": {
     "NoResults": "Không có kết quả.",
     "FilterPlaceholder": "Lọc...",

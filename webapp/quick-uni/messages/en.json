@@ -246,6 +246,15 @@
     "CreateSuccess": "Role created successfully",
     "UpdateAuthoritiesSuccess": "Authorities updated successfully"
   },
+  "Teacher": {
+    "Classes": "Classes",
+    "ClassesTitle": "My Classes",
+    "ClassesDescription": "View and manage your assigned course classes.",
+    "ClassCode": "Class Code",
+    "Subject": "Subject",
+    "Capacity": "Capacity",
+    "Status": "Status"
+  },
   "Table": {
     "NoResults": "No results.",
     "FilterPlaceholder": "Filter...",
