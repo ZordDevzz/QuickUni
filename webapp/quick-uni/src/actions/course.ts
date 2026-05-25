@@ -1,7 +1,19 @@
 "use server";
 
 import { db } from "../db";
-import { courseClass, courseClassType, employee, subject, semester, enrollment, profile } from "../db/schema";
+import { 
+  courseClass, 
+  courseClassType, 
+  employee, 
+  subject, 
+  semester, 
+  enrollment, 
+  profile,
+  student,
+  courseMaterial,
+  grade,
+  gradeType
+} from "../db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { 
@@ -157,3 +169,103 @@ export async function exportRosterAction(classId: string): Promise<ActionRespons
     return { success: false, error: error?.message || "Failed to export roster" };
   }
 }
+
+// --- Student Actions ---
+
+export async function getStudentEnrollments(semesterId: number) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const stu = await db.query.student.findFirst({
+    where: (stu, { exists }) => exists(
+      db.select()
+        .from(profile)
+        .where(
+          and(
+            eq(profile.id, stu.profileId),
+            eq(profile.accountId, session.user.id)
+          )
+        )
+    )
+  });
+
+  if (!stu) return [];
+
+  return await db.query.enrollment.findMany({
+    where: (en, { and, eq, exists, isNull }) => and(
+      eq(en.studentId, stu.id),
+      isNull(en.deletedAt),
+      exists(
+        db.select()
+          .from(courseClass)
+          .where(
+            and(
+              eq(courseClass.id, en.courseClassId),
+              eq(courseClass.semesterId, semesterId),
+              isNull(courseClass.deletedAt)
+            )
+          )
+      )
+    ),
+    with: {
+      courseClass: {
+        with: {
+          subject: true,
+          employee: {
+            with: {
+              profile: true
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+export async function getStudentClassDetails(classId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const stu = await db.query.student.findFirst({
+    where: (stu, { exists }) => exists(
+      db.select()
+        .from(profile)
+        .where(
+          and(
+            eq(profile.id, stu.profileId),
+            eq(profile.accountId, session.user.id)
+          )
+        )
+    )
+  });
+
+  if (!stu) throw new Error("Student not found");
+
+  const enroll = await db.query.enrollment.findFirst({
+    where: and(
+      eq(enrollment.studentId, stu.id),
+      eq(enrollment.courseClassId, classId),
+      isNull(enrollment.deletedAt)
+    )
+  });
+
+  if (!enroll) throw new Error("Not enrolled in this class");
+
+  const [materials, grades] = await Promise.all([
+    db.query.courseMaterial.findMany({
+      where: eq(courseMaterial.courseClassId, classId)
+    }),
+    db.query.grade.findMany({
+      where: and(
+        eq(grade.enrollmentId, enroll.id),
+        isNull(grade.deletedAt)
+      ),
+      with: {
+        gradeType: true
+      }
+    })
+  ]);
+
+  return { materials, grades };
+}
+
