@@ -8,29 +8,36 @@ import { DataTable } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Users, BookOpen, Info } from 'lucide-react';
+import { Loader2, Users, BookOpen, Info, Edit, Plus, UserPlus } from 'lucide-react';
 import { ColumnDef } from '@tanstack/react-table';
+import { DepartmentDialog, MajorDialog, StaffAssignmentDialog } from '@/components/features/academic/DepartmentDialogs';
+import { useRouter } from 'next/navigation';
 
 interface DetailViewProps {
   departmentId: string;
 }
 
 export function DetailView({ departmentId }: DetailViewProps) {
+  const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isMajorDialogOpen, setIsMajorDialogOpen] = useState(false);
+  const [isStaffDialogOpen, setIsStaffDialogOpen] = useState(false);
+
+  async function load() {
+    setLoading(true);
+    try {
+      const result = await getDepartmentDetails(departmentId);
+      setData(result);
+    } catch (error) {
+      console.error('Failed to fetch department details', error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function load() {
-      setLoading(true);
-      try {
-        const result = await getDepartmentDetails(departmentId);
-        setData(result);
-      } catch (error) {
-        console.error('Failed to fetch department details', error);
-      } finally {
-        setLoading(false);
-      }
-    }
     if (departmentId) {
       load();
     }
@@ -94,7 +101,10 @@ export function DetailView({ departmentId }: DetailViewProps) {
             </span>
           </div>
         </div>
-        <Button>Edit Department</Button>
+        <Button onClick={() => setIsEditDialogOpen(true)} variant="outline">
+          <Edit className="h-4 w-4 mr-2" />
+          Edit Department
+        </Button>
       </div>
 
       <Tabs defaultValue="majors" className="w-full">
@@ -117,7 +127,10 @@ export function DetailView({ departmentId }: DetailViewProps) {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
               <CardTitle className="text-xl font-semibold">Chuyên ngành</CardTitle>
-              <Button size="sm">Add Major</Button>
+              <Button size="sm" onClick={() => setIsMajorDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Major
+              </Button>
             </CardHeader>
             <CardContent>
                <DataTable 
@@ -134,7 +147,10 @@ export function DetailView({ departmentId }: DetailViewProps) {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
               <CardTitle className="text-xl font-semibold">Personnel</CardTitle>
-              <Button size="sm">Assign Staff</Button>
+              <Button size="sm" onClick={() => setIsStaffDialogOpen(true)}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Assign Staff
+              </Button>
             </CardHeader>
             <CardContent>
                <DataTable 
@@ -172,6 +188,30 @@ export function DetailView({ departmentId }: DetailViewProps) {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <DepartmentDialog 
+        open={isEditDialogOpen} 
+        onOpenChange={setIsEditDialogOpen} 
+        initialData={data} 
+        onSuccess={() => {
+          load();
+          router.refresh();
+        }}
+      />
+
+      <MajorDialog 
+        open={isMajorDialogOpen} 
+        onOpenChange={setIsMajorDialogOpen} 
+        departmentId={departmentId} 
+        onSuccess={load}
+      />
+
+      <StaffAssignmentDialog 
+        open={isStaffDialogOpen} 
+        onOpenChange={setIsStaffDialogOpen} 
+        departmentId={departmentId} 
+        onSuccess={load}
+      />
     </div>
   );
 }
