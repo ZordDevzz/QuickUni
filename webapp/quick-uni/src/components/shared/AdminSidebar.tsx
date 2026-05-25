@@ -81,7 +81,7 @@ export function AdminSidebar({
   setIsMobileOpen 
 }: AdminSidebarProps) {
   const pathname = usePathname();
-  const t = useTranslations("Admin");
+  const t = useTranslations("Navigation");
   const [expandedItems, setExpandedItems] = useState<string[]>(["Profiles"]);
 
   const toggleExpand = (key: string) => {
