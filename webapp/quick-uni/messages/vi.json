@@ -417,6 +417,36 @@
       "Schedule": {
         "Title": "Thời khóa biểu",
         "Description": "Xem lịch học cá nhân hàng tuần"
+      },
+      "Requests": {
+        "Title": "Yêu cầu của tôi",
+        "Description": "Quản lý các yêu cầu xin nghỉ, hủy lớp và các nhu cầu học thuật khác.",
+        "AddRequest": "Thêm yêu cầu",
+        "Type": "Loại yêu cầu",
+        "Status": "Trạng thái",
+        "CreatedAt": "Ngày tạo",
+        "Actions": "Hành động",
+        "View": "Xem",
+        "NoRequests": "Không tìm thấy yêu cầu nào.",
+        "Wizard": {
+          "Title": "Gửi yêu cầu",
+          "Step1Title": "Chọn loại yêu cầu",
+          "Step1Description": "Chọn loại yêu cầu bạn muốn gửi.",
+          "Step2Title": "Chi tiết yêu cầu",
+          "Step2Description": "Cung cấp các thông tin cần thiết cho yêu cầu của bạn.",
+          "SelectType": "Chọn loại",
+          "StudentAbsence": "Xin nghỉ học",
+          "ClassCancellation": "Hủy lớp học",
+          "Class": "Lớp học",
+          "SelectClass": "Chọn một lớp học",
+          "Date": "Ngày",
+          "Reason": "Lý do",
+          "ReasonPlaceholder": "Mô tả lý do gửi yêu cầu của bạn...",
+          "Submit": "Gửi yêu cầu",
+          "Submitting": "Đang gửi...",
+          "Success": "Gửi yêu cầu thành công",
+          "Error": "Gửi yêu cầu thất bại"
+        }
       }
     }
 }

@@ -418,6 +418,36 @@
       "Schedule": {
         "Title": "Schedule",
         "Description": "View your weekly personal class schedule"
+      },
+      "Requests": {
+        "Title": "My Requests",
+        "Description": "Manage your requests for absences, class cancellations, and other academic needs.",
+        "AddRequest": "Add Request",
+        "Type": "Request Type",
+        "Status": "Status",
+        "CreatedAt": "Created At",
+        "Actions": "Actions",
+        "View": "View",
+        "NoRequests": "No requests found.",
+        "Wizard": {
+          "Title": "Submit Request",
+          "Step1Title": "Select Request Type",
+          "Step1Description": "Choose the type of request you want to submit.",
+          "Step2Title": "Request Details",
+          "Step2Description": "Provide necessary information for your request.",
+          "SelectType": "Select Type",
+          "StudentAbsence": "Student Absence",
+          "ClassCancellation": "Class Cancellation",
+          "Class": "Class",
+          "SelectClass": "Select a class",
+          "Date": "Date",
+          "Reason": "Reason",
+          "ReasonPlaceholder": "Describe the reason for your request...",
+          "Submit": "Submit Request",
+          "Submitting": "Submitting...",
+          "Success": "Request submitted successfully",
+          "Error": "Failed to submit request"
+        }
       }
     }
 }

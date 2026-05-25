@@ -54,6 +54,23 @@ export async function submitRequest(type: string, data: any) {
 }
 
 /**
+ * Fetches requests submitted by the current user.
+ */
+export async function getStudentRequests() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const userId = session.user.id;
+
+  const results = await db.select()
+    .from(request)
+    .where(eq(request.senderId, userId))
+    .orderBy(request.createAt);
+
+  return results;
+}
+
+/**
  * Fetches requests that the current user is responsible for reviewing.
  */
 export async function getRequestsForReviewer() {
