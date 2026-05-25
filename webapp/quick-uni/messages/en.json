@@ -1,3 +1,4 @@
+{
   "Navigation": {
     "Dashboard": "Dashboard",
     "Overview": "Overview",
@@ -364,4 +365,4 @@
     "DeleteSection": "Delete Section",
     "Close": "Close"
     }
-    }
+}
