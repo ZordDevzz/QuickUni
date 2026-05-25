@@ -449,5 +449,32 @@
           "Error": "Failed to submit request"
         }
       }
+    },
+    "Workflow": {
+      "ReviewTitle": "Review Request",
+      "Sender": "Sender",
+      "Type": "Type",
+      "Status": "Status",
+      "CreatedAt": "Created At",
+      "Actions": "Actions",
+      "Details": "Details",
+      "Comment": "Reviewer Comment",
+      "CommentPlaceholder": "Enter your feedback or reason for rejection...",
+      "Approve": "Approve",
+      "Reject": "Reject",
+      "Type": {
+        "student_absence": "Student Absence",
+        "class_cancellation": "Class Cancellation"
+      },
+      "StatusLabel": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled"
+      },
+      "Status": {
+        "approved": "Request has been approved",
+        "rejected": "Request has been rejected"
+      }
     }
 }

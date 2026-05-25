@@ -448,5 +448,32 @@
           "Error": "Gửi yêu cầu thất bại"
         }
       }
+    },
+    "Workflow": {
+      "ReviewTitle": "Xem xét yêu cầu",
+      "Sender": "Người gửi",
+      "Type": "Loại",
+      "Status": "Trạng thái",
+      "CreatedAt": "Ngày tạo",
+      "Actions": "Hành động",
+      "Details": "Chi tiết",
+      "Comment": "Ghi chú của người duyệt",
+      "CommentPlaceholder": "Nhập phản hồi hoặc lý do từ chối...",
+      "Approve": "Duyệt",
+      "Reject": "Từ chối",
+      "Type": {
+        "student_absence": "Xin nghỉ học",
+        "class_cancellation": "Xin hủy lớp"
+      },
+      "StatusLabel": {
+        "pending": "Chờ duyệt",
+        "approved": "Đã duyệt",
+        "rejected": "Từ chối",
+        "cancelled": "Đã hủy"
+      },
+      "Status": {
+        "approved": "Yêu cầu đã được chấp thuận",
+        "rejected": "Yêu cầu đã bị từ chối"
+      }
     }
 }
