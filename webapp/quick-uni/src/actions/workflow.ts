@@ -1,11 +1,11 @@
 "use server";
 
 import { db } from "@/db";
-import { request } from "@/db/schemas/communication";
-import { courseClass } from "@/db/schemas/course";
+import { request, notification, notificationRecipient } from "@/db/schemas/communication";
+import { courseClass, enrollment } from "@/db/schemas/course";
 import { account } from "@/db/schemas/auth";
-import { profile } from "@/db/schemas/user";
-import { eq, or, and, isNull } from "drizzle-orm";
+import { profile, student } from "@/db/schemas/user";
+import { eq, or, and, isNull, sql } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/services/auth";
 import { randomUUID } from "crypto";
@@ -46,6 +46,25 @@ export async function submitRequest(type: string, data: any) {
     data: data,
     status: 'pending'
   }).returning();
+
+  // Create notification for targetId (the reviewer)
+  if (targetId) {
+    const notificationId = randomUUID();
+    await db.insert(notification).values({
+      id: notificationId,
+      actorId: session.user.id,
+      title: type === 'student_absence' ? "New Student Absence Request" : "New Workflow Request",
+      body: `You have a new ${type.replace('_', ' ')} to review.`,
+      data: { requestId: result.id }
+    });
+
+    await db.insert(notificationRecipient).values({
+      notificationId: notificationId,
+      recipientId: targetId,
+      channel: 'in_app',
+      createAt: new Date().toISOString()
+    });
+  }
 
   // Revalidate paths to update UI
   revalidatePath("/[locale]/student/requests", "page");
@@ -130,14 +149,64 @@ export async function processRequest(requestId: string, status: string, comment?
     .where(eq(request.id, requestId))
     .returning();
 
-  // Trigger placeholder logic for side effects
+  // Create notification for senderId (the original requester) informing them of the outcome
+  const notifId = randomUUID();
+  await db.insert(notification).values({
+    id: notifId,
+    actorId: session.user.id,
+    title: "Request Update",
+    body: `Your request for ${result.type.replace('_', ' ')} has been ${status}.`,
+    data: { requestId: result.id, status }
+  });
+
+  await db.insert(notificationRecipient).values({
+    notificationId: notifId,
+    recipientId: result.senderId,
+    channel: 'in_app',
+    createAt: new Date().toISOString()
+  });
+
+  // Trigger side effects for approved requests
   if (status === 'approved') {
     if (result.type === 'student_absence') {
        // Placeholder: Recording absence in logs
        console.log(`[Workflow] Approved student_absence for request ${requestId}. Recording in attendance logs...`);
-       // In a real implementation, this would insert into an attendance table or trigger a notification.
     } else if (result.type === 'class_cancellation') {
-       console.log(`[Workflow] Approved class_cancellation for request ${requestId}. Notifying students...`);
+       // Side Effect: Soft-delete enrollment and decrement currentSlot in course_class
+       if (result.data && (result.data as any).classId) {
+         const classId = (result.data as any).classId;
+         
+         // Find studentId linked to the sender's account
+         const studentRec = await db.select({ id: student.id })
+           .from(student)
+           .innerJoin(profile, eq(student.profileId, profile.id))
+           .where(eq(profile.accountId, result.senderId))
+           .limit(1);
+           
+         if (studentRec.length > 0) {
+           const studentId = studentRec[0].id;
+           
+           // Soft-delete enrollment record
+           await db.update(enrollment)
+             .set({ deletedAt: new Date().toISOString() })
+             .where(and(
+               eq(enrollment.studentId, studentId),
+               eq(enrollment.courseClassId, classId),
+               isNull(enrollment.deletedAt)
+             ));
+             
+           // Decrement current student count in the class
+           await db.update(courseClass)
+             .set({ currentSlot: sql`${courseClass.currentSlot} - 1` })
+             .where(eq(courseClass.id, classId));
+             
+           console.log(`[Workflow] Processed class_cancellation side effects for student ${studentId} in class ${classId}`);
+         }
+       }
+    } else if (result.type === 'teacher_schedule_change') {
+       // Placeholder: Timetable update logic would reside here or in a dedicated service
+       // that updates the 'schedule' table based on the approved change details.
+       console.log(`[Workflow] Approved teacher_schedule_change for request ${requestId}. Timetable updates would happen here.`);
     }
   }
 
