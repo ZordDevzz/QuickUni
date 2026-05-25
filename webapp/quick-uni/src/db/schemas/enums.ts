@@ -47,3 +47,16 @@ export const notificationType = pgEnum("notification_type", [
   "finance",
   "social",
 ]);
+
+export const enumRequestType = pgEnum("enum_request_type", [
+  "student_absence",
+  "class_cancellation",
+  "teacher_schedule_change",
+]);
+
+export const enumWorkflowStatus = pgEnum("enum_workflow_status", [
+  "pending",
+  "approved",
+  "rejected",
+  "cancelled",
+]);

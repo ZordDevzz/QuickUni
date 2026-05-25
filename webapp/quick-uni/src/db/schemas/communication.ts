@@ -21,7 +21,9 @@ import {
   notificationChannel,
   notificationStatus,
   notificationType,
-  enumMsgState
+  enumMsgState,
+  enumRequestType,
+  enumWorkflowStatus
 } from "./enums";
 import { account } from "./auth";
 
@@ -346,6 +348,37 @@ export const groupRoleAuthority = communicationSchema.table(
     primaryKey({
       columns: [table.authorityId, table.roleId],
       name: "group_role_authority_pkey",
+    }),
+  ],
+);
+
+export const request = communicationSchema.table(
+  "request",
+  {
+    id: uuid().primaryKey().notNull(),
+    senderId: uuid("sender_id").notNull(),
+    type: enumRequestType().notNull(),
+    status: enumWorkflowStatus().default("pending").notNull(),
+    targetId: uuid("target_id"),
+    data: jsonb().notNull(),
+    comment: text(),
+    createAt: timestamp("create_at", { withTimezone: true, mode: "string" })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updateAt: timestamp("update_at", { withTimezone: true, mode: "string" }),
+    processedAt: timestamp("processed_at", { withTimezone: true, mode: "string" }),
+    processedBy: uuid("processed_by"),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.senderId],
+      foreignColumns: [account.id],
+      name: "fk_request_sender_id_account_id",
+    }),
+    foreignKey({
+      columns: [table.processedBy],
+      foreignColumns: [account.id],
+      name: "fk_request_processed_by_account_id",
     }),
   ],
 );
