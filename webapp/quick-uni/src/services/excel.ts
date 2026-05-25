@@ -103,3 +103,26 @@ export async function generateOnboardingReport(results: any[]) {
   const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
   return buffer as Buffer;
 }
+
+/**
+ * Generates an Excel file for student roster.
+ */
+export async function generateRosterExcel(students: any[]) {
+  const data = students.map(s => ({
+    "MSSV": s.student?.code || "",
+    "Full Name": s.student?.profile?.fullname || "",
+    "Gender": s.student?.profile?.gender || "",
+    "Enrollment Date": s.createAt ? new Date(s.createAt).toLocaleDateString() : "",
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Roster");
+
+  // Set column widths
+  const headers = ["MSSV", "Full Name", "Gender", "Enrollment Date"];
+  worksheet["!cols"] = headers.map(() => ({ wch: 20 }));
+
+  const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+  return buffer as Buffer;
+}
