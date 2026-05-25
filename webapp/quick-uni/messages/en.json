@@ -400,10 +400,24 @@
       "Classes": {
         "Title": "My Classes",
         "Description": "View your enrolled classes for the selected semester.",
+        "NoActiveSemester": "No active semester selected.",
         "StatusActive": "Active",
         "TeacherLabel": "Teacher",
         "ViewDetails": "View Details",
+        "NoEnrollments": "No enrollments found for this semester.",
+        "TabOverview": "Overview",
+        "TabMaterials": "Materials",
+        "TabGrades": "Grades",
+        "StatusLabel": "Status",
+        "NoMaterials": "No materials available for this class.",
+        "NoGrades": "No grades recorded for this class yet.",
+        "GradeType": "Assessment Type",
+        "GradeValue": "Grade",
         "NoClassesFound": "No classes found."
+      },
+      "Schedule": {
+        "Title": "Schedule",
+        "Description": "View your weekly personal class schedule"
       }
     }
 }

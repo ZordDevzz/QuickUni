@@ -399,10 +399,24 @@
       "Classes": {
         "Title": "Lớp học của tôi",
         "Description": "Xem các lớp học bạn đã đăng ký trong học kỳ đã chọn.",
+        "NoActiveSemester": "Chưa chọn học kỳ đang hoạt động.",
         "StatusActive": "Đang học",
         "TeacherLabel": "Giảng viên",
         "ViewDetails": "Xem chi tiết",
+        "NoEnrollments": "Không tìm thấy đăng ký học nào cho học kỳ này.",
+        "TabOverview": "Tổng quan",
+        "TabMaterials": "Tài liệu",
+        "TabGrades": "Điểm số",
+        "StatusLabel": "Trạng thái",
+        "NoMaterials": "Chưa có tài liệu nào cho lớp học này.",
+        "NoGrades": "Chưa có điểm số nào cho lớp học này.",
+        "GradeType": "Loại điểm/Đánh giá",
+        "GradeValue": "Điểm",
         "NoClassesFound": "Không tìm thấy lớp học nào."
+      },
+      "Schedule": {
+        "Title": "Thời khóa biểu",
+        "Description": "Xem lịch học cá nhân hàng tuần"
       }
     }
-    }
+}
