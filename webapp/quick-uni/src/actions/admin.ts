@@ -1,6 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { db } from "@/db";
+import { systemSetting } from "@/db/schemas/system";
+import { eq } from "drizzle-orm";
 import { 
   updateAccountWorkflow,
   deleteAccountWorkflow,
@@ -156,4 +159,29 @@ export async function updateProfileAction(id: string, formData: UpdateProfileInp
       error: error instanceof Error ? error.message : "Failed to update profile" 
     };
   }
+}
+
+// System Setting Actions
+export async function getDefaultSchemaId(type: "employee" | "student") {
+  const key = type === "employee" ? "DEFAULT_EMPLOYEE_SCHEMA_ID" : "DEFAULT_STUDENT_SCHEMA_ID";
+  const setting = await db.query.systemSetting.findFirst({ where: eq(systemSetting.key, key) });
+
+  // Note: systemSetting.value is JSONB. We expect it to be a number (the schema ID).
+  return setting?.value as number | null;
+}
+
+export async function setDefaultSchemaId(type: "employee" | "student", schemaId: number) {
+  const key = type === "employee" ? "DEFAULT_EMPLOYEE_SCHEMA_ID" : "DEFAULT_STUDENT_SCHEMA_ID";
+
+  await db
+    .insert(systemSetting)
+    .values({
+      key,
+      value: schemaId,
+      displayName: `Default ${type === "employee" ? "Employee" : "Student"} Profile Structure`,
+    })
+    .onConflictDoUpdate({
+      target: systemSetting.key,
+      set: { value: schemaId },
+    });
 }
