@@ -12,7 +12,8 @@ import {
   student,
   courseMaterial,
   grade,
-  gradeType
+  gradeType,
+  weeklyTemplate
 } from "../db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -251,7 +252,7 @@ export async function getStudentClassDetails(classId: string) {
 
   if (!enroll) throw new Error("Not enrolled in this class");
 
-  const [materials, grades] = await Promise.all([
+  const [materials, grades, schedule] = await Promise.all([
     db.query.courseMaterial.findMany({
       where: eq(courseMaterial.courseClassId, classId)
     }),
@@ -263,9 +264,12 @@ export async function getStudentClassDetails(classId: string) {
       with: {
         gradeType: true
       }
+    }),
+    db.query.weeklyTemplate.findMany({
+      where: eq(weeklyTemplate.courseClassId, classId)
     })
   ]);
 
-  return { materials, grades };
+  return { materials, grades, schedule };
 }
 

@@ -19,30 +19,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-
-interface ProfileField {
-  id: number;
-  fieldName: string;
-  fieldCode: string;
-  fieldType: string;
-}
-
-interface ProfileSchemaField {
-  schemaId: number;
-  fieldId: number;
-  sectionId: number;
-  order: number;
-  isRequired: boolean;
-  profileField: ProfileField;
-}
-
-interface ProfileSection {
-  id: number;
-  schemaId: number;
-  name: string;
-  order: number;
-  profileSchemaFields: ProfileSchemaField[];
-}
+import { ProfileField, ProfileSchemaField, ProfileSection } from "./StructureWorkspace";
 
 interface SectionCardProps {
   section: ProfileSection;
@@ -143,8 +120,8 @@ export function SectionCard({
                       onClick={() => onAddField(section.id, field)}
                     >
                       <div className="flex flex-col">
-                        <span className="font-medium">{field.fieldName}</span>
-                        <span className="text-xs text-muted-foreground">{field.fieldCode}</span>
+                        <span className="font-medium">{field.label || field.name}</span>
+                        <span className="text-xs text-muted-foreground">{field.name}</span>
                       </div>
                     </DropdownMenuItem>
                   ))}
@@ -251,12 +228,12 @@ function FieldItem({ field, sectionId, onRemove, onToggleRequired, onSelect, isS
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-medium truncate">{field.profileField.fieldName}</span>
+            <span className="font-medium truncate">{field.profileField.label || field.profileField.name}</span>
             <Badge variant="secondary" className="text-[10px] h-4 px-1">
-              {field.profileField.fieldType}
+              {field.profileField.datatype}
             </Badge>
           </div>
-          <div className="text-xs text-muted-foreground truncate">{field.profileField.fieldCode}</div>
+          <div className="text-xs text-muted-foreground truncate">{field.profileField.name}</div>
         </div>
         
         <div className="flex items-center gap-4" onClick={(e) => e.stopPropagation()}>

@@ -1,5 +1,8 @@
-import AdminSkeleton from "@/components/shared/AdminSkeleton";
+import { getDepartments } from "@/actions/academic";
+import DepartmentClient from "./DepartmentClient";
 
-export default function DepartmentsPage() {
-  return <AdminSkeleton title="Departments" />;
+export default async function DepartmentsPage() {
+  const departments = await getDepartments();
+
+  return <DepartmentClient initialDepartments={departments} />;
 }
