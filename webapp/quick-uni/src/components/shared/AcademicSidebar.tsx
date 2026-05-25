@@ -32,7 +32,8 @@ const navItems: NavItem[] = [
   { key: "Departments", href: "/academic/departments", icon: Building },
   { key: "Courses", href: "/academic/courses", icon: BookOpen },
   { key: "Schedule", href: "/academic/schedule", icon: Clock },
-  { key: "People", href: "/academic/people", icon: Users },
+  { key: "Teachers", href: "/academic/people/teachers", icon: Users, category: "People" },
+  { key: "Students", href: "/academic/people/students", icon: Users },
 ];
 
 interface AcademicSidebarProps {
