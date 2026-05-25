@@ -51,9 +51,46 @@ export function ScheduleManager() {
   const [isPending, startTransition] = useTransition();
   const [isEditAvailabilityMode, setIsEditAvailabilityMode] = useState(false);
 
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [availability, setAvailability] = useState<number[]>(new Array(7).fill(0));
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     getSemesters().then(setSemesters);
   }, []);
+
+  useEffect(() => {
+    async function loadData() {
+      if (!selectedId) {
+        setAssignments([]);
+        setAvailability(new Array(7).fill(0));
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const mappedType = activeTab === "rooms" ? "room" : activeTab === "teachers" ? "teacher" : "class";
+        const [templates, availData] = await Promise.all([
+          getWeeklyTemplateByEntity(selectedId, mappedType as any, semesterId),
+          getAvailability(selectedId, mappedType as any)
+        ]);
+        
+        setAssignments(templates || []);
+        
+        const availMasks = new Array(7).fill(0);
+        availData.forEach(a => {
+          availMasks[a.dayOfWeek] = a.occupiedMask;
+        });
+        setAvailability(availMasks);
+      } catch (error) {
+        console.error("Failed to load data", error);
+        setAssignments([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, [selectedId, activeTab, semesterId, refreshKey]);
 
   useEffect(() => {
     if (selectedSemesterId) {
@@ -264,14 +301,16 @@ export function ScheduleManager() {
           </div>
           <div className="flex-1">
             <TimeGrid 
-                key={`${activeTab}-${selectedId}-${refreshKey}-${semesterId}`}
                 type={activeTab} 
-                entityId={selectedId} 
-                semesterId={semesterId}
-                isEditMode={isEditAvailabilityMode}
+                assignments={assignments}
+                availability={availability}
+                loading={isLoading}
+                mode="edit"
+                isEditAvailabilityMode={isEditAvailabilityMode}
                 onCellClick={handleCellClick}
                 onAssignmentClick={handleAssignmentClick}
                 onToggleBlock={handleToggleBlock}
+                showEmptyState={!selectedId}
             />
           </div>
         </div>

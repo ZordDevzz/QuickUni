@@ -1,80 +1,51 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { EntityType } from "./ScheduleManager";
-import { getWeeklyTemplateByEntity, getAvailability } from "@/actions/scheduling-data";
+import { getWeeklyTemplateByEntity } from "@/actions/scheduling-data";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { hasCollision, createMask } from "@/lib/scheduling/bitmask";
 import { cn, stringToHslColor } from "@/lib/utils";
 
+export type AssignmentWithRelations = Awaited<ReturnType<typeof getWeeklyTemplateByEntity>>[number];
+
 interface TimeGridProps {
+  assignments: AssignmentWithRelations[];
+  availability?: number[];
+  loading?: boolean;
+  mode?: 'view' | 'edit';
   type: EntityType;
-  entityId: string | null;
-  semesterId: number | null;
-  isEditMode?: boolean;
+  isEditAvailabilityMode?: boolean;
   onCellClick?: (dayIndex: number, period: number) => void;
   onAssignmentClick?: (assignment: AssignmentWithRelations) => void;
   onToggleBlock?: (dayIndex: number, period: number) => void;
+  emptyStateMessage?: string;
+  showEmptyState?: boolean;
 }
-
-type AssignmentWithRelations = Awaited<ReturnType<typeof getWeeklyTemplateByEntity>>[number];
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const PERIODS = Array.from({ length: 15 }, (_, i) => i + 1);
 const PERIOD_HEIGHT = 60;
 
 export function TimeGrid({ 
+  assignments,
+  availability = new Array(7).fill(0),
+  loading,
+  mode = 'view',
   type, 
-  entityId, 
-  semesterId, 
-  isEditMode,
+  isEditAvailabilityMode,
   onCellClick, 
   onAssignmentClick,
-  onToggleBlock 
+  onToggleBlock,
+  emptyStateMessage,
+  showEmptyState
 }: TimeGridProps) {
   const t = useTranslations("Admin");
-  const [assignments, setAssignments] = useState<AssignmentWithRelations[]>([]);
-  const [availability, setAvailability] = useState<number[]>(new Array(7).fill(0));
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    async function loadData() {
-      if (!entityId) {
-        setAssignments([]);
-        setAvailability(new Array(7).fill(0));
-        return;
-      }
-
-      setLoading(true);
-      try {
-        const mappedType = type === "rooms" ? "room" : type === "teachers" ? "teacher" : "class";
-        const [templates, availData] = await Promise.all([
-          getWeeklyTemplateByEntity(entityId, mappedType, semesterId),
-          getAvailability(entityId, mappedType)
-        ]);
-        
-        setAssignments(templates || []);
-        
-        const availMasks = new Array(7).fill(0);
-        availData.forEach(a => {
-          availMasks[a.dayOfWeek] = a.occupiedMask;
-        });
-        setAvailability(availMasks);
-      } catch (error) {
-        console.error("Failed to load data", error);
-        setAssignments([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, [entityId, type, semesterId]);
-
-  if (!entityId) {
+  if (showEmptyState) {
     return (
       <div className="flex flex-col items-center justify-center h-full min-h-[600px] border rounded-lg bg-muted/20 text-muted-foreground">
-        <p>{t("SelectEntityToView")}</p>
+        <p>{emptyStateMessage || t("SelectEntityToView")}</p>
       </div>
     );
   }
@@ -120,19 +91,22 @@ export function TimeGrid({
                     <div 
                       key={dayIndex} 
                       className={cn(
-                        "border-r border-b last:border-r-0 relative hover:bg-muted/50 cursor-pointer transition-colors",
+                        "border-r border-b last:border-r-0 relative hover:bg-muted/50 transition-colors",
+                        mode === 'edit' && "cursor-pointer",
                         isBlocked && "diagonal-stripes"
                       )} 
                       style={{ height: `${PERIOD_HEIGHT}px` }}
                       onClick={() => {
-                        if (isEditMode) {
+                        if (mode !== 'edit') return;
+                        
+                        if (isEditAvailabilityMode) {
                           onToggleBlock?.(dayIndex, p);
                         } else {
                           onCellClick?.(dayIndex, p);
                         }
                       }}
                     >
-                      {isBlocked && !isEditMode && (
+                      {isBlocked && (
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
                           <span className="text-[8px] font-bold uppercase rotate-45">{t("Occupied")}</span>
                         </div>

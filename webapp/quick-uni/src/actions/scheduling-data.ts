@@ -1,7 +1,8 @@
 "use server";
 import { db } from "../db";
 import { weeklyTemplate, availability, holidayBlacklist } from "../db/schemas/schedule";
-import { courseClass } from "../db/schemas/course";
+import { courseClass, enrollment } from "../db/schemas/course";
+import { profile, employee, student } from "../db/schemas/user";
 import { eq, and, ne, asc, exists } from "drizzle-orm";
 import { createMask, hasCollision } from "../lib/scheduling/bitmask";
 import { weeklyTemplateValidator, holidayValidator } from "../lib/validators/scheduling";
@@ -357,5 +358,85 @@ export async function getWeeklyTemplateByEntity(entityId: string, type: 'room' |
     console.error("Error in getWeeklyTemplateByEntity:", error);
     if (error instanceof Error) throw error;
     throw new Error("Failed to fetch weekly templates");
+  }
+}
+
+export async function getWeeklyTemplateByStudent(studentId: string, semesterId: number | null) {
+  if (!semesterId) return [];
+  try {
+    return await db.query.weeklyTemplate.findMany({
+      where: (template, { exists, and, eq }) => exists(
+        db.select()
+          .from(enrollment)
+          .where(and(
+            eq(enrollment.courseClassId, template.courseClassId),
+            eq(enrollment.studentId, studentId),
+            exists(
+              db.select()
+                .from(courseClass)
+                .where(and(
+                  eq(courseClass.id, template.courseClassId),
+                  eq(courseClass.semesterId, semesterId)
+                ))
+            )
+          ))
+      ),
+      with: WEEKLY_TEMPLATE_WITH_RELATIONS
+    });
+  } catch (error) {
+    console.error("Error in getWeeklyTemplateByStudent:", error);
+    throw new Error("Failed to fetch student weekly templates");
+  }
+}
+
+export async function getScheduleByRole(role: string, accountId: string, semesterId: number | null) {
+  if (!semesterId) return { assignments: [], availability: [] };
+
+  try {
+    if (role === 'teacher') {
+      const emp = await db.query.employee.findFirst({
+        where: exists(
+          db.select()
+            .from(profile)
+            .where(and(
+              eq(profile.id, employee.profileId),
+              eq(profile.accountId, accountId)
+            ))
+        )
+      });
+
+      if (emp) {
+        const [assignments, availData] = await Promise.all([
+          getWeeklyTemplateByEntity(emp.id, 'teacher', semesterId),
+          getAvailability(emp.id, 'teacher')
+        ]);
+        return { assignments, availability: availData };
+      }
+    }
+
+    if (role === 'student') {
+      const stu = await db.query.student.findFirst({
+        where: exists(
+          db.select()
+            .from(profile)
+            .where(and(
+              eq(profile.id, student.profileId),
+              eq(profile.accountId, accountId)
+            ))
+        )
+      });
+
+      if (stu) {
+        const assignments = await getWeeklyTemplateByStudent(stu.id, semesterId);
+        // Students don't have their own availability blocking usually, 
+        // but we return empty array for consistency
+        return { assignments, availability: [] };
+      }
+    }
+
+    return { assignments: [], availability: [] };
+  } catch (error) {
+    console.error("Error in getScheduleByRole:", error);
+    throw new Error("Failed to fetch schedule by role");
   }
 }
