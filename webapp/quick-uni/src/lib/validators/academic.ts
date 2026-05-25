@@ -14,3 +14,32 @@ export const semesterSchema = z.object({
 });
 
 export type SemesterInput = z.infer<typeof semesterSchema>;
+
+export const departmentSchema = z.object({
+  id: z.string().uuid().optional(),
+  code: z.string().min(1, "Code is required").max(30),
+  name: z.string().min(1, "Name is required").max(255),
+  des: z.string().max(512).optional().nullable(),
+});
+
+export type DepartmentInput = z.infer<typeof departmentSchema>;
+
+export const majorSchema = z.object({
+  id: z.string().uuid().optional(),
+  code: z.string().min(1, "Code is required").max(30),
+  departmentId: z.string().uuid("Department is required"),
+  des: z.string().max(512).optional().nullable(),
+});
+
+export type MajorInput = z.infer<typeof majorSchema>;
+
+export const departmentEmploymentSchema = z.object({
+  employeeId: z.string().uuid(),
+  departmentId: z.string().uuid(),
+  assignDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
+  unassignDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional().nullable(),
+  roleCode: z.string().max(30).optional().nullable(),
+  roleName: z.string().max(255).optional().nullable(),
+});
+
+export type DepartmentEmploymentInput = z.infer<typeof departmentEmploymentSchema>;
