@@ -2,7 +2,7 @@
 
 import { ReactNode, useState } from "react";
 import { AdminSidebar } from "@/components/shared/AdminSidebar";
-import { AdminHeader } from "@/components/shared/AdminHeader";
+import { RoleHeader } from "@/components/shared/RoleHeader";
 import { cn } from "@/lib/utils";
 
 export default function AdminLayoutContent({ children }: { children: ReactNode }) {
@@ -22,7 +22,7 @@ export default function AdminLayoutContent({ children }: { children: ReactNode }
         "flex flex-1 flex-col transition-all duration-300",
         isCollapsed ? "lg:pl-16" : "lg:pl-64"
       )}>
-        <AdminHeader setIsMobileOpen={setIsMobileOpen} />
+        <RoleHeader setIsMobileOpen={setIsMobileOpen} />
         
         <main className="flex-1 p-4 lg:p-8">
           <div className="mx-auto max-w-8xl">

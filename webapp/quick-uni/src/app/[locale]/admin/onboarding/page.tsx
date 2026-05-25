@@ -1,4 +1,3 @@
-import { AdminLayout } from "@/components/shared/AdminLayout";
 import { OnboardingDashboard } from "@/components/features/admin/onboarding/OnboardingDashboard";
 import { getTranslations } from "next-intl/server";
 
@@ -11,10 +10,8 @@ export async function generateMetadata() {
 
 export default function OnboardingPage() {
   return (
-    <AdminLayout>
-      <div className="p-6">
-        <OnboardingDashboard />
-      </div>
-    </AdminLayout>
+    <div className="p-6">
+      <OnboardingDashboard />
+    </div>
   );
 }
