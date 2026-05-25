@@ -395,5 +395,15 @@
     "RemoveFieldFromSchema": "Remove Field from Layout",
     "DeleteSection": "Delete Section",
     "Close": "Close"
+    },
+    "Student": {
+      "Classes": {
+        "Title": "My Classes",
+        "Description": "View your enrolled classes for the selected semester.",
+        "StatusActive": "Active",
+        "TeacherLabel": "Teacher",
+        "ViewDetails": "View Details",
+        "NoClassesFound": "No classes found."
+      }
     }
 }

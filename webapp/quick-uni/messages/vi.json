@@ -394,5 +394,15 @@
     "RemoveFieldFromSchema": "Gỡ bỏ khỏi bố cục",
     "DeleteSection": "Xóa nhóm",
     "Close": "Đóng"
-  }
-}
+    },
+    "Student": {
+      "Classes": {
+        "Title": "Lớp học của tôi",
+        "Description": "Xem các lớp học bạn đã đăng ký trong học kỳ đã chọn.",
+        "StatusActive": "Đang học",
+        "TeacherLabel": "Giảng viên",
+        "ViewDetails": "Xem chi tiết",
+        "NoClassesFound": "Không tìm thấy lớp học nào."
+      }
+    }
+    }
