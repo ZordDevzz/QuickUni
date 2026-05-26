@@ -45,11 +45,24 @@ const main = async () => {
   }
 
   try {
+    // 1. Roles & System Setup
+    console.log("⚙️  Seeding system...");
     const { schemaId, roles } = await seedSystem();
+
+    // 2. Org Entities
+    console.log("🏢 Seeding organization...");
     const { rooms } = await seedOrg();
+
+    // 3. People (Users)
+    console.log("👥 Seeding people...");
     await seedPeople(schemaId, roles);
+
+    // 4. Academic Data
+    console.log("📚 Seeding academic entities...");
     const { semesterId, subjects } = await seedAcademic();
-    
+
+    // 5. Scheduling
+    console.log("📅 Seeding scheduling...");
     const teachers = await db.select().from(employee);
     await seedScheduling(semesterId, subjects, teachers, rooms);
 
