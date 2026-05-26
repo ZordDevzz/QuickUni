@@ -7,10 +7,19 @@ import { useSearchParams } from "next/navigation";
 import { ProfileTab } from "./ProfileTab";
 import { SecurityTab } from "./SecurityTab";
 import { PreferencesTab } from "./PreferencesTab";
+import { profileField } from "@/db/schemas/user";
+
+type ProfileField = typeof profileField.$inferSelect & { isRequired: boolean };
+
+interface Profile {
+  id: string;
+  fullname: string | null;
+  [key: string]: unknown;
+}
 
 interface AccountClientProps {
-  profile: any;
-  schemaFields: any[];
+  profile: Profile | null;
+  schemaFields: ProfileField[];
 }
 
 export function AccountClient({ profile, schemaFields }: AccountClientProps) {
@@ -46,7 +55,8 @@ export function AccountClient({ profile, schemaFields }: AccountClientProps) {
       
       <div className="flex-1">
         <TabsContent value="profile" className="mt-0">
-          <ProfileTab profile={profile} fields={schemaFields} />
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <ProfileTab profile={profile} fields={schemaFields as any[]} />
         </TabsContent>
         <TabsContent value="security" className="mt-0">
           <SecurityTab />

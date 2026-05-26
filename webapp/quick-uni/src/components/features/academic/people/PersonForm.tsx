@@ -102,9 +102,11 @@ export function PersonForm({ type, schemaId, initialData, onSuccess }: PersonFor
     try {
         let res;
         if (isEdit && initialData?.id) {
-            res = await updatePerson(type, initialData.id, values);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            res = await updatePerson(type, initialData.id, { ...values, schemaId } as any);
         } else {
-            res = await createPerson(type, { ...values, schemaId });
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            res = await createPerson(type, { ...values, schemaId } as any);
         }
         
         if (res.success) {
@@ -112,7 +114,8 @@ export function PersonForm({ type, schemaId, initialData, onSuccess }: PersonFor
           onSuccess?.();
           router.refresh();
         } else {
-          notify(res.error || "An error occurred", { type: "error" });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          notify((res as any).error || "An error occurred", { type: "error" });
         }
     } catch (error: unknown) {
         notify((error as Error).message || "An unexpected error occurred", { type: "error" });

@@ -11,6 +11,7 @@ export async function GET(req: Request) {
 
   const accounts = await getAccounts();
   // Exclude password hashes
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
   const safeAccounts = accounts.map(({ pwdHash, ...rest }) => rest);
   return NextResponse.json(safeAccounts);
 }
@@ -32,6 +33,7 @@ export async function POST(req: Request) {
       ipAddress,
     });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { pwdHash, ...safeAccount } = newAccount;
     return NextResponse.json(safeAccount, { status: 201 });
   } catch (error) {

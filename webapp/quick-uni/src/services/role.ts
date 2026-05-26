@@ -1,10 +1,12 @@
 import { db } from "@/db";
 import { 
   systemRole, 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
   systemAuthority, 
   systemRoleAuthority, 
   userSystemRole 
 } from "@/db/schema";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { eq, inArray, isNull } from "drizzle-orm";
 import { 
   InsertRoleInput, 

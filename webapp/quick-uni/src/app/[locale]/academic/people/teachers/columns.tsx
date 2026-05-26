@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { TeacherRowActions } from "./teacher-row-actions";
 import { FormattedDate } from "@/components/shared/FormattedDate";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getColumns = (t: any): ColumnDef<any>[] => [
   {
     accessorKey: "profile.fullname",

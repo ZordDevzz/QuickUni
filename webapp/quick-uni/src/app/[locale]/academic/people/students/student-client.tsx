@@ -15,7 +15,7 @@ import {
 import { PersonForm } from "@/components/features/academic/people/PersonForm";
 import { useTranslations } from "next-intl";
 
-export function StudentClient({ data, defaultSchemaId }: { data: any[]; defaultSchemaId: number | null }) {
+export function StudentClient({ data, defaultSchemaId }: { data: unknown[]; defaultSchemaId: number | null }) {
   const [isOpen, setIsOpen] = useState(false);
   const t = useTranslations("Profile");
   const commonT = useTranslations("Admin");

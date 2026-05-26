@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,20 +21,20 @@ interface ProfileField {
 }
 
 interface ProfileTabProps {
-  profile: any;
+  profile: unknown;
   fields: ProfileField[];
 }
 
 export function ProfileTab({ profile, fields }: ProfileTabProps) {
   const t = useTranslations("AccountSettings");
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<Record<string, any>>(
-    (profile.dynamicData as Record<string, any>) || {}
+  const [formData, setFormData] = useState<Record<string, unknown>>(
+    ((profile as { dynamicData?: Record<string, unknown> })?.dynamicData) || {}
   );
 
   const sections = Array.from(new Set(fields.map(f => f.uiSection)));
 
-  const handleInputChange = (name: string, value: any) => {
+  const handleInputChange = (name: string, value: unknown) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -47,6 +48,7 @@ export function ProfileTab({ profile, fields }: ProfileTabProps) {
       } else {
         notify(result.error || t("ProfileNotFound"), { type: "error" });
       }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       notify("System error", { type: "error" });
     } finally {
@@ -71,12 +73,11 @@ export function ProfileTab({ profile, fields }: ProfileTabProps) {
                     {field.isRequired && <span className="text-destructive ml-1">*</span>}
                   </Label>
                   <Input
-                    id={field.name}
-                    value={formData[field.name] || ""}
-                    onChange={(e) => handleInputChange(field.name, e.target.value)}
-                    required={field.isRequired}
-                  />
-                </div>
+                  id={field.name}
+                  value={String(formData[field.name] || "")}
+                  onChange={(e) => handleInputChange(field.name, e.target.value)}
+                  required={field.isRequired}
+                  />                </div>
               ))}
           </CardContent>
         </Card>

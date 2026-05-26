@@ -39,6 +39,7 @@ export function SecurityTab() {
         } else {
           notify(result.error || "Failed to change password", { type: "error" });
         }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         notify("System error", { type: "error" });
       } finally {
@@ -117,9 +118,9 @@ export function SecurityTab() {
           </CardContent>
           <CardFooter>
             <form.Subscribe
-              selector={(state) => [state.canSubmit, state.isSubmitting]}
+              selector={(state) => [state.isSubmitting]}
             >
-              {([canSubmit, isSubmitting]) => (
+              {([isSubmitting]) => (
                 <Button type="submit" disabled={loading || isSubmitting}>
                   {(loading || isSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {t("UpdatePassword")}

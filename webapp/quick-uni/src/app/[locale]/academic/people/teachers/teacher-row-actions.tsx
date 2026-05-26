@@ -18,6 +18,7 @@ import {
 import { PersonForm } from "@/components/features/academic/people/PersonForm";
 import { useTranslations } from "next-intl";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function TeacherRowActions({ teacher }: { teacher: any }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const t = useTranslations("Admin");
