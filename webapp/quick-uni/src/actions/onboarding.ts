@@ -23,7 +23,7 @@ export type ActionResponse = {
   success: boolean;
   error?: string;
   sessionId?: string;
-  summary?: any;
+  summary?: OnboardingSummary;
 };
 
 async function checkAdmin() {

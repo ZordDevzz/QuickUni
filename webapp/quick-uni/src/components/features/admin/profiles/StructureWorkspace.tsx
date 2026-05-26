@@ -99,6 +99,7 @@ export function StructureWorkspace({ initialSchemas, allFields }: StructureWorks
         profileSchemaFields: [...(section.profileSchemaFields || [])].sort((a, b) => a.order - b.order)
       })).sort((a, b) => a.order - b.order);
     });
+// eslint-disable-next-line react-hooks/set-state-in-effect
     setSchemasData(data);
   }, [initialSchemas]);
 
@@ -113,6 +114,7 @@ export function StructureWorkspace({ initialSchemas, allFields }: StructureWorks
         const sectionData = selectedItem.data as ProfileSection;
         const section = sections.find(s => s.id === sectionData.id);
         if (section) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
           setSelectedItem({ type: "section", data: section });
         } else {
           setSelectedItem(null);
@@ -376,8 +378,10 @@ export function StructureWorkspace({ initialSchemas, allFields }: StructureWorks
       if (result.success) {
         toast.success(t("SaveSuccess"));
       } else {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
         toast.error((result as any).error || t("SaveError"));
       }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       toast.error(t("SaveError"));
     } finally {

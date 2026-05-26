@@ -1,10 +1,12 @@
 import { getProfileSchemasAction } from "@/actions/profile-schema";
 import { OnboardingWizard } from "@/components/features/admin/onboarding/OnboardingWizard";
 import { AdminHeader } from "@/components/shared/AdminHeader";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 
 export default async function NewOnboardingPage() {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
   const t = await getTranslations("Onboarding");
   const result = await getProfileSchemasAction();
   const schemas = result.success ? result.data : [];

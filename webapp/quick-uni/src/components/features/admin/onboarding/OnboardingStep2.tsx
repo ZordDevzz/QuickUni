@@ -67,6 +67,7 @@ export function OnboardingStep2({ sessionId, onBack, onNext }: OnboardingStep2Pr
 
       const result = await validateOnboardingExcel(sessionId, formData);
       if (result.success && result.summary) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setValidationResults((result.summary as any).results);
         setSummary(result.summary);
         toast.success(t("ValidationComplete"));

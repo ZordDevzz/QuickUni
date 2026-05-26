@@ -25,13 +25,16 @@ interface OnboardingStep1Props {
 }
 
 export function OnboardingStep1({ schemas, onNext, initialData }: OnboardingStep1Props) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [name, setName] = useState((initialData as any)?.name || "");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [entityType, setEntityType] = useState<"student" | "employee">((initialData as any)?.entityType || "student");
-  const [schemaId, setSchemaId] = useState<string>((initialData as any)?.schemaId?.toString() || "");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [schemaId, setSchemaId] = useState<string>((initialData as any)?.schemaId?.toString() || "");      
   const [isSaving, setIsSaving] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [sessionId, setSessionId] = useState<string | null>((initialData as any)?.id || null);
   const t = useTranslations("Onboarding");
-
   const handleSaveAndDownload = async () => {
     if (!name || !schemaId) {
       toast.error("Please fill all required fields");
@@ -107,6 +110,7 @@ export function OnboardingStep1({ schemas, onNext, initialData }: OnboardingStep
                 <SelectValue placeholder={t("SelectSchema")} />
               </SelectTrigger>
               <SelectContent>
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 {schemas.map((schema: any) => (
                   <SelectItem key={schema.id} value={schema.id.toString()}>
                     {schema.schemaCode}

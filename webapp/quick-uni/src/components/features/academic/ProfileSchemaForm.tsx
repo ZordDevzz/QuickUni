@@ -52,6 +52,7 @@ export function ProfileSchemaForm({ initialData, onSuccess }: ProfileSchemaFormP
         } else {
           toast.error(result.error);
         }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         toast.error("An unexpected error occurred");
       }

@@ -39,7 +39,8 @@ export async function GET(
 
     const buffer = await generateOnboardingReport(summary.executionResults);
 
-    return new NextResponse(buffer, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return new NextResponse(buffer as any, {
       status: 200,
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

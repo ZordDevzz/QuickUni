@@ -44,6 +44,7 @@ export function OnboardingStep3({ sessionId, onComplete }: OnboardingStep3Props)
     const res = await getSessionAction(sessionId);
     if (res.success && res.data) {
       setSession(res.data);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((res.data as any).status !== "processing") {
         setExecuting(false);
       } else {

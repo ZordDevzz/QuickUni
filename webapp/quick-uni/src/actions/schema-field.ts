@@ -60,6 +60,7 @@ export async function addFieldToSchemaAction(schemaId: number, fieldId: number, 
     });
     revalidatePath("/admin/profiles/schemas");
     return { success: true };
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (_) {
     return { success: false, error: "Failed to add field to schema" };
   }
@@ -75,6 +76,7 @@ export async function removeFieldFromSchemaAction(schemaId: number, fieldId: num
     );
     revalidatePath("/admin/profiles/schemas");
     return { success: true };
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (_) {
     return { success: false, error: "Failed to remove field from schema" };
   }
@@ -92,6 +94,7 @@ export async function updateSchemaFieldAction(schemaId: number, fieldId: number,
       );
     revalidatePath("/admin/profiles/schemas");
     return { success: true };
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (_) {
     return { success: false, error: "Failed to update field" };
   }

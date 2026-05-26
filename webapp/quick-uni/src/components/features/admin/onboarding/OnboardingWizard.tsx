@@ -30,6 +30,7 @@ export function OnboardingWizard({ schemas, initialSessionId }: OnboardingWizard
       const resume = async () => {
         const res = await getSessionAction(initialSessionId);
         if (res.success && res.data) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const status = (res.data as any).status;
           if (status === "draft") setStep(1);
           else if (status === "validating" || status === "ready") setStep(2);

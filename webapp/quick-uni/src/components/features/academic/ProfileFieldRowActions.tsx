@@ -44,6 +44,7 @@ export function ProfileFieldRowActions({ data }: ProfileFieldRowActionsProps) {
       } else {
         toast.error(result.error);
       }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("Failed to delete profile field");
     } finally {

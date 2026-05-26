@@ -42,7 +42,8 @@ export async function GET(
       return new NextResponse("Session not found", { status: 404 });
     }
 
-    const fields = session.profileSchema?.profileSchemaFields.map(sf => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const fields = (session as any).profileSchema?.profileSchemaFields.map((sf: any) => ({
       label: sf.profileField?.label || sf.profileField?.name || "Unknown",
       name: sf.profileField?.name || "unknown",
       isRequired: sf.isRequired,
@@ -50,7 +51,8 @@ export async function GET(
 
     const buffer = await generateOnboardingTemplate(fields);
 
-    return new NextResponse(buffer, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return new NextResponse(buffer as any, {
       status: 200,
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

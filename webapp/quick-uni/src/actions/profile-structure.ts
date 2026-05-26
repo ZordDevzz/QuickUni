@@ -7,7 +7,7 @@ import { structureBatchUpdateValidator } from "../lib/validators/profile-structu
 
 export type ActionResponse = { success: true } | { success: false; error: string };
 
-export async function updateProfileStructureAction(data: any): Promise<ActionResponse> {
+export async function updateProfileStructureAction(data: unknown): Promise<ActionResponse> {
   try {
     const validated = structureBatchUpdateValidator.parse(data);
     
@@ -52,6 +52,6 @@ export async function updateProfileStructureAction(data: any): Promise<ActionRes
     });
   } catch (error) {
     console.error("Failed to update profile structure:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    return { success: false, error: error instanceof Error ? (error as Error).message : "Unknown error" };
   }
 }

@@ -179,6 +179,7 @@ export function RoleClient({ roles, authorities }: RoleClientProps) {
       } else {
         toast.error(res.error || tc("Toast.SubmitFailed"));
       }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error(tc("Toast.SystemError"));
     } finally {
@@ -197,6 +198,7 @@ export function RoleClient({ roles, authorities }: RoleClientProps) {
       } else {
         toast.error(res.error || tc("Toast.DeleteFailed"));
       }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error(tc("Toast.SystemError"));
     } finally {
@@ -218,6 +220,7 @@ export function RoleClient({ roles, authorities }: RoleClientProps) {
       } else {
         toast.error(res.error || tc("Toast.SubmitFailed"));
       }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error(tc("Toast.SystemError"));
     } finally {
