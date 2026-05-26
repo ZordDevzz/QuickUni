@@ -256,9 +256,9 @@
     "Classes": {
       "Title": "Lớp học",
       "ClassesTitle": "Lớp học của tôi",
-      "ClassesDescription": "Xem và quản lý các lớp học phần được phân công.",
+      "ClassesDescription": "Xem và quản lý các lớp học bạn phụ trách.",
       "ClassCode": "Mã lớp",
-      "Subject": "Học phần",
+      "Subject": "Môn học",
       "Capacity": "Sĩ số",
       "Status": "Trạng thái"
     }

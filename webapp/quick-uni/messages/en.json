@@ -248,19 +248,19 @@
   "Status": "Status"
   },
   "Teacher": {
-  "Schedule": {
-    "Title": "My Schedule",
-    "Description": "View your teaching assignments"
-  },
-  "Classes": {
-    "Title": "Classes",
-    "ClassesTitle": "My Classes",
-    "ClassesDescription": "View and manage your assigned course classes.",
-    "ClassCode": "Class Code",
-    "Subject": "Subject",
-    "Capacity": "Capacity",
-    "Status": "Status"
-  }
+    "Schedule": {
+      "Title": "My Schedule",
+      "Description": "View your teaching assignments"
+    },
+    "Classes": {
+      "Title": "Classes",
+      "ClassesTitle": "My Classes",
+      "ClassesDescription": "View and manage your assigned course classes.",
+      "ClassCode": "Class Code",
+      "Subject": "Subject",
+      "Capacity": "Capacity",
+      "Status": "Status"
+    }
   },
     "NoResults": "No results.",
     "FilterPlaceholder": "Filter...",
