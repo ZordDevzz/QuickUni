@@ -46,12 +46,6 @@ export function AccountRowActions({ account }: AccountRowActionsProps) {
   const tr = useTranslations("Role");
   const toastT = useTranslations("Toast");
 
-  useEffect(() => {
-    if (isRolesOpen) {
-      loadRoles();
-    }
-  }, [isRolesOpen]);
-
   const loadRoles = async () => {
     setIsLoadingRoles(true);
     try {
@@ -61,12 +55,23 @@ export function AccountRowActions({ account }: AccountRowActionsProps) {
       ]);
       setAllRoles(roles);
       setUserRoles(currentUserRoles);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       notify("Failed to load roles", { type: "error" });
     } finally {
       setIsLoadingRoles(false);
     }
   };
+
+  useEffect(() => {
+    async function init() {
+      if (isRolesOpen) {
+        await loadRoles();
+      }
+    }
+    init();
+// eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRolesOpen]);
 
   const handleUpdateRoles = async () => {
     setIsLoadingRoles(true);
@@ -81,6 +86,7 @@ export function AccountRowActions({ account }: AccountRowActionsProps) {
       } else {
         notify(result.error || "Failed to update roles", { type: "error" });
       }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       notify("System error", { type: "error" });
     } finally {
