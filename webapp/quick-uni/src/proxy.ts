@@ -34,7 +34,15 @@ export async function proxy(req: NextRequest) {
   if (isAuthPage) {
     if (isAuth) {
       const userType = token.type as string;
-      const targetPath = (userType === "dev" || userType === "tech") ? "/admin" : "/";
+      let targetPath = "/";
+      
+      if (userType === "dev" || userType === "tech") {
+        targetPath = "/admin";
+      } else if (userType === "student") {
+        targetPath = "/student";
+      } else if (userType === "employee") {
+        targetPath = "/teacher";
+      }
       
       return NextResponse.redirect(new URL(targetPath, req.url));
     }
@@ -51,11 +59,21 @@ export async function proxy(req: NextRequest) {
     );
   }
 
-  // If user is dev/tech and at root, redirect to admin
+  // If user is at root, redirect to their dashboard
   if (isPath("/")) {
     const userType = token.type as string;
+    let targetPath = null;
+    
     if (userType === "dev" || userType === "tech") {
-      return NextResponse.redirect(new URL("/admin", req.url));
+      targetPath = "/admin";
+    } else if (userType === "student") {
+      targetPath = "/student";
+    } else if (userType === "employee") {
+      targetPath = "/teacher";
+    }
+
+    if (targetPath) {
+      return NextResponse.redirect(new URL(targetPath, req.url));
     }
   }
 
