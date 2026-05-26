@@ -245,17 +245,23 @@
     "UpdateSuccess": "Role updated successfully",
     "CreateSuccess": "Role created successfully",
     "UpdateAuthoritiesSuccess": "Authorities updated successfully"
+  "Status": "Status"
   },
   "Teacher": {
-    "Classes": "Classes",
+  "Schedule": {
+    "Title": "My Schedule",
+    "Description": "View your teaching assignments"
+  },
+  "Classes": {
+    "Title": "Classes",
     "ClassesTitle": "My Classes",
     "ClassesDescription": "View and manage your assigned course classes.",
     "ClassCode": "Class Code",
     "Subject": "Subject",
     "Capacity": "Capacity",
     "Status": "Status"
+  }
   },
-  "Table": {
     "NoResults": "No results.",
     "FilterPlaceholder": "Filter...",
     "Columns": "Columns",
