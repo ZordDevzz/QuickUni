@@ -40,9 +40,9 @@ export async function changePasswordAction(data: ChangePasswordInput) {
       .where(eq(account.id, session.user.id));
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Change password error:", error);
-    return { success: false, error: error.message || "Failed to change password" };
+    return { success: false, error: (error as Error).message || "Failed to change password" };
   }
 }
 
@@ -60,7 +60,11 @@ export async function updatePersonalProfileAction(data: ProfileUpdateInput) {
     // Hardcoded protected fields for safety
     const protectedFields = ["msv", "employee_id", "username", "role", "code"];
     const filteredData = { ...validated };
-    protectedFields.forEach(field => delete (filteredData as any)[field]);
+    protectedFields.forEach(field => {
+      if (field in filteredData) {
+        delete (filteredData as Record<string, unknown>)[field];
+      }
+    });
 
     await db.update(profile)
       .set({ 
@@ -71,8 +75,8 @@ export async function updatePersonalProfileAction(data: ProfileUpdateInput) {
 
     revalidatePath("/account");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Update profile error:", error);
-    return { success: false, error: error.message || "Failed to update profile" };
+    return { success: false, error: (error as Error).message || "Failed to update profile" };
   }
 }

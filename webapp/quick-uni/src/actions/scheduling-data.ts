@@ -3,6 +3,7 @@ import { db } from "../db";
 import { weeklyTemplate, availability, holidayBlacklist } from "../db/schemas/schedule";
 import { courseClass, enrollment } from "../db/schemas/course";
 import { profile, employee, student } from "../db/schemas/user";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { eq, and, ne, asc, exists } from "drizzle-orm";
 import { createMask, hasCollision } from "../lib/scheduling/bitmask";
 import { weeklyTemplateValidator, holidayValidator } from "../lib/validators/scheduling";
@@ -89,11 +90,11 @@ export async function getCurrentSemester() {
   }
 }
 
-export async function upsertWeeklyTemplate(data: any) {
+export async function upsertWeeklyTemplate(data: unknown) {
   try {
     const validated = weeklyTemplateValidator.parse(data);
     const mask = createMask(validated.startPeriod, validated.endPeriod);
-    const finalData = { ...validated, occupyMask: mask } as typeof weeklyTemplate.$inferInsert;
+    const finalData = { ...validated, occupyMask: mask };
 
     if (validated.id) {
       await db.update(weeklyTemplate)
@@ -101,7 +102,7 @@ export async function upsertWeeklyTemplate(data: any) {
         .where(eq(weeklyTemplate.id, validated.id));
       return { success: true, id: validated.id };
     } else {
-      const result = await db.insert(weeklyTemplate).values(finalData).returning({ id: weeklyTemplate.id });
+      const result = await db.insert(weeklyTemplate).values(finalData as typeof weeklyTemplate.$inferInsert).returning({ id: weeklyTemplate.id });
       return { success: true, id: result[0].id };
     }
   } catch (error) {
@@ -266,7 +267,7 @@ export async function getHolidays() {
   }
 }
 
-export async function addHolidayAction(data: any) {
+export async function addHolidayAction(data: unknown) {
   try {
     const validated = holidayValidator.parse(data);
     await db.insert(holidayBlacklist).values({

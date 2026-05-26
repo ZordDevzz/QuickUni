@@ -5,17 +5,21 @@ import { request, notification, notificationRecipient } from "@/db/schemas/commu
 import { courseClass, enrollment } from "@/db/schemas/course";
 import { account } from "@/db/schemas/auth";
 import { profile, student } from "@/db/schemas/user";
+import { enumRequestType, enumWorkflowStatus } from "@/db/schemas/enums";
 import { eq, or, and, isNull, sql } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/services/auth";
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 
+type RequestType = (typeof enumRequestType.enumValues)[number];
+type WorkflowStatus = (typeof enumWorkflowStatus.enumValues)[number];
+
 /**
  * Submits a new request to the system.
  * Handles targetId lookup for specific request types.
  */
-export async function submitRequest(type: string, data: any) {
+export async function submitRequest(type: RequestType, data: unknown) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) throw new Error("Unauthorized");
 
@@ -23,11 +27,12 @@ export async function submitRequest(type: string, data: any) {
   
   // Logic to find targetId for student_absence
   if (type === 'student_absence') {
-    if (!data.classId) throw new Error("Missing classId for student_absence");
+    const reqData = data as { classId?: string };
+    if (!reqData.classId) throw new Error("Missing classId for student_absence");
     
     // Find the teacherId for the given course class
     const classInfo = await db.query.courseClass.findFirst({
-      where: eq(courseClass.id, data.classId)
+      where: eq(courseClass.id, reqData.classId)
     });
     
     if (classInfo) {
@@ -41,9 +46,9 @@ export async function submitRequest(type: string, data: any) {
   const [result] = await db.insert(request).values({
     id: randomUUID(),
     senderId: session.user.id,
-    type: type as any,
-    targetId: targetId as any,
-    data: data,
+    type: type,
+    targetId: targetId,
+    data: data as Record<string, unknown>,
     status: 'pending'
   }).returning();
 
@@ -97,7 +102,7 @@ export async function getRequestsForReviewer() {
   if (!session?.user?.id) throw new Error("Unauthorized");
 
   const userId = session.user.id;
-  const userType = (session.user as any).type;
+  const userType = session.user.type;
 
   // Reviewers can see requests directly targeted to them
   const conditions = [eq(request.targetId, userId)];
@@ -134,13 +139,13 @@ export async function getRequestsForReviewer() {
  * Processes a request by updating its status and comment.
  * Triggers placeholder logic for side effects.
  */
-export async function processRequest(requestId: string, status: string, comment?: string) {
+export async function processRequest(requestId: string, status: WorkflowStatus, comment?: string) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) throw new Error("Unauthorized");
 
   const [result] = await db.update(request)
     .set({
-      status: status as any,
+      status: status,
       comment: comment,
       processedBy: session.user.id,
       processedAt: new Date().toISOString(),
@@ -173,8 +178,9 @@ export async function processRequest(requestId: string, status: string, comment?
        console.log(`[Workflow] Approved student_absence for request ${requestId}. Recording in attendance logs...`);
     } else if (result.type === 'class_cancellation') {
        // Side Effect: Soft-delete enrollment and decrement currentSlot in course_class
-       if (result.data && (result.data as any).classId) {
-         const classId = (result.data as any).classId;
+       const reqData = result.data as { classId?: string };
+       if (reqData && reqData.classId) {
+         const classId = reqData.classId;
          
          // Find studentId linked to the sender's account
          const studentRec = await db.select({ id: student.id })
@@ -217,3 +223,4 @@ export async function processRequest(requestId: string, status: string, comment?
   
   return result;
 }
+

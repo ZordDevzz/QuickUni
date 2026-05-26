@@ -24,9 +24,9 @@ export async function createRoleAction(data: InsertRoleInput): Promise<ActionRes
     await roleService.createRole(validatedData);
     revalidatePath("/admin/system/roles");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to create role:", error);
-    return { success: false, error: error?.message || "Failed to create role" };
+    return { success: false, error: error instanceof Error ? error.message : "Failed to create role" };
   }
 }
 
@@ -36,9 +36,9 @@ export async function updateRoleAction(id: number, data: UpdateRoleInput): Promi
     await roleService.updateRole(id, validatedData);
     revalidatePath("/admin/system/roles");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to update role:", error);
-    return { success: false, error: error?.message || "Failed to update role" };
+    return { success: false, error: error instanceof Error ? error.message : "Failed to update role" };
   }
 }
 
@@ -47,9 +47,9 @@ export async function deleteRoleAction(id: number): Promise<ActionResponse> {
     await roleService.deleteRole(id);
     revalidatePath("/admin/system/roles");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to delete role:", error);
-    return { success: false, error: error?.message || "Failed to delete role" };
+    return { success: false, error: error instanceof Error ? error.message : "Failed to delete role" };
   }
 }
 
@@ -59,9 +59,9 @@ export async function updateRoleAuthoritiesAction(data: AssignAuthoritiesInput):
     await roleService.updateRoleAuthorities(validatedData.roleId, validatedData.authorityIds);
     revalidatePath("/admin/system/roles");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to update role authorities:", error);
-    return { success: false, error: error?.message || "Failed to update role authorities" };
+    return { success: false, error: error instanceof Error ? error.message : "Failed to update role authorities" };
   }
 }
 
@@ -71,9 +71,9 @@ export async function updateUserRolesAction(data: AssignUserRoleInput): Promise<
     await roleService.updateUserRoles(validatedData.userId, validatedData.roleIds);
     revalidatePath("/admin/accounts"); // Or wherever the user management is
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to update user roles:", error);
-    return { success: false, error: error?.message || "Failed to update user roles" };
+    return { success: false, error: error instanceof Error ? error.message : "Failed to update user roles" };
   }
 }
 

@@ -2,11 +2,26 @@
 
 import { db } from "@/db";
 import { profile, employee, student } from "@/db/schemas/user";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { eq, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 
-export async function createPerson(type: "employee" | "student", data: any) {
+export type PersonInput = {
+  fullname: string;
+  gender: 'male' | 'female' | 'others';
+  dob: string;
+  nationalId: string;
+  schemaId: number;
+  dynamicData?: Record<string, unknown>;
+  address?: string;
+  countryCode?: string;
+  ethnic?: string;
+  religious?: string;
+  code: string;
+};
+
+export async function createPerson(type: 'employee' | 'student', data: PersonInput) {
   return await db.transaction(async (tx) => {
     const profileId = randomUUID();
 
@@ -45,7 +60,7 @@ export async function createPerson(type: "employee" | "student", data: any) {
   });
 }
 
-export async function updatePerson(type: "employee" | "student", id: string, data: any) {
+export async function updatePerson(type: "employee" | "student", id: string, data: PersonInput) {
   return await db.transaction(async (tx) => {
     // 1. Get current entity to find profileId
     const entity = type === "employee" 

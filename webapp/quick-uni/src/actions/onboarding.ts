@@ -22,8 +22,27 @@ export type ActionResponse = {
   success: boolean;
   error?: string;
   sessionId?: string;
-  summary?: any;
+  summary?: unknown;
 };
+
+interface OnboardingRow {
+  data: Record<string, unknown>;
+  errors: string[];
+  isValid: boolean;
+  processed?: boolean;
+  error?: string;
+}
+
+interface OnboardingSummary {
+  total: number;
+  valid: number;
+  error: number;
+  results: OnboardingRow[];
+  success?: number;
+  failed?: number;
+  currentProcessed?: number;
+  executionResults?: OnboardingRow[];
+}
 
 async function checkAdmin() {
   const session = await getAuthSession();
@@ -66,7 +85,7 @@ export async function createOnboardingSession(data: {
   } catch (error: unknown) {
     return { 
       success: false, 
-      error: error instanceof Error ? error.message : "Failed to create onboarding session" 
+      error: error instanceof Error ? (error as Error).message : "Failed to create onboarding session" 
     };
   }
 }
@@ -125,7 +144,7 @@ export async function validateOnboardingExcel(sessionId: string, formData: FormD
   } catch (error: unknown) {
     return { 
       success: false, 
-      error: error instanceof Error ? error.message : "Failed to validate onboarding excel" 
+      error: error instanceof Error ? (error as Error).message : "Failed to validate onboarding excel" 
     };
   }
 }
@@ -146,7 +165,7 @@ export async function executeOnboardingSession(sessionId: string): Promise<Actio
        throw new Error(`Session is not ready for execution (current status: ${session.status})`);
     }
 
-    const summary = session.summary as any;
+    const summary = session.summary as unknown as OnboardingSummary;
     if (!summary || !summary.results) throw new Error("No validated data found");
 
     await db.update(onboardingSession)
@@ -199,7 +218,7 @@ export async function executeOnboardingSession(sessionId: string): Promise<Actio
         });
 
         // 2. Link Profile to Entity
-        await linkProfileToEntity(profile.id, session.entityType as any, {
+        await linkProfileToEntity(profile.id, session.entityType as "student" | "employee", {
           code: rowData["Entity Code"]?.toString(),
         });
 
@@ -209,7 +228,7 @@ export async function executeOnboardingSession(sessionId: string): Promise<Actio
           {
             username: rowData["Entity Code"]?.toString(),
             password: password,
-            type: session.entityType as any,
+            type: session.entityType as "student" | "employee",
             status: "active",
           },
           profile.id,
@@ -222,9 +241,10 @@ export async function executeOnboardingSession(sessionId: string): Promise<Actio
 
         successCount++;
         finalResults.push({ ...row, processed: true });
-      } catch (e: any) {
+      } catch (e: unknown) {
         failCount++;
-        finalResults.push({ ...row, processed: false, error: e.message });
+        const errorMessage = e instanceof Error ? e.message : "Processing failed";
+        finalResults.push({ ...row, processed: false, error: errorMessage });
       }
 
       processedCount++;
@@ -272,12 +292,12 @@ export async function executeOnboardingSession(sessionId: string): Promise<Actio
   } catch (error: unknown) {
     return { 
       success: false, 
-      error: error instanceof Error ? error.message : "Failed to execute onboarding session" 
+      error: error instanceof Error ? (error as Error).message : "Failed to execute onboarding session" 
     };
   }
 }
 
-export async function getSessionAction(sessionId: string): Promise<ActionResponse & { data?: any }> {
+export async function getSessionAction(sessionId: string): Promise<ActionResponse & { data?: unknown }> {
   try {
     await checkAdmin();
 
@@ -291,12 +311,12 @@ export async function getSessionAction(sessionId: string): Promise<ActionRespons
   } catch (error: unknown) {
     return { 
       success: false, 
-      error: error instanceof Error ? error.message : "Failed to fetch session" 
+      error: error instanceof Error ? (error as Error).message : "Failed to fetch session" 
     };
   }
 }
 
-export async function getSessionsAction(): Promise<ActionResponse & { data?: any[] }> {
+export async function getSessionsAction(): Promise<ActionResponse & { data?: unknown[] }> {
   try {
     await checkAdmin();
 
@@ -308,7 +328,7 @@ export async function getSessionsAction(): Promise<ActionResponse & { data?: any
   } catch (error: unknown) {
     return { 
       success: false, 
-      error: error instanceof Error ? error.message : "Failed to fetch sessions" 
+      error: error instanceof Error ? (error as Error).message : "Failed to fetch sessions" 
     };
   }
 }
@@ -324,7 +344,7 @@ export async function deleteOnboardingSessionAction(sessionId: string): Promise<
   } catch (error: unknown) {
     return { 
       success: false, 
-      error: error instanceof Error ? error.message : "Failed to delete session" 
+      error: error instanceof Error ? (error as Error).message : "Failed to delete session" 
     };
   }
 }
