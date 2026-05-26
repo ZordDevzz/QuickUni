@@ -1,4 +1,5 @@
 import * as XLSX from "xlsx";
+import { OnboardingRow } from "@/types/onboarding";
 
 /**
  * Generates an Excel template for admin onboarding.
@@ -58,9 +59,9 @@ export async function generateOnboardingTemplate(fields: { label: string, name: 
 export async function parseAndValidateOnboardingExcel(buffer: Buffer, fields: { label: string, name: string, isRequired: boolean }[]) {
   const workbook = XLSX.read(buffer, { type: "buffer" });
   const sheet = workbook.Sheets["Template"] || workbook.Sheets[workbook.SheetNames[0]];
-  const rawData = XLSX.utils.sheet_to_json(sheet);
+  const rawData = XLSX.utils.sheet_to_json(sheet) as Record<string, unknown>[];
   
-  return rawData.map((row: any) => {
+  return rawData.map((row) => {
     const errors: string[] = [];
     
     // Fixed validations
@@ -79,14 +80,14 @@ export async function parseAndValidateOnboardingExcel(buffer: Buffer, fields: { 
       data: row,
       errors,
       isValid: errors.length === 0
-    };
+    } as OnboardingRow;
   });
 }
 
 /**
  * Generates an Excel report of the onboarding execution.
  */
-export async function generateOnboardingReport(results: any[]) {
+export async function generateOnboardingReport(results: OnboardingRow[]) {
   const data = results.map(r => ({
     "Full Name": r.data["Full Name"],
     "Entity Code": r.data["Entity Code"],
@@ -104,16 +105,29 @@ export async function generateOnboardingReport(results: any[]) {
   return buffer as Buffer;
 }
 
+interface RosterStudent {
+  student?: {
+    code?: string;
+    profile?: {
+      fullname?: string;
+      gender?: string;
+    };
+  };
+  createAt?: string;
+}
+
 /**
  * Generates an Excel file for student roster.
  */
-export async function generateRosterExcel(students: any[]) {
-  const data = students.map(s => ({
-    "MSSV": s.student?.code || "",
-    "Full Name": s.student?.profile?.fullname || "",
-    "Gender": s.student?.profile?.gender || "",
-    "Enrollment Date": s.createAt ? new Date(s.createAt).toLocaleDateString() : "",
-  }));
+export async function generateRosterExcel(students: unknown[]) {
+  const data = (students as RosterStudent[]).map(s => {
+    return {
+      "MSSV": s.student?.code || "",
+      "Full Name": s.student?.profile?.fullname || "",
+      "Gender": s.student?.profile?.gender || "",
+      "Enrollment Date": s.createAt ? new Date(s.createAt).toLocaleDateString() : "",
+    };
+  });
 
   const worksheet = XLSX.utils.json_to_sheet(data);
   const workbook = XLSX.utils.book_new();

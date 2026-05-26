@@ -42,9 +42,15 @@ export async function GET(
       return new NextResponse("Session not found", { status: 404 });
     }
 
-    const buffer = await generateOnboardingTemplate(session as any);
+    const fields = session.profileSchema?.profileSchemaFields.map(sf => ({
+      label: sf.profileField?.label || sf.profileField?.name || "Unknown",
+      name: sf.profileField?.name || "unknown",
+      isRequired: sf.isRequired,
+    })) || [];
 
-    return new NextResponse(buffer as any, {
+    const buffer = await generateOnboardingTemplate(fields);
+
+    return new NextResponse(buffer, {
       status: 200,
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

@@ -14,6 +14,7 @@ import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { OnboardingRow, OnboardingSummary } from "@/types/onboarding";
 
 /**
  * Result type for onboarding actions
@@ -24,25 +25,6 @@ export type ActionResponse = {
   sessionId?: string;
   summary?: unknown;
 };
-
-interface OnboardingRow {
-  data: Record<string, unknown>;
-  errors: string[];
-  isValid: boolean;
-  processed?: boolean;
-  error?: string;
-}
-
-interface OnboardingSummary {
-  total: number;
-  valid: number;
-  error: number;
-  results: OnboardingRow[];
-  success?: number;
-  failed?: number;
-  currentProcessed?: number;
-  executionResults?: OnboardingRow[];
-}
 
 async function checkAdmin() {
   const session = await getAuthSession();

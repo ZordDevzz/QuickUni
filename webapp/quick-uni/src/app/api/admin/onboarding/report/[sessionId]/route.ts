@@ -5,6 +5,7 @@ import { generateOnboardingReport } from "@/services/excel";
 import { eq } from "drizzle-orm";
 import { isAdmin } from "@/services/user";
 import { getAuthSession } from "@/services/auth";
+import { OnboardingSummary } from "@/types/onboarding";
 
 export async function GET(
   _request: NextRequest,
@@ -31,14 +32,14 @@ export async function GET(
       return new NextResponse("Session not found", { status: 404 });
     }
 
-    const summary = sessionData.summary as any;
+    const summary = sessionData.summary as unknown as OnboardingSummary;
     if (!summary || !summary.executionResults) {
       return new NextResponse("No execution results found", { status: 400 });
     }
 
     const buffer = await generateOnboardingReport(summary.executionResults);
 
-    return new NextResponse(buffer as any, {
+    return new NextResponse(buffer, {
       status: 200,
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
