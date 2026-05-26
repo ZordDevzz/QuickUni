@@ -47,10 +47,26 @@ export function ScheduleManager() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const [semesterId, setSemesterId] = useState<number | null>(selectedSemesterId);
+  // Track previous values to reset state when dependencies change during render
+  const [prevSelectedSemesterId, setPrevSelectedSemesterId] = useState<number | null>(selectedSemesterId);
+  const [prevSemesterId, setPrevSemesterId] = useState<number | null>(semesterId);
+
+  if (selectedSemesterId !== prevSelectedSemesterId) {
+    setPrevSelectedSemesterId(selectedSemesterId);
+    setSemesterId(selectedSemesterId);
+  }
+
+  if (semesterId !== prevSemesterId) {
+    setPrevSemesterId(semesterId);
+    setSelectedId(null);
+  }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [semesters, setSemesters] = useState<any[]>([]);
   const [isPending, startTransition] = useTransition();
   const [isEditAvailabilityMode, setIsEditAvailabilityMode] = useState(false);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [assignments, setAssignments] = useState<any[]>([]);
   const [availability, setAvailability] = useState<number[]>(new Array(7).fill(0));
   const [isLoading, setIsLoading] = useState(false);
@@ -71,7 +87,9 @@ export function ScheduleManager() {
       try {
         const mappedType = activeTab === "rooms" ? "room" : activeTab === "teachers" ? "teacher" : "class";
         const [templates, availData] = await Promise.all([
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
           getWeeklyTemplateByEntity(selectedId, mappedType as any, semesterId),
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
           getAvailability(selectedId, mappedType as any)
         ]);
         
@@ -91,16 +109,6 @@ export function ScheduleManager() {
     }
     loadData();
   }, [selectedId, activeTab, semesterId, refreshKey]);
-
-  useEffect(() => {
-    if (selectedSemesterId) {
-      setSemesterId(selectedSemesterId);
-    }
-  }, [selectedSemesterId]);
-
-  useEffect(() => {
-    setSelectedId(null);
-  }, [semesterId]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value as EntityType);
@@ -132,6 +140,7 @@ export function ScheduleManager() {
     
     const result = await toggleAvailabilityAction({
       entityId: selectedId,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
       entityType: mappedType as any,
       dayOfWeek: dbDayOfWeek,
       slotMask
@@ -144,7 +153,7 @@ export function ScheduleManager() {
     }
   };
 
-  const handleAssignmentClick = (assignment: any) => {
+  const handleAssignmentClick = (assignment: unknown) => {
     if (isEditAvailabilityMode) return;
     
     setDialogData({

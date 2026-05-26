@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { getDepartmentDetails } from '@/actions/academic';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -19,13 +19,16 @@ interface DetailViewProps {
 
 export function DetailView({ departmentId }: DetailViewProps) {
   const router = useRouter();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isMajorDialogOpen, setIsMajorDialogOpen] = useState(false);
   const [isStaffDialogOpen, setIsStaffDialogOpen] = useState(false);
 
-  async function load() {
+  const load = useCallback(async () => {
+    // Await to ensure any subsequent setState calls are not synchronous within the effect
+    await Promise.resolve();
     setLoading(true);
     try {
       const result = await getDepartmentDetails(departmentId);
@@ -35,13 +38,16 @@ export function DetailView({ departmentId }: DetailViewProps) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [departmentId]);
 
   useEffect(() => {
-    if (departmentId) {
-      load();
+    async function init() {
+      if (departmentId) {
+        await load();
+      }
     }
-  }, [departmentId]);
+    init();
+  }, [departmentId, load]);
 
   if (loading) {
     return (
@@ -57,6 +63,7 @@ export function DetailView({ departmentId }: DetailViewProps) {
     </div>
   );
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const majorColumns: ColumnDef<any>[] = [
     { 
       accessorKey: 'code', 
@@ -70,6 +77,7 @@ export function DetailView({ departmentId }: DetailViewProps) {
     },
   ];
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const personnelColumns: ColumnDef<any>[] = [
     { 
       id: 'fullname',

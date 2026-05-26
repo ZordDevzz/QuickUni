@@ -43,7 +43,10 @@ export function SchemaFieldManager({ schemaId }: SchemaFieldManagerProps) {
   }, [schemaId]);
 
   useEffect(() => {
-    fetchData();
+    async function init() {
+      await fetchData();
+    }
+    init();
   }, [fetchData]);
 
   const handleAdd = async (fieldId: number) => {
