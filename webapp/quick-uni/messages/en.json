@@ -244,8 +244,8 @@
     "DeleteSuccess": "Role deleted successfully",
     "UpdateSuccess": "Role updated successfully",
     "CreateSuccess": "Role created successfully",
-    "UpdateAuthoritiesSuccess": "Authorities updated successfully"
-  "Status": "Status"
+    "UpdateAuthoritiesSuccess": "Authorities updated successfully",
+    "Status": "Status"
   },
   "Teacher": {
     "Schedule": {
@@ -262,6 +262,7 @@
       "Status": "Status"
     }
   },
+  "Table": {
     "NoResults": "No results.",
     "FilterPlaceholder": "Filter...",
     "Columns": "Columns",

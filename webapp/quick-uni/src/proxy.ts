@@ -16,10 +16,16 @@ export async function proxy(req: NextRequest) {
   });
   const isAuth = !!token;
   
-  // Extract pathname and normalize it (remove trailing slash except for root)
   let pathname = req.nextUrl.pathname;
   if (pathname.length > 1 && pathname.endsWith('/')) {
     pathname = pathname.slice(0, -1);
+  }
+
+  const roles = (token?.roles as number[]) || [];
+  const isAcademic = roles.includes(4);
+
+  if (pathname.startsWith('/academic') && !isAcademic) {
+    return NextResponse.redirect(new URL('/unauthorized', req.url));
   }
   
   // Helper to check if pathname matches ignoring locale

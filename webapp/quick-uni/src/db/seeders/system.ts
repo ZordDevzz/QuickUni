@@ -11,6 +11,7 @@ export const seedSystem = async () => {
     { id: 1, name: "Admin", isDefaultRole: false },
     { id: 2, name: "Teacher", isDefaultRole: false },
     { id: 3, name: "Student", isDefaultRole: true },
+    { id: 4, name: "Academic Office", isDefaultRole: false },
   ];
   await db.insert(systemRole).values(roles).onConflictDoNothing();
 
@@ -55,5 +56,5 @@ export const seedSystem = async () => {
   );
 
   console.log("✅ System data seeded.");
-  return { schemaId: schema.id, roles: { admin: 1, teacher: 2, student: 3 } };
+  return { schemaId: schema.id, roles: { admin: 1, teacher: 2, student: 3, academic_office: 4 } };
 };
