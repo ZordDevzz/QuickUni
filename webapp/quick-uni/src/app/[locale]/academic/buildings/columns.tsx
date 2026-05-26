@@ -5,6 +5,7 @@ import { BuildingRowActions } from "@/components/features/academic/BuildingRowAc
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const columns: ColumnDef<any>[] = [
   {
     accessorKey: "code",

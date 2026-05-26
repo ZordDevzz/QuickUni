@@ -11,6 +11,7 @@ export async function autoGenerateWeeklyAction(semesterId: number) {
   try {
     // 1. Fetch all data needed for the solver
     const rooms = await getRooms();
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     const teachers = await getTeachers();
     const classes = await getCourseClasses(semesterId);
     

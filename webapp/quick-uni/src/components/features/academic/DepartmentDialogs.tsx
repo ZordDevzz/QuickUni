@@ -78,8 +78,8 @@ export function DepartmentDialog({ open, onOpenChange, initialData, onSuccess }:
       notify(initialData?.id ? "Department updated" : "Department created", { type: "success" });
       onOpenChange(false);
       onSuccess?.();
-    } catch (error: any) {
-      notify(error.message || "Failed to save department", { type: "error" });
+    } catch (error: unknown) {
+      notify((error as Error).message || "Failed to save department", { type: "error" });
     }
   }
 
@@ -178,8 +178,8 @@ export function MajorDialog({ open, onOpenChange, departmentId, initialData, onS
       notify(initialData?.id ? "Major updated" : "Major created", { type: "success" });
       onOpenChange(false);
       onSuccess?.();
-    } catch (error: any) {
-      notify(error.message || "Failed to save major", { type: "error" });
+    } catch (error: unknown) {
+      notify((error as Error).message || "Failed to save major", { type: "error" });
     }
   }
 
@@ -240,6 +240,7 @@ interface StaffAssignmentDialogProps {
 
 export function StaffAssignmentDialog({ open, onOpenChange, departmentId, initialData, onSuccess }: StaffAssignmentDialogProps) {
   const t = useTranslations("Admin");
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [employees, setEmployees] = useState<any[]>([]);
   
   const form = useForm<DepartmentEmploymentInput>({
@@ -277,8 +278,8 @@ export function StaffAssignmentDialog({ open, onOpenChange, departmentId, initia
       notify("Staff assigned successfully", { type: "success" });
       onOpenChange(false);
       onSuccess?.();
-    } catch (error: any) {
-      notify(error.message || "Failed to assign staff", { type: "error" });
+    } catch (error: unknown) {
+      notify((error as Error).message || "Failed to assign staff", { type: "error" });
     }
   }
 

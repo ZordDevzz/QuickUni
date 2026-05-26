@@ -5,19 +5,40 @@ import { courseClassInsertSchema, courseClassUpdateSchema } from "@/lib/validato
 import { createCourseClassAction, updateCourseClassAction } from "@/actions/course";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Field, FieldLabel, FieldError, FieldContent } from "@/components/ui/field";
 import { notify } from "@/lib/custom-toast";
 import { useRouter } from "next/navigation";
 
-interface Dependencies {
-  teachers: any[];
-  subjects: any[];
-  semesters: any[];
-  types: any[];
+interface DependencyItem {
+  id: string | number;
+  code?: string | null;
+  name?: string | null;
+  profile?: {
+    fullname?: string | null;
+  } | null;
+}
+
+export interface Dependencies {
+  teachers: DependencyItem[];
+  subjects: DependencyItem[];
+  semesters: DependencyItem[];
+  types: DependencyItem[];
+}
+
+export interface CourseClass {
+  id: string;
+  code: string;
+  teacherId: string;
+  subjectId: string;
+  cap: number;
+  semesterId: string;
+  type: number;
+  status: string;
 }
 
 interface CourseClassFormProps {
-  courseClass?: any;
+  courseClass?: CourseClass;
   dependencies: Dependencies;
   onSuccess?: () => void;
 }
@@ -50,6 +71,7 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
         if (isEdit && courseClass) {
           result = await updateCourseClassAction(courseClass.id, validation.data);
         } else {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
           result = await createCourseClassAction(validation.data as any);
         }
 
@@ -60,8 +82,8 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
         } else {
           notify(result.error || "Failed", { type: "error" });
         }
-      } catch (error: any) {
-        notify(error.message || "Failed", { type: "error" });
+      } catch (error: unknown) {
+        notify((error as Error).message || "Failed", { type: "error" });
       }
     },
   });

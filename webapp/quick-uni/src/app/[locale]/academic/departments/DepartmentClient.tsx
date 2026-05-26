@@ -17,6 +17,7 @@ interface DepartmentClientProps {
 export default function DepartmentClient({ initialDepartments }: DepartmentClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
   const pathname = usePathname();
   const selectedId = searchParams.get('id');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);

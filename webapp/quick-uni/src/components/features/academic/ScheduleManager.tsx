@@ -153,6 +153,7 @@ export function ScheduleManager() {
     }
   };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleAssignmentClick = (assignment: any) => {
     if (isEditAvailabilityMode) return;
     

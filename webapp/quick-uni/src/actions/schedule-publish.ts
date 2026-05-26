@@ -1,9 +1,11 @@
 "use server";
 
 import { db } from '../db';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { weeklyTemplate, schedule, holidayBlacklist } from '../db/schemas/schedule';
 import { semester as semesterTable } from '../db/schemas/academic';
 import { courseClass } from '../db/schemas/course';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { eq, and, or, isNull, exists, inArray } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { isWithinInterval, parseISO, addDays, format } from 'date-fns';

@@ -55,8 +55,9 @@ export function SemesterClient({ data }: { data: Semester[] }) {
       }
       setIsOpen(false);
       form.reset();
-    } catch (e: any) {
-      toast.error(e.message || "An error occurred");
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "An error occurred";
+      toast.error(errorMessage);
     }
   };
 

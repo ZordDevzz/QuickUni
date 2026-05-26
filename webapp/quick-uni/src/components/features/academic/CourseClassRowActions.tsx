@@ -25,11 +25,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CourseClassForm } from "./CourseClassForm";
+import { CourseClassForm, CourseClass, Dependencies } from "./CourseClassForm";
 import { deleteCourseClassAction } from "@/actions/course";
 import { notify } from "@/lib/custom-toast";
 
-export function CourseClassRowActions({ courseClass, dependencies }: { courseClass: any, dependencies: any }) {
+export function CourseClassRowActions({ courseClass, dependencies }: { courseClass: CourseClass, dependencies: Dependencies }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();

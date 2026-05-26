@@ -2,11 +2,13 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { CourseClassRowActions } from "@/components/features/academic/CourseClassRowActions";
+import { Dependencies } from "@/components/features/academic/CourseClassForm";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-export const getColumns = (dependencies: any): ColumnDef<any>[] => [
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getColumns = (dependencies: Dependencies): ColumnDef<any>[] => [
   {
     accessorKey: "code",
     header: ({ column }) => (

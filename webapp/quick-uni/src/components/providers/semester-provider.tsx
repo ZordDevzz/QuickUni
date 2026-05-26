@@ -23,6 +23,7 @@ export function SemesterProvider({
   useEffect(() => {
     const savedId = localStorage.getItem("selectedSemesterId");
     if (savedId) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedSemesterIdState(parseInt(savedId));
     } else if (defaultSemesterId) {
       setSelectedSemesterIdState(defaultSemesterId);

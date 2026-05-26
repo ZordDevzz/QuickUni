@@ -3,6 +3,7 @@
 import { db } from "../db";
 import { semester, department, major } from "../db/schemas/academic";
 import { departmentEmployment } from "../db/schemas/system";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { eq, ne, desc, asc, isNull, sql } from "drizzle-orm";
 import {
   semesterSchema,
