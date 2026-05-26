@@ -39,7 +39,7 @@ vi.mock("@/db", () => {
           mockInsertValues(table, vals);
           return {
             returning: vi.fn(() => mockInsertReturning()),
-            then: (resolve: any) => resolve([vals])
+            then: (resolve: unknown) => resolve([vals])
           };
         })
       })),
@@ -51,19 +51,21 @@ vi.mock("@/db", () => {
               mockUpdateWhere(table, cond);
               return {
                 returning: vi.fn(() => mockUpdateReturning()),
-                then: (resolve: any) => resolve([])
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                then: (resolve: (data: any[]) => void) => resolve([])
               };
             })
           };
         })
       })),
-      select: vi.fn((cols) => ({
-        from: vi.fn((table) => ({
-          innerJoin: vi.fn((joinTable, cond) => ({
-            where: vi.fn((whereCond) => ({
-              limit: vi.fn((limitVal) => {
+      select: vi.fn(() => ({
+        from: vi.fn(() => ({
+          innerJoin: vi.fn(() => ({
+            where: vi.fn(() => ({
+              limit: vi.fn(() => {
                 return {
-                  then: (resolve: any) => resolve(mockSelectLimit())
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  then: (resolve: (data: any[]) => void) => resolve(mockSelectLimit())
                 }
               })
             }))
@@ -86,6 +88,7 @@ describe("Request Side Effects", () => {
 
   it("submits a request (student_absence) and sets targetId to teacherId", async () => {
     const { getServerSession } = await import("next-auth");
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     (getServerSession as any).mockResolvedValue({ user: { id: "user1" } });
 
     mockFindFirst.mockResolvedValueOnce({ id: "c1", teacherId: "teacher1" });
@@ -109,6 +112,7 @@ describe("Request Side Effects", () => {
 
   it("processes a request (class_cancellation) and applies side effects", async () => {
     const { getServerSession } = await import("next-auth");
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     (getServerSession as any).mockResolvedValue({ user: { id: "admin1" } });
 
     mockUpdateReturning.mockReturnValueOnce([{ 

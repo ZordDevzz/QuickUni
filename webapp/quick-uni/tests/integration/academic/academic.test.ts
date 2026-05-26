@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { 
   getSemesters, 
   createSemester, 
-  updateSemester, 
   toggleCurrentSemester, 
   deleteSemester 
 } from "@/actions/academic";
@@ -78,7 +77,7 @@ describe('academic semester actions', () => {
     };
 
     // Access the mock transaction object
-    let capturedTx: any;
+    let capturedTx: unknown;
     vi.mocked(db.transaction).mockImplementationOnce(async (cb) => {
       capturedTx = {
         update: vi.fn(() => ({
@@ -105,7 +104,7 @@ describe('academic semester actions', () => {
 
   it('toggleCurrentSemester should set isCurrent to true and unset others', async () => {
     const id = 1;
-    let capturedTx: any;
+    let capturedTx: unknown;
     vi.mocked(db.transaction).mockImplementationOnce(async (cb) => {
       capturedTx = {
         update: vi.fn(() => ({
@@ -132,6 +131,7 @@ describe('academic semester actions', () => {
   });
 
   it('deleteSemester should throw error if deleting current semester', async () => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(db.query.semester.findFirst).mockResolvedValueOnce({ id: 1, isCurrent: true } as any);
 
     await expect(deleteSemester(1)).rejects.toThrow('Cannot delete the current semester');
