@@ -28,8 +28,15 @@ import {
 import { RoomForm } from "./RoomForm";
 import { deleteRoomAction } from "@/actions/facility";
 import { notify } from "@/lib/custom-toast";
+import { room as roomSchema, building as buildingSchema } from "@/db/schemas/schedule";
 
-export function RoomRowActions({ room, buildings }: { room: any, buildings: any[] }) {
+export function RoomRowActions({
+  room,
+  buildings,
+}: {
+  room: typeof roomSchema.$inferSelect;
+  buildings: (typeof buildingSchema.$inferSelect)[];
+}) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();

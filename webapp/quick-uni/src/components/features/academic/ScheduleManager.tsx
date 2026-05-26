@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { autoGenerateWeeklyAction } from "@/actions/schedule-generate";
 import { publishTemplateToSchedule } from "@/actions/schedule-publish";
-import { getSemesters, toggleAvailabilityAction } from "@/actions/scheduling-data";
+import { getSemesters, toggleAvailabilityAction, getWeeklyTemplateByEntity, getAvailability } from "@/actions/scheduling-data";
 import { toast } from "sonner";
 import { Loader2, Play, Send, Calendar, ChevronDown, Lock, Unlock } from "lucide-react";
 import { useSemester } from "@/components/providers/semester-provider";
@@ -153,7 +153,7 @@ export function ScheduleManager() {
     }
   };
 
-  const handleAssignmentClick = (assignment: unknown) => {
+  const handleAssignmentClick = (assignment: any) => {
     if (isEditAvailabilityMode) return;
     
     setDialogData({
