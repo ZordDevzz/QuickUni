@@ -10,6 +10,7 @@ declare module "next-auth" {
       /** The user's unique identifier. */
       id: string
       type?: "student" | "employee" | "tech" | "dev" | null
+      roles?: number[]
     } & DefaultSession["user"]
   }
 
@@ -18,6 +19,7 @@ declare module "next-auth" {
       username?: string | null
       email?: string | null
       type?: "student" | "employee" | "tech" | "dev" | null
+      roles?: number[]
   }
 }
 
@@ -25,5 +27,6 @@ declare module "next-auth/jwt" {
   interface JWT extends NextAuthJWT {
     id: string
     type?: "student" | "employee" | "tech" | "dev" | null
+    roles?: number[]
   }
 }

@@ -2,6 +2,7 @@ import { NextAuthOptions, getServerSession } from "next-auth";
 import { getToken } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { getUserByUsername } from "@/services/user";
+import { getUserRoles } from "@/services/role";
 import { compare } from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
@@ -19,7 +20,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         const user = await getUserByUsername(credentials.username);
-        
+
         if (!user) {
           return null;
         }
@@ -27,11 +28,13 @@ export const authOptions: NextAuthOptions = {
         const isValidPassword = await compare(credentials.password, user.pwdHash);
 
         if (isValidPassword) {
+          const userRoles = await getUserRoles(user.id);
           return {
             id: user.id,
             name: user.username,
             email: user.email,
             type: user.type as "student" | "employee" | "tech" | "dev",
+            roles: userRoles.map((r) => r.systemRole),
           };
         }
 
@@ -50,6 +53,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.type = user.type;
+        token.roles = user.roles;
       }
       return token;
     },
@@ -57,12 +61,12 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id;
         session.user.type = token.type;
+        session.user.roles = token.roles;
       }
       return session;
     },
   },
 };
-
 export const getAuthSession = async (req?: Request) => {
   if (req) {
     const token = await getToken({ 
@@ -77,6 +81,7 @@ export const getAuthSession = async (req?: Request) => {
           name: token.name,
           email: token.email,
           type: token.type,
+          roles: token.roles,
         }
       };
     }
