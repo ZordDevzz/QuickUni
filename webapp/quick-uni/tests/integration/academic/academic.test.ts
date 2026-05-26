@@ -77,7 +77,7 @@ describe('academic semester actions', () => {
     };
 
     // Access the mock transaction object
-    let capturedTx: unknown;
+    let capturedTx: any;
     vi.mocked(db.transaction).mockImplementationOnce(async (cb) => {
       capturedTx = {
         update: vi.fn(() => ({
@@ -104,7 +104,7 @@ describe('academic semester actions', () => {
 
   it('toggleCurrentSemester should set isCurrent to true and unset others', async () => {
     const id = 1;
-    let capturedTx: unknown;
+    let capturedTx: any;
     vi.mocked(db.transaction).mockImplementationOnce(async (cb) => {
       capturedTx = {
         update: vi.fn(() => ({

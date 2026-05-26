@@ -39,7 +39,8 @@ vi.mock("@/db", () => {
           mockInsertValues(table, vals);
           return {
             returning: vi.fn(() => mockInsertReturning()),
-            then: (resolve: unknown) => resolve([vals])
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            then: (resolve: (data: any[]) => void) => resolve([vals])
           };
         })
       })),

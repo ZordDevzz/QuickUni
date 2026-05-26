@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createPerson, getPeople } from '@/actions/people';
 import { db } from '@/db';
 import { revalidatePath } from 'next/cache';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { profile, student, employee } from '@/db/schemas/user';
 
 const mockTx = vi.hoisted(() => ({
@@ -41,9 +42,10 @@ describe('People Workflow Integration', () => {
     const data = {
       code: "STU001",
       fullname: "John Doe",
-      gender: "male",
+      gender: "male" as const,
       dob: "2000-01-01",
       nationalId: "123456789",
+      schemaId: 1,
     };
 
     await createPerson('student', data);

@@ -54,8 +54,28 @@ describe("Teacher Workspace Server Actions", () => {
 
     it("should fetch classes for the teacher", async () => {
       vi.mocked(getServerSession).mockResolvedValue({ user: { id: "user-1" } });
-      vi.mocked(db.query.employee.findFirst).mockResolvedValue({ id: "emp-1" });
-      vi.mocked(db.query.courseClass.findMany).mockResolvedValue([{ id: "class-1", code: "C1" }]);
+      vi.mocked(db.query.employee.findFirst).mockResolvedValue({ 
+        id: "emp-1",
+        code: "EMP001",
+        profileId: "prof-1",
+        createAt: new Date().toISOString(),
+        updateAt: null,
+        deletedAt: null
+      });
+      vi.mocked(db.query.courseClass.findMany).mockResolvedValue([{ 
+        id: "class-1", 
+        code: "C1",
+        teacherId: "emp-1",
+        subjectId: "sub-1",
+        cap: 30,
+        currentSlot: 0,
+        status: "opened",
+        type: 1,
+        semesterId: 1,
+        createAt: new Date().toISOString(),
+        updateAt: null,
+        deletedAt: null
+      }]);
       
       const result = await getTeacherClasses(1);
       expect(result).toHaveLength(1);
