@@ -86,8 +86,8 @@ describe("Teacher Workspace Server Actions", () => {
   describe("getClassStudents", () => {
     it("should fetch students for a given class", async () => {
       vi.mocked(db.query.enrollment.findMany).mockResolvedValue([
-        { id: "e1", student: { id: "s1", profile: { fullname: "Student 1" } } }
-      ]);
+        { id: 1, student: { id: "s1", profile: { fullname: "Student 1" } } }
+      ] as any);
       
       const result = await getClassStudents("class-1");
       expect(result).toHaveLength(1);
