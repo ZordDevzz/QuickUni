@@ -4,6 +4,7 @@ import { seedOrg } from "./seeders/org";
 import { seedPeople } from "./seeders/people";
 import { seedAcademic } from "./seeders/academic";
 import { seedScheduling } from "./seeders/scheduling";
+import { validateSeed } from "./seeders/validate";
 import { execSync } from "child_process";
 import { db } from "./index";
 import { employee } from "./schema";
@@ -65,6 +66,9 @@ const main = async () => {
     console.log("📅 Seeding scheduling...");
     const teachers = await db.select().from(employee);
     await seedScheduling(semesterId, subjects, teachers, rooms);
+
+    // 6. Validation
+    await validateSeed();
 
     console.log("✨ SEEDING COMPLETED SUCCESSFULLY.");
     process.exit(0);
