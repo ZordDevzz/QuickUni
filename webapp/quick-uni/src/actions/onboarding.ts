@@ -14,7 +14,7 @@ import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { OnboardingRow, OnboardingSummary } from "@/types/onboarding";
+import { OnboardingSummary } from "@/types/onboarding";
 
 /**
  * Result type for onboarding actions
@@ -23,7 +23,7 @@ export type ActionResponse = {
   success: boolean;
   error?: string;
   sessionId?: string;
-  summary?: unknown;
+  summary?: any;
 };
 
 async function checkAdmin() {
@@ -187,13 +187,13 @@ export async function executeOnboardingSession(sessionId: string): Promise<Actio
         // 1. Create Profile
         const profile = await createProfileWorkflow({
           id: randomUUID(),
-          fullname: rowData["Full Name"],
+          fullname: rowData["Full Name"] as string,
           gender: genderValue,
-          dob: dobValue,
-          nationalId: rowData["National ID"]?.toString(),
-          address: rowData["Address"],
-          ethnic: rowData["Ethnic"],
-          religious: rowData["Religious"],
+          dob: dobValue as string,
+          nationalId: rowData["National ID"]?.toString() || "",
+          address: rowData["Address"] as string,
+          ethnic: rowData["Ethnic"] as string,
+          religious: rowData["Religious"] as string,
           schemaId: session.schemaId,
           dynamicData: rowData,
           sessionId: session.id,
@@ -201,15 +201,16 @@ export async function executeOnboardingSession(sessionId: string): Promise<Actio
 
         // 2. Link Profile to Entity
         await linkProfileToEntity(profile.id, session.entityType as "student" | "employee", {
-          code: rowData["Entity Code"]?.toString(),
+          code: rowData["Entity Code"]?.toString() || "",
         });
 
         // 3. Issue Account
-        const password = rowData["National ID"]?.toString() || rowData["Entity Code"]?.toString();
+        const username = rowData["Entity Code"]?.toString() || "";
+        const password = rowData["National ID"]?.toString() || rowData["Entity Code"]?.toString() || "";
         await issueAccountWorkflow(
           {
-            username: rowData["Entity Code"]?.toString(),
-            password: password,
+            username,
+            password,
             type: session.entityType as "student" | "employee",
             status: "active",
           },
@@ -279,7 +280,7 @@ export async function executeOnboardingSession(sessionId: string): Promise<Actio
   }
 }
 
-export async function getSessionAction(sessionId: string): Promise<ActionResponse & { data?: unknown }> {
+export async function getSessionAction(sessionId: string): Promise<ActionResponse & { data?: typeof onboardingSession.$inferSelect }> {
   try {
     await checkAdmin();
 

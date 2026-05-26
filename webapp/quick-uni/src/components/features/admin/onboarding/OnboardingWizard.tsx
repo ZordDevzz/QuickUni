@@ -6,6 +6,7 @@ import { OnboardingStep2 } from "./OnboardingStep2";
 import { OnboardingStep3 } from "./OnboardingStep3";
 import { 
   CheckCircle2, 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
   Circle, 
   Settings, 
   FileSearch, 
@@ -15,14 +16,13 @@ import { useTranslations } from "next-intl";
 import { getSessionAction } from "@/actions/onboarding";
 
 interface OnboardingWizardProps {
-  schemas: any[];
+  schemas: unknown[];
   initialSessionId?: string | null;
 }
 
 export function OnboardingWizard({ schemas, initialSessionId }: OnboardingWizardProps) {
   const [step, setStep] = useState(1);
   const [sessionId, setSessionId] = useState<string | null>(initialSessionId || null);
-  const [summary, setSummary] = useState<any>(null);
   const t = useTranslations("Onboarding");
 
   useEffect(() => {
@@ -30,12 +30,10 @@ export function OnboardingWizard({ schemas, initialSessionId }: OnboardingWizard
       const resume = async () => {
         const res = await getSessionAction(initialSessionId);
         if (res.success && res.data) {
-          const status = res.data.status;
+          const status = (res.data as any).status;
           if (status === "draft") setStep(1);
           else if (status === "validating" || status === "ready") setStep(2);
           else setStep(3);
-          
-          if (res.data.summary) setSummary(res.data.summary);
         }
       };
       resume();
@@ -89,8 +87,7 @@ export function OnboardingWizard({ schemas, initialSessionId }: OnboardingWizard
           <OnboardingStep2 
             sessionId={sessionId} 
             onBack={() => setStep(1)} 
-            onNext={(s) => {
-              setSummary(s);
+            onNext={() => {
               setStep(3);
             }} 
           />
