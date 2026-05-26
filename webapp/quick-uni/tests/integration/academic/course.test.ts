@@ -71,7 +71,8 @@ describe('course actions', () => {
     };
     const response = await createCourseClassAction(data);
     expect(db.insert).toHaveBeenCalled();
-    expect(revalidatePath).toHaveBeenCalledWith('/admin/courses/classes');
+    expect(revalidatePath).toHaveBeenCalledWith('/[locale]/academic/courses/classes', 'page');
+    expect(revalidatePath).toHaveBeenCalledWith('/academic/courses/classes');
     expect(response.success).toBe(true);
   });
 
@@ -80,7 +81,8 @@ describe('course actions', () => {
     const data = { cap: 35 };
     const response = await updateCourseClassAction(id, data);
     expect(db.update).toHaveBeenCalled();
-    expect(revalidatePath).toHaveBeenCalledWith('/admin/courses/classes');
+    expect(revalidatePath).toHaveBeenCalledWith('/[locale]/academic/courses/classes', 'page');
+    expect(revalidatePath).toHaveBeenCalledWith('/academic/courses/classes');
     expect(response.success).toBe(true);
   });
 
@@ -88,7 +90,8 @@ describe('course actions', () => {
     const id = '00000000-0000-0000-0000-000000000003';
     const response = await deleteCourseClassAction(id);
     expect(db.update).toHaveBeenCalled();
-    expect(revalidatePath).toHaveBeenCalledWith('/admin/courses/classes');
+    expect(revalidatePath).toHaveBeenCalledWith('/[locale]/academic/courses/classes', 'page');
+    expect(revalidatePath).toHaveBeenCalledWith('/academic/courses/classes');
     expect(response.success).toBe(true);
   });
 });

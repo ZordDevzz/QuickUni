@@ -11,26 +11,37 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 interface NavItem {
   key: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   category?: string;
+  items?: Omit<NavItem, "icon">[];
 }
 
 const navItems: NavItem[] = [
   { key: "Dashboard", href: "/academic", icon: LayoutDashboard },
   { key: "Semesters", href: "/academic/semesters", icon: Calendar, category: "Academic" },
-  { key: "Facilities", href: "/academic/facilities", icon: Building },
+  { 
+    key: "Facilities", 
+    href: "/academic/buildings", 
+    icon: Building,
+    items: [
+      { key: "Buildings", href: "/academic/buildings" },
+      { key: "Rooms", href: "/academic/rooms" }
+    ]
+  },
   { key: "Departments", href: "/academic/departments", icon: Building },
-  { key: "Courses", href: "/academic/courses", icon: BookOpen },
+  { key: "Courses", href: "/academic/courses/classes", icon: BookOpen },
   { key: "Schedule", href: "/academic/schedule", icon: Clock },
   { key: "Teachers", href: "/academic/people/teachers", icon: Users, category: "People" },
   { key: "Students", href: "/academic/people/students", icon: Users },
@@ -51,6 +62,13 @@ export function AcademicSidebar({
 }: AcademicSidebarProps) {
   const pathname = usePathname();
   const t = useTranslations("Navigation");
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Facilities"]);
+
+  const toggleExpand = (key: string) => {
+    setExpandedItems(prev => 
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+    );
+  };
 
   return (
     <>
@@ -100,7 +118,10 @@ export function AcademicSidebar({
         <nav className="flex-1 space-y-1 p-2 overflow-y-auto overflow-x-hidden scrollbar-none">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname.endsWith(item.href) || (item.href !== "/academic" && pathname.includes(item.href));
+            const hasSubItems = item.items && item.items.length > 0;
+            const isExpanded = expandedItems.includes(item.key);
+            const isChildActive = item.items?.some(subItem => pathname.endsWith(subItem.href) || pathname.includes(subItem.href));
+            const isActive = pathname.endsWith(item.href) || (item.href !== "/academic" && pathname.includes(item.href)) || isChildActive;
             const label = t(item.key);
             
             return (
@@ -110,20 +131,59 @@ export function AcademicSidebar({
                     {t(item.category)}
                   </div>
                 )}
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                    isActive 
-                      ? "bg-primary text-primary-foreground shadow-sm" 
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                    isCollapsed && "justify-center px-2"
-                  )}
-                  title={isCollapsed ? label : undefined}
-                >
-                  <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-primary-foreground" : "text-muted-foreground")} />
-                  {!isCollapsed && <span className="truncate">{label}</span>}
-                </Link>
+                {hasSubItems && !isCollapsed ? (
+                  <>
+                    <button
+                      onClick={() => toggleExpand(item.key)}
+                      className={cn(
+                        "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                        isActive && "text-foreground font-semibold"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+                        <span className="truncate">{label}</span>
+                      </div>
+                      <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
+                    </button>
+                    {isExpanded && (
+                      <div className="mt-1 ml-4 space-y-1 border-l pl-4">
+                        {item.items!.map((subItem) => {
+                          const isSubActive = pathname.endsWith(subItem.href) || pathname.includes(subItem.href);
+                          return (
+                            <Link
+                              key={subItem.href}
+                              href={subItem.href}
+                              className={cn(
+                                "block rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                isSubActive 
+                                  ? "text-primary font-semibold" 
+                                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                              )}
+                            >
+                              {t(subItem.key)}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                      isActive 
+                        ? "bg-primary text-primary-foreground shadow-sm font-semibold" 
+                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                      isCollapsed && "justify-center px-2"
+                    )}
+                    title={isCollapsed ? label : undefined}
+                  >
+                    <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-primary-foreground" : "text-muted-foreground")} />
+                    {!isCollapsed && <span className="truncate">{label}</span>}
+                  </Link>
+                )}
               </div>
             );
           })}

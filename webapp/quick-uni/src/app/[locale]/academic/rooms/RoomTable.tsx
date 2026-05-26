@@ -17,6 +17,7 @@ interface Room {
   buildingId: number;
   capacity: number | null;
   type: string | null;
+  isAvailable: boolean;
   building?: Building | null;
 }
 

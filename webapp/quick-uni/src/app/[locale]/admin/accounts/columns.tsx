@@ -9,7 +9,7 @@ import { Account } from "@/types/profile"
 import { FormattedDate } from "@/components/shared/FormattedDate"
 import { TranslationFunction } from "@/types/i18n"
 
-export const getColumns = (t: TranslationFunction): ColumnDef<Account>[] => [
+export const getColumns = (t: TranslationFunction, restrictType?: "student" | "personnel"): ColumnDef<Account>[] => [
   {
     accessorKey: "username",
     header: ({ column }) => {
@@ -66,6 +66,6 @@ export const getColumns = (t: TranslationFunction): ColumnDef<Account>[] => [
   {
     id: "actions",
     header: () => <div className="text-right">{t("Actions")}</div>,
-    cell: ({ row }) => <div className="flex justify-end"><AccountRowActions account={row.original} /></div>,
+    cell: ({ row }) => <div className="flex justify-end"><AccountRowActions account={row.original} restrictType={restrictType} /></div>,
   },
 ]

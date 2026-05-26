@@ -32,7 +32,8 @@ export async function createBuildingAction(data: BuildingInsertInput): Promise<A
   try {
     const validatedData = buildingInsertSchema.parse(data);
     await db.insert(building).values(validatedData);
-    revalidatePath("/admin/academic/buildings");
+    revalidatePath("/[locale]/academic/buildings", "page");
+    revalidatePath("/academic/buildings");
     return { success: true };
   } catch (error: unknown) {
     console.error("Failed to create building:", error);
@@ -47,7 +48,8 @@ export async function updateBuildingAction(id: number, data: BuildingUpdateInput
   try {
     const validatedData = buildingUpdateSchema.parse(data);
     await db.update(building).set(validatedData).where(eq(building.id, id));
-    revalidatePath("/admin/academic/buildings");
+    revalidatePath("/[locale]/academic/buildings", "page");
+    revalidatePath("/academic/buildings");
     return { success: true };
   } catch (error: unknown) {
     console.error("Failed to update building:", error);
@@ -61,7 +63,8 @@ export async function updateBuildingAction(id: number, data: BuildingUpdateInput
 export async function deleteBuildingAction(id: number): Promise<ActionResponse> {
   try {
     await db.delete(building).where(eq(building.id, id));
-    revalidatePath("/admin/academic/buildings");
+    revalidatePath("/[locale]/academic/buildings", "page");
+    revalidatePath("/academic/buildings");
     return { success: true };
   } catch (error: unknown) {
     console.error("Failed to delete building:", error);
@@ -87,7 +90,8 @@ export async function createRoomAction(data: RoomInsertInput): Promise<ActionRes
   try {
     const validatedData = roomInsertSchema.parse(data);
     await db.insert(room).values(validatedData);
-    revalidatePath("/admin/academic/rooms");
+    revalidatePath("/[locale]/academic/rooms", "page");
+    revalidatePath("/academic/rooms");
     return { success: true };
   } catch (error: unknown) {
     console.error("Failed to create room:", error);
@@ -102,7 +106,8 @@ export async function updateRoomAction(id: number, data: RoomUpdateInput): Promi
   try {
     const validatedData = roomUpdateSchema.parse(data);
     await db.update(room).set(validatedData).where(eq(room.id, id));
-    revalidatePath("/admin/academic/rooms");
+    revalidatePath("/[locale]/academic/rooms", "page");
+    revalidatePath("/academic/rooms");
     return { success: true };
   } catch (error: unknown) {
     console.error("Failed to update room:", error);
@@ -116,7 +121,8 @@ export async function updateRoomAction(id: number, data: RoomUpdateInput): Promi
 export async function deleteRoomAction(id: number): Promise<ActionResponse> {
   try {
     await db.delete(room).where(eq(room.id, id));
-    revalidatePath("/admin/academic/rooms");
+    revalidatePath("/[locale]/academic/rooms", "page");
+    revalidatePath("/academic/rooms");
     return { success: true };
   } catch (error: unknown) {
     console.error("Failed to delete room:", error);

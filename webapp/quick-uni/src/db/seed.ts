@@ -7,7 +7,6 @@ import { seedScheduling } from "./seeders/scheduling";
 import { validateSeed } from "./seeders/validate";
 import { execSync } from "child_process";
 import { db } from "./index";
-import { employee } from "./schema";
 import { sql } from "drizzle-orm";
 
 const runMigration = () => {
@@ -52,11 +51,11 @@ const main = async () => {
 
     // 2. Org Entities
     console.log("🏢 Seeding organization...");
-    const { rooms } = await seedOrg();
+    const { departments, majors, rooms } = await seedOrg();
 
     // 3. People (Users)
     console.log("👥 Seeding people...");
-    await seedPeople(schemaId, roles);
+    const { teachersList, studentList } = await seedPeople(schemaId, roles, departments, majors);
 
     // 4. Academic Data
     console.log("📚 Seeding academic entities...");
@@ -64,8 +63,7 @@ const main = async () => {
 
     // 5. Scheduling
     console.log("📅 Seeding scheduling...");
-    const teachers = await db.select().from(employee);
-    await seedScheduling(semesterId, subjects, teachers, rooms);
+    await seedScheduling(semesterId, subjects, teachersList, rooms, studentList);
 
     // 6. Validation
     await validateSeed();

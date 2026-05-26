@@ -1,6 +1,6 @@
 "use server";
 import { db } from "../db";
-import { weeklyTemplate, availability, holidayBlacklist } from "../db/schemas/schedule";
+import { weeklyTemplate, availability, holidayBlacklist, scheduleType } from "../db/schemas/schedule";
 import { courseClass, enrollment } from "../db/schemas/course";
 import { profile, employee, student } from "../db/schemas/user";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -32,6 +32,17 @@ export async function getRooms() {
   } catch (error) {
     console.error("Error in getRooms:", error);
     throw new Error("Failed to fetch rooms");
+  }
+}
+
+export async function getScheduleTypes() {
+  try {
+    return await db.query.scheduleType.findMany({
+      orderBy: (t, { asc }) => [asc(t.id)]
+    });
+  } catch (error) {
+    console.error("Error in getScheduleTypes:", error);
+    throw new Error("Failed to fetch schedule types");
   }
 }
 
@@ -94,7 +105,9 @@ export async function upsertWeeklyTemplate(data: unknown) {
   try {
     const validated = weeklyTemplateValidator.parse(data);
     const mask = createMask(validated.startPeriod, validated.endPeriod);
-    const finalData = { ...validated, occupyMask: mask };
+    // scheduleType maps to the scheduleTypeId column
+    const { scheduleType: schedTypeId, ...rest } = validated;
+    const finalData = { ...rest, scheduleTypeId: schedTypeId, occupyMask: mask };
 
     if (validated.id) {
       await db.update(weeklyTemplate)

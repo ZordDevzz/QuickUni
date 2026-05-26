@@ -29,8 +29,8 @@ describe('Scheduler Service', () => {
   it('should not allow two different teachers in the same room at the same time', () => {
     const request: ScheduleRequest = {
       classes: [
-        { id: 'Class_1', teacherId: 'Teacher_1', periods: 10 },
-        { id: 'Class_2', teacherId: 'Teacher_2', periods: 10 },
+        { id: 'Class_1', teacherId: 'Teacher_1', periods: 5 },
+        { id: 'Class_2', teacherId: 'Teacher_2', periods: 5 },
       ],
       rooms: [{ id: 101 }], // Only one room
       availability: new Map<string, number[]>(),
@@ -56,7 +56,7 @@ describe('Scheduler Service', () => {
 
     const request: ScheduleRequest = {
       classes: [
-        { id: 'Class_1', teacherId: 'Teacher_1', periods: 1 },
+        { id: 'Class_1', teacherId: 'Teacher_1', periods: 1, allowWeekend: true },
       ],
       rooms: [{ id: 101 }],
       availability: new Map<string, number[]>([
@@ -78,7 +78,7 @@ describe('Scheduler Service', () => {
 
     const request: ScheduleRequest = {
       classes: [
-        { id: 'Class_1', teacherId: 'Teacher_1', periods: 1 },
+        { id: 'Class_1', teacherId: 'Teacher_1', periods: 1, allowEvening: true, allowWeekend: true },
       ],
       rooms: [{ id: 101 }],
       availability: new Map<string, number[]>([
@@ -112,5 +112,74 @@ describe('Scheduler Service', () => {
 
     const result = solveWeekly(request);
     expect(result).toBeNull();
+  });
+
+  it('should block weekend scheduling by default', () => {
+    // Weekdays are entirely blocked, weekends are free.
+    // Class has allowWeekend = false or undefined.
+    // It should NOT schedule since weekdays are full and weekend is blocked.
+    const globalAvailability = new Array(7).fill(0);
+    for (let d = 1; d <= 5; d++) {
+      globalAvailability[d] = 0x7FFF; // Block Mon-Fri entirely
+    }
+    // Days 6 (Sat) and 0 (Sun) are completely free (value 0).
+
+    const request: ScheduleRequest = {
+      classes: [
+        { id: 'Class_1', teacherId: 'Teacher_1', periods: 2 }, // allowWeekend is false by default
+      ],
+      rooms: [{ id: 101 }],
+      availability: new Map<string, number[]>([
+        ['global', globalAvailability]
+      ]),
+    };
+
+    const result = solveWeekly(request);
+    expect(result).toBeNull(); // Cannot schedule because weekend is blocked by default
+  });
+
+  it('should allow weekend scheduling if allowWeekend is true', () => {
+    // Weekdays are entirely blocked, weekends are free.
+    // Class has allowWeekend = true.
+    // It should schedule successfully on the weekend.
+    const globalAvailability = new Array(7).fill(0);
+    for (let d = 1; d <= 5; d++) {
+      globalAvailability[d] = 0x7FFF; // Block Mon-Fri entirely
+    }
+
+    const request: ScheduleRequest = {
+      classes: [
+        { id: 'Class_1', teacherId: 'Teacher_1', periods: 2, allowWeekend: true },
+      ],
+      rooms: [{ id: 101 }],
+      availability: new Map<string, number[]>([
+        ['global', globalAvailability]
+      ]),
+    };
+
+    const result = solveWeekly(request);
+    expect(result).not.toBeNull();
+    expect(result!.length).toBe(1);
+    const day = result![0].dayOfWeek;
+    expect(day === 6 || day === 0).toBe(true);
+  });
+
+  it('should prioritize weekdays over weekends even if allowWeekend is true', () => {
+    // Both weekdays and weekends are completely free.
+    // Class has allowWeekend = true.
+    // It should still prioritize Monday-Friday (days 1-5).
+    const request: ScheduleRequest = {
+      classes: [
+        { id: 'Class_1', teacherId: 'Teacher_1', periods: 2, allowWeekend: true },
+      ],
+      rooms: [{ id: 101 }],
+      availability: new Map<string, number[]>(),
+    };
+
+    const result = solveWeekly(request);
+    expect(result).not.toBeNull();
+    expect(result!.length).toBe(1);
+    const day = result![0].dayOfWeek;
+    expect(day >= 1 && day <= 5).toBe(true);
   });
 });

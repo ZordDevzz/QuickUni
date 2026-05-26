@@ -16,20 +16,23 @@ interface AccountFormProps {
   account?: Account; // If provided, we are in edit mode
   onSuccess?: () => void;
   profiles?: Profile[]; // List of available profiles to link
+  restrictType?: "student" | "personnel";
 }
 
-export function AccountForm({ account, onSuccess, profiles = [] }: AccountFormProps) {
+export function AccountForm({ account, onSuccess, profiles = [], restrictType }: AccountFormProps) {
   const router = useRouter();
   const isEdit = !!account;
   const t = useTranslations("Account");
   const toastT = useTranslations("Toast");
+
+  const defaultType = restrictType === "student" ? "student" : "employee";
 
   const form = useForm({
     defaultValues: {
       username: account?.username || "",
       email: account?.email || "",
       phone: account?.phone || "",
-      type: (account?.type as "student" | "employee" | "tech" | "dev") || "student",
+      type: (account?.type as "student" | "employee" | "tech" | "dev") || defaultType,
       status: (account?.status as "active" | "suspended" | "banned" | "expired") || "active",
       password: "",
       profileId: "",
@@ -171,13 +174,18 @@ export function AccountForm({ account, onSuccess, profiles = [] }: AccountFormPr
                   id={field.name}
                   name={field.name}
                   value={field.state.value}
+                  disabled={restrictType === "student" && !isEdit}
                   onChange={(e) => field.handleChange(e.target.value as "student" | "employee" | "tech" | "dev")}
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30"
                 >
-                  <option value="student">Student</option>
-                  <option value="employee">Employee</option>
-                  <option value="tech">Tech</option>
-                  <option value="dev">Dev</option>
+                  {(!restrictType || restrictType === "student") && <option value="student">Student</option>}
+                  {(!restrictType || restrictType === "personnel") && (
+                    <>
+                      <option value="employee">Employee</option>
+                      <option value="tech">Tech</option>
+                      <option value="dev">Dev</option>
+                    </>
+                  )}
                 </select>
                 <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
               </FieldContent>
@@ -226,7 +234,17 @@ export function AccountForm({ account, onSuccess, profiles = [] }: AccountFormPr
                     >
                       <option value="">{t("SelectProfile")}</option>
                       {profiles
-                        .filter((p) => !p.accountId)
+                        .filter((p: any) => {
+                          if (p.accountId) return false;
+                          const isStudent = (p.students && p.students.length > 0) || p.profileSchema?.schemaCode?.startsWith("STD");
+                          if (restrictType === "student") {
+                            return isStudent;
+                          }
+                          if (restrictType === "personnel") {
+                            return !isStudent;
+                          }
+                          return true;
+                        })
                         .map((p) => (
                           <option key={p.id} value={p.id}>
                             {p.fullname} ({p.nationalId})

@@ -56,7 +56,8 @@ describe('facility actions', () => {
       const data = { code: 'B1', name: 'Building 1' };
       const result = await createBuildingAction(data);
       expect(db.insert).toHaveBeenCalledWith(building);
-      expect(revalidatePath).toHaveBeenCalledWith('/admin/academic/buildings');
+      expect(revalidatePath).toHaveBeenCalledWith('/[locale]/academic/buildings', 'page');
+      expect(revalidatePath).toHaveBeenCalledWith('/academic/buildings');
       expect(result.success).toBe(true);
     });
 
@@ -64,14 +65,16 @@ describe('facility actions', () => {
       const data = { name: 'Updated Building' };
       const result = await updateBuildingAction(1, data);
       expect(db.update).toHaveBeenCalledWith(building);
-      expect(revalidatePath).toHaveBeenCalledWith('/admin/academic/buildings');
+      expect(revalidatePath).toHaveBeenCalledWith('/[locale]/academic/buildings', 'page');
+      expect(revalidatePath).toHaveBeenCalledWith('/academic/buildings');
       expect(result.success).toBe(true);
     });
 
     it('deleteBuildingAction should delete and revalidate', async () => {
       const result = await deleteBuildingAction(1);
       expect(db.delete).toHaveBeenCalledWith(building);
-      expect(revalidatePath).toHaveBeenCalledWith('/admin/academic/buildings');
+      expect(revalidatePath).toHaveBeenCalledWith('/[locale]/academic/buildings', 'page');
+      expect(revalidatePath).toHaveBeenCalledWith('/academic/buildings');
       expect(result.success).toBe(true);
     });
   });
@@ -90,7 +93,8 @@ describe('facility actions', () => {
       const data = { code: 'R1', buildingId: 1, capacity: 30 };
       const result = await createRoomAction(data);
       expect(db.insert).toHaveBeenCalledWith(room);
-      expect(revalidatePath).toHaveBeenCalledWith('/admin/academic/rooms');
+      expect(revalidatePath).toHaveBeenCalledWith('/[locale]/academic/rooms', 'page');
+      expect(revalidatePath).toHaveBeenCalledWith('/academic/rooms');
       expect(result.success).toBe(true);
     });
 
@@ -98,14 +102,16 @@ describe('facility actions', () => {
       const data = { capacity: 40 };
       const result = await updateRoomAction(1, data);
       expect(db.update).toHaveBeenCalledWith(room);
-      expect(revalidatePath).toHaveBeenCalledWith('/admin/academic/rooms');
+      expect(revalidatePath).toHaveBeenCalledWith('/[locale]/academic/rooms', 'page');
+      expect(revalidatePath).toHaveBeenCalledWith('/academic/rooms');
       expect(result.success).toBe(true);
     });
 
     it('deleteRoomAction should delete and revalidate', async () => {
       const result = await deleteRoomAction(1);
       expect(db.delete).toHaveBeenCalledWith(room);
-      expect(revalidatePath).toHaveBeenCalledWith('/admin/academic/rooms');
+      expect(revalidatePath).toHaveBeenCalledWith('/[locale]/academic/rooms', 'page');
+      expect(revalidatePath).toHaveBeenCalledWith('/academic/rooms');
       expect(result.success).toBe(true);
     });
   });

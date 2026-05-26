@@ -46,7 +46,20 @@ export const getAccounts = async () => {
   return await db.query.account.findMany({
     where: isNull(account.deletedAt),
     orderBy: (account, { desc }) => [desc(account.createAt)],
+    with: {
+      userSystemRoles: true,
+    }
   });
+};
+
+export const getStudentAccounts = async () => {
+  const accounts = await getAccounts();
+  return accounts.filter(acc => acc.userSystemRoles.some(r => Number(r.systemRole) === 3));
+};
+
+export const getPersonnelAccounts = async () => {
+  const accounts = await getAccounts();
+  return accounts.filter(acc => acc.userSystemRoles.some(r => [1, 2, 4].includes(Number(r.systemRole))));
 };
 
 export const createAccount = async (data: typeof account.$inferInsert) => {

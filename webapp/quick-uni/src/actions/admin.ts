@@ -53,6 +53,8 @@ export async function createAccountAction(formData: CreateAccountInput, profileI
     });
 
     revalidatePath("/admin/accounts");
+    revalidatePath("/admin/personnel");
+    revalidatePath("/admin/students");
     return { success: true };
   } catch (error: unknown) {
     return { 
@@ -71,6 +73,8 @@ export async function createProfileAction(formData: CreateProfileInput): Promise
       dob: new Date(validatedData.dob).toISOString().split('T')[0],
     });
     revalidatePath("/admin/profiles");
+    revalidatePath("/admin/personnel");
+    revalidatePath("/admin/students");
     return { success: true };
   } catch (error: unknown) {
     return { 
@@ -84,6 +88,8 @@ export async function linkProfileToEntityAction(profileId: string, type: "studen
   try {
     await linkProfileToEntity(profileId, type, { code });
     revalidatePath("/admin/profiles");
+    revalidatePath("/admin/personnel");
+    revalidatePath("/admin/students");
     return { success: true };
   } catch (error: unknown) {
     return { 
@@ -107,6 +113,8 @@ export async function updateAccountAction(id: string, formData: UpdateAccountInp
     });
 
     revalidatePath("/admin/accounts");
+    revalidatePath("/admin/personnel");
+    revalidatePath("/admin/students");
     return { success: true };
   } catch (error: unknown) {
     return { 
@@ -129,6 +137,8 @@ export async function deleteAccountAction(id: string): Promise<ActionResponse> {
     });
 
     revalidatePath("/admin/accounts");
+    revalidatePath("/admin/personnel");
+    revalidatePath("/admin/students");
     return { success: true };
   } catch (error: unknown) {
     return { 
@@ -152,6 +162,8 @@ export async function updateProfileAction(id: string, formData: UpdateProfileInp
 
     await updateProfile(id, dataToUpdate);
     revalidatePath("/admin/profiles");
+    revalidatePath("/admin/personnel");
+    revalidatePath("/admin/students");
     return { success: true };
   } catch (error: unknown) {
     return { 

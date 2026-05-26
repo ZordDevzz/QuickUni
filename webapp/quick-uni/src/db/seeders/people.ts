@@ -1,54 +1,218 @@
 import { db } from "../index";
-import { account, profile, employee, student, userSystemRole } from "../schema";
+import { 
+  account, 
+  profile, 
+  employee, 
+  student, 
+  userSystemRole, 
+  departmentEmployment,
+  mainClass,
+  mainClassMember,
+  educationType
+} from "../schema";
 import { hash } from "bcryptjs";
-import { faker } from "@faker-js/faker";
 import { randomUUID } from "crypto";
 
-export const seedPeople = async (schemaId: number, roles: any) => {
-  console.log("👥 Seeding people...");
+export const seedPeople = async (schemaId: number, roles: any, departments: any[], majors: any[]) => {
+  console.log("👥 Seeding people (realistic Vietnamese accounts)...");
   const pwdHash = await hash("password123", 10);
 
-  // 1. Teachers (Employees)
-  for (let i = 0; i < 5; i++) {
-    const accountId = randomUUID();
-    const profileId = randomUUID();
-    const email = faker.internet.email();
-    
-    await db.insert(account).values({ id: accountId, username: email, pwdHash, email, type: "employee", status: "active" });
-    await db.insert(userSystemRole).values({ userId: accountId, systemRole: roles.teacher });
-    await db.insert(profile).values({
-      id: profileId, 
-      accountId, 
-      schemaId,
-      fullname: faker.person.fullName(),
-      gender: faker.helpers.arrayElement(["male", "female", "others"]),
-      dob: faker.date.birthdate({ min: 25, max: 60, mode: 'age' }).toISOString().split('T')[0],
-      nationalId: faker.string.numeric(12),
-      dynamicData: { personal_email: email, phone: faker.phone.number() }
+  // 1. Seed Education Type first
+  const [eduType] = await db.insert(educationType).values({
+    code: "CQ",
+    name: "Đại học chính quy",
+    des: "Hệ đào tạo đại học chính quy 4 năm",
+    length: 4,
+  }).returning();
+
+  // 2. Academic Office Staff
+  const academicAccountId = randomUUID();
+  const academicProfileId = randomUUID();
+  const academicEmployeeId = randomUUID();
+  
+  await db.insert(account).values({
+    id: academicAccountId,
+    username: "academic",
+    pwdHash,
+    email: "academic@quickuni.edu.vn",
+    type: "employee",
+    status: "active"
+  });
+  await db.insert(userSystemRole).values({ userId: academicAccountId, systemRole: roles.academic_office });
+  await db.insert(profile).values({
+    id: academicProfileId,
+    accountId: academicAccountId,
+    schemaId,
+    fullname: "Phạm Minh Hải",
+    gender: "male",
+    dob: "1985-04-12",
+    nationalId: "001085002934",
+    dynamicData: { personal_email: "haipm@gmail.com", phone: "0912345678" }
+  });
+  await db.insert(employee).values({
+    id: academicEmployeeId,
+    profileId: academicProfileId,
+    code: "CB00001"
+  });
+
+  // Assign to AAO Department (Phòng Đào tạo)
+  const aaoDept = departments.find(d => d.code === "AAO")!;
+  await db.insert(departmentEmployment).values({
+    employeeId: academicEmployeeId,
+    departmentId: aaoDept.id,
+    assignDate: "2020-09-01",
+    roleCode: "ACADEMIC_STAFF",
+    roleName: "Cán bộ quản lý đào tạo"
+  });
+
+  // 3. Teachers & Departments Mapping
+  const teachersData = [
+    // FITI
+    { fullname: "Nguyễn Văn An", gender: "male" as const, dob: "1978-08-15", code: "GV00001", deptCode: "FITI", email: "an.nv@quickuni.edu.vn" },
+    { fullname: "Trần Thị Bình", gender: "female" as const, dob: "1983-05-20", code: "GV00002", deptCode: "FITI", email: "binh.tt@quickuni.edu.vn" },
+    // FET
+    { fullname: "Lê Hoàng Long", gender: "male" as const, dob: "1980-11-03", code: "GV00003", deptCode: "FET", email: "long.lh@quickuni.edu.vn" },
+    { fullname: "Phạm Thanh Sơn", gender: "male" as const, dob: "1982-01-28", code: "GV00004", deptCode: "FET", email: "son.pt@quickuni.edu.vn" },
+    // FBA
+    { fullname: "Nguyễn Thị Mai", gender: "female" as const, dob: "1985-07-19", code: "GV00005", deptCode: "FBA", email: "mai.nt@quickuni.edu.vn" },
+    { fullname: "Phan Anh Tuấn", gender: "male" as const, dob: "1975-03-14", code: "GV00006", deptCode: "FBA", email: "tuan.pa@quickuni.edu.vn" },
+    // FFL
+    { fullname: "Vũ Thu Hương", gender: "female" as const, dob: "1988-09-25", code: "GV00007", deptCode: "FFL", email: "huong.vt@quickuni.edu.vn" },
+    { fullname: "Nguyễn Hoàng Nam", gender: "male" as const, dob: "1981-12-10", code: "GV00008", deptCode: "FFL", email: "nam.nh@quickuni.edu.vn" }
+  ];
+
+  const teachersList: any[] = [];
+
+  for (const t of teachersData) {
+    const accId = randomUUID();
+    const profId = randomUUID();
+    const empId = randomUUID();
+
+    await db.insert(account).values({
+      id: accId,
+      username: t.email.split("@")[0],
+      pwdHash,
+      email: t.email,
+      type: "employee",
+      status: "active"
     });
-    await db.insert(employee).values({ id: randomUUID(), profileId, code: `GV${faker.string.numeric(5)}` });
+    await db.insert(userSystemRole).values({ userId: accId, systemRole: roles.teacher });
+    await db.insert(profile).values({
+      id: profId,
+      accountId: accId,
+      schemaId,
+      fullname: t.fullname,
+      gender: t.gender,
+      dob: t.dob,
+      nationalId: `0010${Math.floor(10000000 + Math.random() * 90000000)}`,
+      dynamicData: { personal_email: `${accId.substring(0, 5)}@gmail.com`, phone: `09${Math.floor(10000000 + Math.random() * 90000000)}` }
+    });
+    const [empRecord] = await db.insert(employee).values({
+      id: empId,
+      profileId: profId,
+      code: t.code
+    }).returning();
+
+    teachersList.push(empRecord);
+
+    // Assign to Department
+    const dept = departments.find(d => d.code === t.deptCode)!;
+    await db.insert(departmentEmployment).values({
+      employeeId: empId,
+      departmentId: dept.id,
+      assignDate: "2021-09-01",
+      roleCode: "TEACHER",
+      roleName: "Giảng viên"
+    });
   }
 
-  // 2. Students
-  for (let i = 0; i < 20; i++) {
-    const accountId = randomUUID();
-    const profileId = randomUUID();
-    const email = faker.internet.email();
-    
-    await db.insert(account).values({ id: accountId, username: email, pwdHash, email, type: "student", status: "active" });
-    await db.insert(userSystemRole).values({ userId: accountId, systemRole: roles.student });
-    await db.insert(profile).values({
-      id: profileId, 
-      accountId, 
-      schemaId,
-      fullname: faker.person.fullName(),
-      gender: faker.helpers.arrayElement(["male", "female", "others"]),
-      dob: faker.date.birthdate({ min: 18, max: 25, mode: 'age' }).toISOString().split('T')[0],
-      nationalId: faker.string.numeric(12),
-      dynamicData: { personal_email: email, phone: faker.phone.number() }
-    });
-    await db.insert(student).values({ id: randomUUID(), profileId, code: `SV${faker.string.numeric(8)}` });
+  // 4. Main Classes (Administrative cohorts)
+  const fitiCNTT = majors.find(m => m.code === "CNTT")!;
+  const fitiATTT = majors.find(m => m.code === "ATTT")!;
+  const fbaQTKD = majors.find(m => m.code === "QTKD")!;
+  const fflNNA = majors.find(m => m.code === "NNA")!;
+
+  const mainClassesData = [
+    { code: "21CNTT1", teacherId: teachersList[0].id, majorId: fitiCNTT.id, academicYear: 2021 },
+    { code: "21ATTT1", teacherId: teachersList[1].id, majorId: fitiATTT.id, academicYear: 2021 },
+    { code: "22QTKD1", teacherId: teachersList[4].id, majorId: fbaQTKD.id, academicYear: 2022 },
+    { code: "22NNA1", teacherId: teachersList[6].id, majorId: fflNNA.id, academicYear: 2022 },
+  ];
+
+  const mainClassesList: any[] = [];
+  for (const mc of mainClassesData) {
+    const [mcRecord] = await db.insert(mainClass).values({
+      id: randomUUID(),
+      code: mc.code,
+      teacher: mc.teacherId,
+      typeId: eduType.id,
+      majorId: mc.majorId,
+      academicYear: mc.academicYear,
+    }).returning();
+    mainClassesList.push(mcRecord);
   }
 
-  console.log("✅ People seeded.");
+  // 5. Students Seeding (24 profiles, 6 per class)
+  const studentsNames = [
+    // 21CNTT1
+    "Nguyễn Minh Triết", "Lê Thị Thu Thảo", "Trần Hoàng Nam", "Phạm Quốc Anh", "Vũ Huy Hoàng", "Đặng Minh Quân",
+    // 21ATTT1
+    "Hoàng Bích Phương", "Đỗ Tuấn Kiệt", "Bùi Thế Anh", "Phùng Khánh Linh", "Nguyễn Tiến Đạt", "Lê Tuấn Tú",
+    // 22QTKD1
+    "Trần Ngọc Khánh", "Nguyễn Thu Hà", "Phạm Minh Hằng", "Nguyễn Đức Mạnh", "Lê Gia Huy", "Vũ Mai Phương",
+    // 22NNA1
+    "Nguyễn Hải Yến", "Trần Đăng Khoa", "Lâm Mỹ Tâm", "Phan Thanh Hằng", "Nguyễn Trường Giang", "Vương Quốc Bảo"
+  ];
+
+  const studentList: any[] = [];
+
+  for (let i = 0; i < studentsNames.length; i++) {
+    const classIndex = Math.floor(i / 6);
+    const isMonitor = (i % 6) === 0; // The first student in each group is Class Monitor
+
+    const accId = randomUUID();
+    const profId = randomUUID();
+    const studId = randomUUID();
+    const name = studentsNames[i];
+    const username = `sv${210000 + i}`;
+    const email = `${username}@quickuni.edu.vn`;
+
+    await db.insert(account).values({
+      id: accId,
+      username,
+      pwdHash,
+      email,
+      type: "student",
+      status: "active"
+    });
+    await db.insert(userSystemRole).values({ userId: accId, systemRole: roles.student });
+    await db.insert(profile).values({
+      id: profId,
+      accountId: accId,
+      schemaId,
+      fullname: name,
+      gender: i % 2 === 0 ? "male" : "female",
+      dob: classIndex < 2 ? "2003-05-12" : "2004-09-18",
+      nationalId: `00120300${1000 + i}`,
+      dynamicData: { personal_email: `${username}@gmail.com`, phone: `0987${100000 + i}` }
+    });
+    const [studRecord] = await db.insert(student).values({
+      id: studId,
+      profileId: profId,
+      code: username.toUpperCase()
+    }).returning();
+
+    studentList.push(studRecord);
+
+    // Assign to Main Class
+    const targetClass = mainClassesList[classIndex];
+    await db.insert(mainClassMember).values({
+      studentId: studId,
+      classId: targetClass.id,
+      roleId: isMonitor ? 1 : 3 // 1: Monitor, 3: Member
+    });
+  }
+
+  console.log(`✅ People seeded. 1 Academic Staff, ${teachersList.length} Teachers, ${studentList.length} Students across ${mainClassesList.length} Cohorts.`);
+  return { teachersList, studentList };
 };

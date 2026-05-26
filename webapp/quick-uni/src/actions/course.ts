@@ -126,7 +126,8 @@ export async function createCourseClassAction(data: CourseClassInsertInput): Pro
       ...validatedData,
       id: randomUUID()
     });
-    revalidatePath("/admin/courses/classes");
+    revalidatePath("/[locale]/academic/courses/classes", "page");
+    revalidatePath("/academic/courses/classes");
     return { success: true };
   } catch (error: unknown) {
     console.error("Failed to create course class:", error);
@@ -141,7 +142,8 @@ export async function updateCourseClassAction(id: string, data: CourseClassUpdat
     await db.update(courseClass)
       .set({ ...validatedData, updateAt: new Date().toISOString() })
       .where(eq(courseClass.id, id));
-    revalidatePath("/admin/courses/classes");
+    revalidatePath("/[locale]/academic/courses/classes", "page");
+    revalidatePath("/academic/courses/classes");
     return { success: true };
   } catch (error: unknown) {
     console.error("Failed to update course class:", error);
@@ -155,7 +157,8 @@ export async function deleteCourseClassAction(id: string): Promise<ActionRespons
     await db.update(courseClass)
       .set({ deletedAt: new Date().toISOString() })
       .where(eq(courseClass.id, id));
-    revalidatePath("/admin/courses/classes");
+    revalidatePath("/[locale]/academic/courses/classes", "page");
+    revalidatePath("/academic/courses/classes");
     return { success: true };
   } catch (error: unknown) {
     console.error("Failed to delete course class:", error);

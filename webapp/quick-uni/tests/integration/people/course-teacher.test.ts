@@ -72,6 +72,9 @@ describe("Teacher Workspace Server Actions", () => {
         status: "opened",
         type: 1,
         semesterId: 1,
+        minSessionPeriods: 2,
+        allowEvening: false,
+        allowWeekend: false,
         createAt: new Date().toISOString(),
         updateAt: null,
         deletedAt: null

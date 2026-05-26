@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 import { PROFILE_TEMPLATES } from "../profiles/templates";
 
 export type UserRole = "teacher" | "student" | "academic_office";
@@ -6,7 +6,7 @@ export type UserRole = "teacher" | "student" | "academic_office";
 export const createUserProfileData = (role: UserRole) => {
   const template = PROFILE_TEMPLATES[role] || {};
   return {
-    id: uuidv4(),
+    id: randomUUID(),
     dynamicData: template,
   };
 };

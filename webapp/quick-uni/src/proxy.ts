@@ -39,15 +39,26 @@ export async function proxy(req: NextRequest) {
 
   if (isAuthPage) {
     if (isAuth) {
-      const userType = token.type as string;
       let targetPath = "/";
       
-      if (userType === "dev" || userType === "tech") {
+      if (roles.includes(1)) {
         targetPath = "/admin";
-      } else if (userType === "student") {
-        targetPath = "/student";
-      } else if (userType === "employee") {
+      } else if (roles.includes(4)) {
+        targetPath = "/academic";
+      } else if (roles.includes(2)) {
         targetPath = "/teacher";
+      } else if (roles.includes(3)) {
+        targetPath = "/student";
+      } else {
+        // Fallback to legacy userType
+        const userType = token.type as string;
+        if (userType === "dev" || userType === "tech") {
+          targetPath = "/admin";
+        } else if (userType === "student") {
+          targetPath = "/student";
+        } else if (userType === "employee") {
+          targetPath = "/teacher";
+        }
       }
       
       return NextResponse.redirect(new URL(targetPath, req.url));
@@ -67,15 +78,26 @@ export async function proxy(req: NextRequest) {
 
   // If user is at root, redirect to their dashboard
   if (isPath("/")) {
-    const userType = token.type as string;
     let targetPath = null;
     
-    if (userType === "dev" || userType === "tech") {
+    if (roles.includes(1)) {
       targetPath = "/admin";
-    } else if (userType === "student") {
-      targetPath = "/student";
-    } else if (userType === "employee") {
+    } else if (roles.includes(4)) {
+      targetPath = "/academic";
+    } else if (roles.includes(2)) {
       targetPath = "/teacher";
+    } else if (roles.includes(3)) {
+      targetPath = "/student";
+    } else {
+      // Fallback to legacy userType
+      const userType = token.type as string;
+      if (userType === "dev" || userType === "tech") {
+        targetPath = "/admin";
+      } else if (userType === "student") {
+        targetPath = "/student";
+      } else if (userType === "employee") {
+        targetPath = "/teacher";
+      }
     }
 
     if (targetPath) {

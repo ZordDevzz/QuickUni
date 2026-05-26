@@ -1,5 +1,17 @@
 import { db } from "../index";
-import { systemRole, account, userSystemRole, profileSchema, profileField, profileSchemaField } from "../schema";
+import { 
+  systemRole, 
+  account, 
+  userSystemRole, 
+  profileSchema, 
+  profileField, 
+  profileSchemaField,
+  enrollStatus,
+  classRole,
+  gradeScale,
+  scheduleType,
+  scheduleStatus
+} from "../schema";
 import { hash } from "bcryptjs";
 import { randomUUID } from "crypto";
 
@@ -54,6 +66,50 @@ export const seedSystem = async () => {
       isRequired: true,
     }))
   );
+
+  // 6. Enroll Statuses
+  const enrollStatuses = [
+    { id: 1, code: "APPROVED", name: "Đã duyệt" },
+    { id: 2, code: "PENDING", name: "Đang chờ" },
+    { id: 3, code: "CANCELLED", name: "Đã hủy" },
+  ];
+  await db.insert(enrollStatus).values(enrollStatuses).onConflictDoNothing();
+
+  // 7. Class Roles
+  const classRoles = [
+    { id: 1, code: "MONITOR", name: "Lớp trưởng", des: "Người đứng đầu quản lý lớp sinh viên hành chính" },
+    { id: 2, code: "VICE_MONITOR", name: "Lớp phó", des: "Hỗ trợ quản lý lớp sinh viên hành chính" },
+    { id: 3, code: "MEMBER", name: "Thành viên", des: "Sinh viên trong lớp chính quy" },
+  ];
+  await db.insert(classRole).values(classRoles).onConflictDoNothing();
+
+  // 8. Grade Scale
+  const gradeScales = [
+    { minScore10: "9.00", letterGrade: "A+", gpaScore4: "4.00", des: "Xuất sắc" },
+    { minScore10: "8.50", letterGrade: "A", gpaScore4: "4.00", des: "Giỏi" },
+    { minScore10: "8.00", letterGrade: "B+", gpaScore4: "3.50", des: "Khá giỏi" },
+    { minScore10: "7.00", letterGrade: "B", gpaScore4: "3.00", des: "Khá" },
+    { minScore10: "6.50", letterGrade: "C+", gpaScore4: "2.50", des: "Trung bình khá" },
+    { minScore10: "5.50", letterGrade: "C", gpaScore4: "2.00", des: "Trung bình" },
+    { minScore10: "5.00", letterGrade: "D+", gpaScore4: "1.50", des: "Trung bình yếu" },
+    { minScore10: "4.00", letterGrade: "D", gpaScore4: "1.00", des: "Yếu" },
+    { minScore10: "0.00", letterGrade: "F", gpaScore4: "0.00", des: "Kém" },
+  ];
+  await db.insert(gradeScale).values(gradeScales).onConflictDoNothing();
+
+  // 9. Schedule Types
+  const scheduleTypes = [
+    { id: 1, code: "REGULAR",    name: "Lịch chính",   des: "Buổi học chính thức theo thời khóa biểu" },
+    { id: 2, code: "MAKEUP",     name: "Lịch dạy bù",  des: "Buổi học bù hoặc thay thế" },
+  ];
+  await db.insert(scheduleType).values(scheduleTypes).onConflictDoNothing();
+
+  // 10. Schedule Statuses
+  const scheduleStatuses = [
+    { id: 1, code: "NORMAL",    name: "Bình thường", isComplete: false },
+    { id: 2, code: "CANCELLED", name: "Đã hủy",     isComplete: false },
+  ];
+  await db.insert(scheduleStatus).values(scheduleStatuses).onConflictDoNothing();
 
   console.log("✅ System data seeded.");
   return { schemaId: schema.id, roles: { admin: 1, teacher: 2, student: 3, academic_office: 4 } };

@@ -15,10 +15,11 @@ import { useTranslations } from "next-intl";
 import { Profile } from "@/types/profile";
 
 interface CreateAccountButtonProps {
-  profiles?: Profile[];
+  profiles?: any[];
+  restrictType?: "student" | "personnel";
 }
 
-export function CreateAccountButton({ profiles = [] }: CreateAccountButtonProps) {
+export function CreateAccountButton({ profiles = [], restrictType }: CreateAccountButtonProps) {
   const [open, setOpen] = useState(false);
   const t = useTranslations("Account");
 
@@ -33,7 +34,7 @@ export function CreateAccountButton({ profiles = [] }: CreateAccountButtonProps)
         <DialogHeader>
           <DialogTitle>{t("CreateTitle")}</DialogTitle>
         </DialogHeader>
-        <AccountForm profiles={profiles} onSuccess={() => setOpen(false)} />
+        <AccountForm profiles={profiles} onSuccess={() => setOpen(false)} restrictType={restrictType} />
       </DialogContent>
     </Dialog>
   );

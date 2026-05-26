@@ -59,6 +59,7 @@ export const room = scheduleSchema.table(
     buildingId: smallint("building_id").notNull(),
     capacity: smallint(),
     type: varchar({ length: 50 }),
+    isAvailable: boolean("is_available").default(true).notNull(),
   },
   (table) => [
     foreignKey({
@@ -189,6 +190,7 @@ export const weeklyTemplate = scheduleSchema.table(
     startPeriod: smallint("start_period").notNull(),
     endPeriod: smallint("end_period").notNull(),
     occupyMask: integer("occupy_mask").notNull(),
+    scheduleTypeId: smallint("schedule_type_id").default(1).notNull(),
   },
   (table) => [
     foreignKey({
@@ -200,6 +202,11 @@ export const weeklyTemplate = scheduleSchema.table(
       columns: [table.roomId],
       foreignColumns: [room.id],
       name: "fk_weekly_template_room_id_room_id",
+    }),
+    foreignKey({
+      columns: [table.scheduleTypeId],
+      foreignColumns: [scheduleType.id],
+      name: "fk_weekly_template_schedule_type_id_schedule_type_id",
     }),
   ],
 );

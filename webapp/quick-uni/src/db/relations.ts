@@ -452,6 +452,10 @@ export const weeklyTemplateRelations = relations(weeklyTemplate, ({ one }) => ({
     fields: [weeklyTemplate.roomId],
     references: [room.id],
   }),
+  scheduleType: one(scheduleType, {
+    fields: [weeklyTemplate.scheduleTypeId],
+    references: [scheduleType.id],
+  }),
 }));
 
 export const scheduleStatusRelations = relations(
@@ -463,6 +467,7 @@ export const scheduleStatusRelations = relations(
 
 export const scheduleTypeRelations = relations(scheduleType, ({ many }) => ({
   schedules: many(schedule),
+  weeklyTemplates: many(weeklyTemplate),
 }));
 
 export const systemAuditLogRelations = relations(systemAuditLog, ({ one }) => ({

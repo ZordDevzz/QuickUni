@@ -7,7 +7,7 @@ import { getTranslations } from 'next-intl/server';
 export default async function TeacherSchedulePage() {
   const session = await getAuthSession();
   
-  if (!session || session.user.type !== 'teacher') {
+  if (!session || (session.user.type as string) !== 'teacher') {
     redirect('/login');
   }
 

@@ -24,6 +24,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AccountRowActionsProps {
   account: Account;
+  restrictType?: "student" | "personnel";
 }
 
 interface Role {
@@ -31,7 +32,7 @@ interface Role {
   name: string | null;
 }
 
-export function AccountRowActions({ account }: AccountRowActionsProps) {
+export function AccountRowActions({ account, restrictType }: AccountRowActionsProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isRolesOpen, setIsRolesOpen] = useState(false);
@@ -121,45 +122,49 @@ export function AccountRowActions({ account }: AccountRowActionsProps) {
 
   return (
     <div className="flex justify-end gap-2">
-      <Dialog open={isRolesOpen} onOpenChange={setIsRolesOpen}>
-        <DialogTrigger asChild>
-          <Button variant="ghost" size="icon" title={tr("Roles")}>
-            <Shield className="h-4 w-4" />
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{tr("Roles")}: {account.username}</DialogTitle>
-          </DialogHeader>
-          <ScrollArea className="h-[300px] pr-4">
-            <div className="space-y-4 py-4">
-              {allRoles.map((role) => (
-                <div key={role.id} className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={`role-${role.id}`} 
-                    checked={userRoles.includes(role.id)}
-                    onCheckedChange={() => toggleRole(role.id)}
-                  />
-                  <Label htmlFor={`role-${role.id}`}>{role.name}</Label>
-                </div>
-              ))}
-              {allRoles.length === 0 && !isLoadingRoles && (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No roles found.
-                </p>
-              )}
-            </div>
-          </ScrollArea>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsRolesOpen(false)}>
-              {t("Cancel")}
+      {restrictType !== "student" && (
+        <Dialog open={isRolesOpen} onOpenChange={setIsRolesOpen}>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="icon" title={tr("Roles")}>
+              <Shield className="h-4 w-4" />
             </Button>
-            <Button onClick={handleUpdateRoles} disabled={isLoadingRoles}>
-              {isLoadingRoles ? t("Saving") : tr("UpdateAuthorities")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{tr("Roles")}: {account.username}</DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="h-[300px] pr-4">
+              <div className="space-y-4 py-4">
+                {allRoles
+                  .filter(role => restrictType === "personnel" ? role.id !== 3 : true)
+                  .map((role) => (
+                    <div key={role.id} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`role-${role.id}`} 
+                        checked={userRoles.includes(role.id)}
+                        onCheckedChange={() => toggleRole(role.id)}
+                      />
+                      <Label htmlFor={`role-${role.id}`}>{role.name}</Label>
+                    </div>
+                  ))}
+                {allRoles.length === 0 && !isLoadingRoles && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No roles found.
+                  </p>
+                )}
+              </div>
+            </ScrollArea>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsRolesOpen(false)}>
+                {t("Cancel")}
+              </Button>
+              <Button onClick={handleUpdateRoles} disabled={isLoadingRoles}>
+                {isLoadingRoles ? t("Saving") : tr("UpdateAuthorities")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogTrigger asChild>
@@ -171,7 +176,7 @@ export function AccountRowActions({ account }: AccountRowActionsProps) {
           <DialogHeader>
             <DialogTitle>{t("EditTitle", { username: account.username })}</DialogTitle>
           </DialogHeader>
-          <AccountForm account={account} onSuccess={() => setIsEditOpen(false)} />
+          <AccountForm account={account} onSuccess={() => setIsEditOpen(false)} restrictType={restrictType} />
         </DialogContent>
       </Dialog>
 

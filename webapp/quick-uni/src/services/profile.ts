@@ -8,7 +8,28 @@ export const getProfiles = async () => {
     orderBy: (profile, { desc }) => [desc(profile.createAt)],
     with: {
       account: true,
+      students: true,
+      employees: true,
+      profileSchema: true,
     }
+  });
+};
+
+export const getStudentProfiles = async () => {
+  const profiles = await getProfiles();
+  return profiles.filter(p => {
+    const isStudentSchema = p.profileSchema?.schemaCode?.startsWith("STD");
+    const hasStudentRelation = p.students && p.students.length > 0;
+    return hasStudentRelation || isStudentSchema;
+  });
+};
+
+export const getPersonnelProfiles = async () => {
+  const profiles = await getProfiles();
+  return profiles.filter(p => {
+    const isStudentSchema = p.profileSchema?.schemaCode?.startsWith("STD");
+    const hasStudentRelation = p.students && p.students.length > 0;
+    return !hasStudentRelation && !isStudentSchema;
   });
 };
 

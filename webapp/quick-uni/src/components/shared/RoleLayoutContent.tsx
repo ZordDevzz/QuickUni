@@ -3,6 +3,7 @@
 import { ReactNode, useState } from "react";
 import { RoleHeader } from "@/components/shared/RoleHeader";
 import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 
 interface RoleLayoutContentProps {
   children: ReactNode;
@@ -17,6 +18,17 @@ interface RoleLayoutContentProps {
 export default function RoleLayoutContent({ children, Sidebar }: RoleLayoutContentProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const pathname = usePathname();
+
+  const isWizard = pathname?.endsWith("/academic/schedule/wizard");
+
+  if (isWizard) {
+    return (
+      <div className="w-full min-h-screen bg-background">
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-muted/20">

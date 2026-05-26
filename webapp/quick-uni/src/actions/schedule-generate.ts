@@ -7,11 +7,10 @@ import { courseClass } from "@/db/schemas/course";
 import { revalidatePath } from "next/cache";
 import { inArray, eq } from "drizzle-orm";
 
-export async function autoGenerateWeeklyAction(semesterId: number) {
+export async function autoGenerateWeeklyAction(semesterId: number, teacherPrefs?: Record<string, number>) {
   try {
     // 1. Fetch all data needed for the solver
     const rooms = await getRooms();
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
     const teachers = await getTeachers();
     const classes = await getCourseClasses(semesterId);
     
@@ -34,9 +33,12 @@ export async function autoGenerateWeeklyAction(semesterId: number) {
       classes: classes.map(c => ({ 
         id: c.id, 
         teacherId: c.teacherId, 
-        periods: 2 // default to 2 periods as per task requirement
+        periods: c.minSessionPeriods || 4, // custom period duration
+        allowEvening: c.allowEvening, // allow evening flag
+        allowWeekend: c.allowWeekend, // allow weekend flag
+        preferredConsecutiveDays: teacherPrefs?.[c.teacherId] ?? 2 // state-only consecutive teaching days preference
       })),
-      rooms: rooms.map(r => ({ id: r.id })),
+      rooms: rooms.filter(r => r.isAvailable).map(r => ({ id: r.id })), // only available rooms
       availability: availabilityMap
     });
 
@@ -56,6 +58,7 @@ export async function autoGenerateWeeklyAction(semesterId: number) {
       });
       
       revalidatePath("/admin/schedule");
+      revalidatePath("/[locale]/academic/schedule", "page");
       return { success: true };
     }
     return { success: false, error: "No solution found" };

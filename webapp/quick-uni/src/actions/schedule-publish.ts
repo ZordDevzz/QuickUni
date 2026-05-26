@@ -1,12 +1,10 @@
 "use server";
 
 import { db } from '../db';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { weeklyTemplate, schedule, holidayBlacklist } from '../db/schemas/schedule';
 import { semester as semesterTable } from '../db/schemas/academic';
 import { courseClass } from '../db/schemas/course';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { eq, and, or, isNull, exists, inArray } from 'drizzle-orm';
+import { eq, and, or, inArray } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { isWithinInterval, parseISO, addDays, format } from 'date-fns';
 
@@ -55,15 +53,15 @@ export async function publishTemplateToSchedule(semesterId: number) {
         const hEnd = parseISO(h.endDate);
         return isWithinInterval(currentDate, { start: hStart, end: hEnd });
       });
-      
+
       if (!isHoliday) {
         const dayOfWeek = currentDate.getDay(); // 0 (Sun) - 6 (Sat)
         const dateStr = format(currentDate, 'yyyy-MM-dd');
         const dayTemplates = templates.filter(t => t.dayOfWeek === dayOfWeek);
-        
+
         for (const t of dayTemplates) {
           scheduleEntries.push({
-            type: 1, // Default type (lecture/practice)
+            type: t.scheduleTypeId, // 1=Lịch chính, 2=Lịch dạy bù
             courseClassId: t.courseClassId,
             roomId: t.roomId,
             schDate: dateStr,
@@ -72,7 +70,7 @@ export async function publishTemplateToSchedule(semesterId: number) {
             period: t.startPeriod,
             endPeriod: t.endPeriod,
             mPerPeriod: 45,
-            statusId: 1, // Planned
+            statusId: 1, // Bình thường
           });
         }
       }
@@ -85,7 +83,6 @@ export async function publishTemplateToSchedule(semesterId: number) {
 
     // 6. Batch insert into schedule table
     if (scheduleEntries.length > 0) {
-      // Split into chunks if too large (Drizzle/PG limit)
       const chunkSize = 1000;
       for (let i = 0; i < scheduleEntries.length; i += chunkSize) {
         await db.insert(schedule).values(scheduleEntries.slice(i, i + chunkSize));
@@ -96,9 +93,9 @@ export async function publishTemplateToSchedule(semesterId: number) {
     return { success: true };
   } catch (error) {
     console.error("Error in publishTemplateToSchedule:", error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : "Failed to publish schedule" 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to publish schedule"
     };
   }
 }

@@ -12,7 +12,8 @@ import {
   smallserial,
   uniqueIndex,
   primaryKey,
-  bigserial
+  bigserial,
+  boolean
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { semester, educationType, major, subject } from "./academic";
@@ -43,6 +44,9 @@ export const courseClass = courseSchema.table(
     status: varchar({ length: 20 }).default("opened"),
     type: smallint().notNull(),
     semesterId: smallint("semester_id").notNull(),
+    minSessionPeriods: smallint("min_session_periods").default(4).notNull(),
+    allowEvening: boolean("allow_evening").default(false).notNull(),
+    allowWeekend: boolean("allow_weekend").default(false).notNull(),
     createAt: timestamp("create_at", {
       withTimezone: true,
       mode: "string",

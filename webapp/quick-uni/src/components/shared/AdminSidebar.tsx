@@ -11,7 +11,10 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  X
+  X,
+  Briefcase,
+  GraduationCap,
+  FolderTree
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,29 +33,33 @@ interface NavItem {
 const navItems: NavItem[] = [
   { key: "Overview", href: "/admin", icon: LayoutDashboard },
   { 
-    key: "Accounts", 
-    href: "/admin/accounts", 
-    icon: Users, 
+    key: "PersonnelMgmt", 
+    href: "/admin/personnel", 
+    icon: Briefcase, 
     category: "UserManagement" 
+  },
+  { 
+    key: "StudentMgmt", 
+    href: "/admin/students", 
+    icon: GraduationCap 
   },
   { 
     key: "Onboarding", 
     href: "/admin/onboarding", 
     icon: UserPlus 
   },
+  { key: "Settings", href: "/admin/system/settings", icon: Settings, category: "System" },
+  { key: "Roles", href: "/admin/system/roles", icon: Users },
   { 
-    key: "Profiles", 
-    href: "/admin/profiles", 
-    icon: User,
+    key: "ProfileConfig", 
+    href: "/admin/profiles/structure", 
+    icon: FolderTree,
     items: [
-      { key: "Profiles", href: "/admin/profiles" },
       { key: "Structure", href: "/admin/profiles/structure" },
       { key: "ProfileSchema", href: "/admin/profiles/schemas" },
       { key: "ProfileField", href: "/admin/profiles/fields" },
     ]
   },
-  { key: "Settings", href: "/admin/system/settings", icon: Settings, category: "System" },
-  { key: "Roles", href: "/admin/system/roles", icon: Users },
 ];
 
 interface AdminSidebarProps {

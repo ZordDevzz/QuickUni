@@ -3,7 +3,7 @@
 import { EntityType } from "./ScheduleManager";
 import { getWeeklyTemplateByEntity } from "@/actions/scheduling-data";
 import { useTranslations } from "next-intl";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw, BookOpen } from "lucide-react";
 import { hasCollision, createMask } from "@/lib/scheduling/bitmask";
 import { cn, stringToHslColor } from "@/lib/utils";
 
@@ -153,7 +153,19 @@ export function TimeGrid({
                       color: textColor,
                     }}
                   >
-                    <div className="text-[10px] font-bold truncate uppercase" style={{ color: borderColor }}>
+                    {/* Schedule Type badge */}
+                    {assignment.scheduleTypeId === 2 && (
+                      <div className="absolute top-1 right-1">
+                        <span
+                          title="Lịch dạy bù"
+                          className="inline-flex items-center gap-0.5 text-[8px] font-bold uppercase px-1 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/20"
+                        >
+                          <RefreshCw className="h-2 w-2" />
+                          Bù
+                        </span>
+                      </div>
+                    )}
+                    <div className="text-[10px] font-bold truncate uppercase pr-6" style={{ color: borderColor }}>
                         {assignment.courseClass?.code}
                     </div>
                     <div className="text-[9px] font-medium leading-tight line-clamp-2 mt-1">

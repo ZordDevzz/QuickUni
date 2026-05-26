@@ -12,27 +12,31 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { 
   getRooms, 
   getCourseClasses, 
+  getScheduleTypes,
   upsertWeeklyTemplate,
   deleteWeeklyTemplate,
   validateWeeklyTemplateEdit
 } from "@/actions/scheduling-data";
 import { weeklyTemplateValidator, WeeklyTemplateInput } from "@/lib/validators/scheduling";
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, Trash2, RefreshCw, BookOpen } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ScheduleSlotDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  initialData: Partial<WeeklyTemplateInput> | null;
+  initialData: Partial<WeeklyTemplateInput & { scheduleTypeId?: number }> | null;
   semesterId: number | null;
   onSuccess: () => void;
 }
 
 type RoomOption = Awaited<ReturnType<typeof getRooms>>[number];
 type CourseClassOption = Awaited<ReturnType<typeof getCourseClasses>>[number];
+type ScheduleTypeOption = Awaited<ReturnType<typeof getScheduleTypes>>[number];
 
 export function ScheduleSlotDialog({ 
   isOpen, 
@@ -45,21 +49,25 @@ export function ScheduleSlotDialog({
   const [loading, setLoading] = useState(false);
   const [rooms, setRooms] = useState<RoomOption[]>([]);
   const [courseClasses, setCourseClasses] = useState<CourseClassOption[]>([]);
+  const [scheduleTypes, setScheduleTypes] = useState<ScheduleTypeOption[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
 
   async function loadOptions() {
-    // Avoid synchronous setState in effect
     await Promise.resolve();
     setLoading(true);
     try {
-      const roomsData = await getRooms();
+      const [roomsData, typesData] = await Promise.all([
+        getRooms(),
+        getScheduleTypes(),
+      ]);
       setRooms(roomsData);
-      
+      setScheduleTypes(typesData);
+
       if (semesterId) {
         const classesData = await getCourseClasses(semesterId);
         setCourseClasses(classesData);
       }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("Failed to load form options");
     } finally {
@@ -74,7 +82,7 @@ export function ScheduleSlotDialog({
       }
     }
     init();
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, semesterId]);
 
   const form = useForm({
@@ -85,6 +93,7 @@ export function ScheduleSlotDialog({
       dayOfWeek: initialData?.dayOfWeek ?? 0,
       startPeriod: initialData?.startPeriod ?? 1,
       endPeriod: initialData?.endPeriod ?? 1,
+      scheduleType: (initialData as any)?.scheduleTypeId ?? 1,
     } as WeeklyTemplateInput,
     onSubmit: async ({ value }) => {
       try {
@@ -94,7 +103,6 @@ export function ScheduleSlotDialog({
           return;
         }
 
-        // Validate collisions
         const validationResult = await validateWeeklyTemplateEdit(validation.data);
         if (!validationResult.valid) {
           toast.error(validationResult.reason);
@@ -107,7 +115,7 @@ export function ScheduleSlotDialog({
           onSuccess();
           onClose();
         }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         toast.error("Failed to save schedule slot");
       }
@@ -116,7 +124,7 @@ export function ScheduleSlotDialog({
 
   async function handleDelete() {
     if (!initialData?.id) return;
-    
+
     setIsDeleting(true);
     try {
       const result = await deleteWeeklyTemplate(initialData.id);
@@ -125,7 +133,7 @@ export function ScheduleSlotDialog({
         onSuccess();
         onClose();
       }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("Failed to delete schedule slot");
     } finally {
@@ -133,15 +141,26 @@ export function ScheduleSlotDialog({
     }
   }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const PERIODS = Array.from({ length: 15 }, (_, i) => i + 1);
 
+  const getTypeColor = (typeId: number) => {
+    if (typeId === 2) return "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/20";
+    return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/20";
+  };
+
+  const getTypeIcon = (typeId: number) => {
+    return typeId === 2
+      ? <RefreshCw className="h-3 w-3" />
+      : <BookOpen className="h-3 w-3" />;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
             {initialData?.id ? t("EditScheduleSlot") : t("AddScheduleSlot")}
           </DialogTitle>
         </DialogHeader>
@@ -159,6 +178,47 @@ export function ScheduleSlotDialog({
             }}
             className="space-y-4"
           >
+            {/* Schedule Type Selector */}
+            <form.Field name="scheduleType">
+              {(field) => (
+                <div className="space-y-2">
+                  <Label htmlFor={field.name}>Loại lịch học</Label>
+                  <div className="flex gap-2">
+                    {scheduleTypes.map((type) => {
+                      const isSelected = field.state.value === type.id;
+                      return (
+                        <button
+                          key={type.id}
+                          type="button"
+                          onClick={() => field.handleChange(type.id)}
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-semibold transition-all flex-1 justify-center",
+                            isSelected
+                              ? getTypeColor(type.id) + " border shadow-xs"
+                              : "border-border/50 text-muted-foreground hover:bg-muted/20"
+                          )}
+                        >
+                          {getTypeIcon(type.id)}
+                          {type.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {/* Live preview badge */}
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="text-[10px] text-muted-foreground">Hiển thị trên lịch:</span>
+                    <Badge
+                      variant="outline"
+                      className={cn("text-[9px] px-2 py-0 h-4 gap-1", getTypeColor(field.state.value as number))}
+                    >
+                      {getTypeIcon(field.state.value as number)}
+                      {scheduleTypes.find(t => t.id === field.state.value)?.name ?? "Lịch chính"}
+                    </Badge>
+                  </div>
+                </div>
+              )}
+            </form.Field>
+
             <form.Field name="courseClassId">
               {(field) => (
                 <div className="space-y-2">
@@ -215,8 +275,6 @@ export function ScheduleSlotDialog({
                       onChange={(e) => field.handleChange(Number(e.target.value))}
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     >
-                      {/* Mapping UI Monday-start to DB Sunday-start (0-6) */}
-                      {/* 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat, 0=Sun */}
                       <option value="1">{t("Mon")}</option>
                       <option value="2">{t("Tue")}</option>
                       <option value="3">{t("Wed")}</option>
@@ -241,9 +299,7 @@ export function ScheduleSlotDialog({
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     >
                       {PERIODS.map((p) => (
-                        <option key={p} value={p}>
-                          {p}
-                        </option>
+                        <option key={p} value={p}>{p}</option>
                       ))}
                     </select>
                   </div>
@@ -262,9 +318,7 @@ export function ScheduleSlotDialog({
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     >
                       {PERIODS.map((p) => (
-                        <option key={p} value={p}>
-                          {p}
-                        </option>
+                        <option key={p} value={p}>{p}</option>
                       ))}
                     </select>
                   </div>
