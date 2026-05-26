@@ -12,8 +12,9 @@ import { processRequest } from "@/actions/workflow";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 
-export default function AdminRequestList({ requests }: { requests: any[] }) {
+export default function AdminRequestList({ requests }: { requests: unknown[] }) {
   const t = useTranslations("Workflow");
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [comment, setComment] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -26,13 +27,14 @@ export default function AdminRequestList({ requests }: { requests: any[] }) {
       toast.success(t(`Status.${status}`));
       setSelectedRequest(null);
       setComment("");
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      toast.error((error as Error).message);
     } finally {
       setIsProcessing(false);
     }
   };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: "sender.fullname",

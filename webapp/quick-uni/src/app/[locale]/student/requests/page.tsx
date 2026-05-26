@@ -10,7 +10,7 @@ export default async function StudentRequestsPage() {
   const requests = await getStudentRequests();
   const currentSemester = await getCurrentSemester();
   
-  let enrollments = [];
+  let enrollments: Awaited<ReturnType<typeof getStudentEnrollments>> = [];
   if (currentSemester) {
     enrollments = await getStudentEnrollments(currentSemester.id);
   }

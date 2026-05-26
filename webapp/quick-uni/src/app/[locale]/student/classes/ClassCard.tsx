@@ -13,6 +13,7 @@ export interface ClassEnrollment {
   courseClass: {
     id: string;
     code: string;
+    status?: string | null;
     subject: {
       name: string;
     };
@@ -21,18 +22,18 @@ export interface ClassEnrollment {
         fullname: string | null;
         firstName?: string;
         lastName?: string;
-      }
+      } | null;
     }
   }
 }
 
-export function ClassCard({ enrollment }: { enrollment: any }) {
+export function ClassCard({ enrollment }: { enrollment: ClassEnrollment }) {
   const t = useTranslations("Student.Classes");
   const [isOpen, setIsOpen] = useState(false);
   const { courseClass } = enrollment;
   
-  const teacherName = courseClass.employee.profile.fullname || 
-    `${courseClass.employee.profile.firstName || ''} ${courseClass.employee.profile.lastName || ''}`.trim() || 
+  const teacherName = courseClass.employee.profile?.fullname || 
+    `${courseClass.employee.profile?.firstName || ''} ${courseClass.employee.profile?.lastName || ''}`.trim() || 
     "N/A";
 
   return (

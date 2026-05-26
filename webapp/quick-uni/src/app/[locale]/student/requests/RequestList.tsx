@@ -8,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 
 interface RequestListProps {
-  requests: any[];
+  requests: unknown[];
 }
 
 export default function RequestList({ requests }: RequestListProps) {
   const t = useTranslations("Student.Requests");
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: "type",
@@ -53,6 +54,7 @@ export default function RequestList({ requests }: RequestListProps) {
     {
       id: "actions",
       header: t("Actions"),
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
       cell: ({ row }) => {
         return (
           <Button variant="ghost" size="icon">

@@ -43,8 +43,10 @@ const requestSchema = z.object({
 
 type RequestFormValues = z.infer<typeof requestSchema>;
 
+import { ClassEnrollment } from "../classes/ClassCard";
+
 interface RequestWizardProps {
-  enrollments: any[];
+  enrollments: ClassEnrollment[];
 }
 
 export default function RequestWizard({ enrollments }: RequestWizardProps) {
@@ -78,7 +80,7 @@ export default function RequestWizard({ enrollments }: RequestWizardProps) {
       setOpen(false);
       form.reset();
       setStep(1);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       notify(t("Error"), { type: "error" });
     } finally {

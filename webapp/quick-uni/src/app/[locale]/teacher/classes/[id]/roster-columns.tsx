@@ -15,7 +15,7 @@ export type StudentRosterData = {
   createAt: string;
 };
 
-export const getRosterColumns = (t: any): ColumnDef<StudentRosterData>[] => [
+export const getRosterColumns = (t: (key: string) => string): ColumnDef<StudentRosterData>[] => [
   {
     accessorKey: "student.code",
     header: t("MSSV") || "MSSV",

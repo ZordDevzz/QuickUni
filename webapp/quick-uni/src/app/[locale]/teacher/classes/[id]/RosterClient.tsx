@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { DataTable } from "@/components/ui/data-table";
-import { getRosterColumns } from "./roster-columns";
+import { getRosterColumns, StudentRosterData } from "./roster-columns";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -11,7 +11,7 @@ import { exportRosterAction } from "@/actions/course";
 import { toast } from "sonner";
 
 interface RosterClientProps {
-  data: any[];
+  data: unknown[];
 }
 
 export function RosterClient({ data }: RosterClientProps) {
@@ -34,6 +34,7 @@ export function RosterClient({ data }: RosterClientProps) {
       } else {
         toast.error(result.error || "Export failed");
       }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       toast.error("An error occurred during export");
     } finally {
@@ -58,9 +59,9 @@ export function RosterClient({ data }: RosterClientProps) {
           {teacherT("ExportExcel") || "Export to Excel"}
         </Button>
       </div>
-      <DataTable 
+      <DataTable<StudentRosterData, unknown>
         columns={columns} 
-        data={data} 
+        data={data as StudentRosterData[]} 
       />
     </div>
   );

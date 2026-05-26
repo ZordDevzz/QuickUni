@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/services/auth";
 import { getScheduleByRole } from "@/actions/scheduling-data";
 import { TimeGrid } from "@/components/features/academic/TimeGrid";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

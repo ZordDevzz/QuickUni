@@ -7,13 +7,15 @@ import {
   DialogHeader, 
   DialogTitle 
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, Library, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getStudentClassDetails } from "@/actions/course";
 import { toast } from "sonner";
 import { Loader2, FileText, GraduationCap, Info } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableTableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
+import { ClassEnrollment } from "./ClassCard";
 
 export function ClassDetailDialog({ 
   isOpen, 
@@ -22,9 +24,10 @@ export function ClassDetailDialog({
 }: { 
   isOpen: boolean, 
   onOpenChange: (open: boolean) => void, 
-  enrollment: any 
+  enrollment: ClassEnrollment 
 }) {
   const t = useTranslations("Student.Classes");
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [details, setDetails] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -35,6 +38,7 @@ export function ClassDetailDialog({
         try {
           const data = await getStudentClassDetails(enrollment.courseClass.id);
           setDetails(data);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
           toast.error("Failed to load class details");
         } finally {
@@ -83,7 +87,7 @@ export function ClassDetailDialog({
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <h4 className="font-semibold text-sm text-muted-foreground uppercase">{t("TeacherLabel")}</h4>
-                    <p>{courseClass.employee.profile.fullname || "N/A"}</p>
+                    <p>{courseClass.employee.profile?.fullname || "N/A"}</p>
                   </div>
                   <div className="space-y-1">
                     <h4 className="font-semibold text-sm text-muted-foreground uppercase">{t("StatusLabel")}</h4>
@@ -96,7 +100,7 @@ export function ClassDetailDialog({
               <TabsContent value="materials" className="m-0">
                 {details?.materials?.length > 0 ? (
                   <div className="space-y-2">
-                    {details.materials.map((m: any) => (
+                    {details.materials.map((m: { id: string; fileUrl: string; title: string }) => (
                       <a 
                         key={m.id} 
                         href={m.fileUrl} 
@@ -118,18 +122,22 @@ export function ClassDetailDialog({
                 {details?.studentGrades?.length > 0 ? (
                   <Table>
                     <TableHeader>
-                      <TableTableRow>
+                      <TableRow>
                         <TableHead>{t("GradeType")}</TableHead>
                         <TableHead className="text-right">{t("GradeValue")}</TableHead>
-                      </TableTableRow>
+                      </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {details.studentGrades.map((g: any) => (
-                        <TableTableRow key={g.id}>
-                          <TableCell>{g.gradeType?.name || "Regular"}</TableCell>
-                          <TableCell className="text-right font-bold">{g.grade}</TableCell>
-                        </TableTableRow>
-                      ))}
+                      {details.studentGrades.map((g: unknown) => {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const grade = g as any;
+                        return (
+                          <TableRow key={grade.id}>
+                            <TableCell>{grade.gradeType?.name || "Regular"}</TableCell>
+                            <TableCell className="text-right font-bold">{grade.grade}</TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 ) : (
