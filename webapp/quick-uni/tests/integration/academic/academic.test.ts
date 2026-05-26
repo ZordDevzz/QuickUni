@@ -77,6 +77,7 @@ describe('academic semester actions', () => {
     };
 
     // Access the mock transaction object
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let capturedTx: any;
     vi.mocked(db.transaction).mockImplementationOnce(async (cb) => {
       capturedTx = {
@@ -104,6 +105,7 @@ describe('academic semester actions', () => {
 
   it('toggleCurrentSemester should set isCurrent to true and unset others', async () => {
     const id = 1;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let capturedTx: any;
     vi.mocked(db.transaction).mockImplementationOnce(async (cb) => {
       capturedTx = {

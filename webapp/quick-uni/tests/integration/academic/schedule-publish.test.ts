@@ -39,6 +39,7 @@ describe('publishTemplateToSchedule', () => {
   });
 
   it('should return success: false if semester is not found', async () => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db.query.semester.findFirst as any).mockResolvedValue(null);
 
     const result = await publishTemplateToSchedule(1);
@@ -73,12 +74,17 @@ describe('publishTemplateToSchedule', () => {
       },
     ];
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db.query.semester.findFirst as any).mockResolvedValue(semester);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db.query.holidayBlacklist.findMany as any).mockResolvedValue(holidays);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db.query.weeklyTemplate.findMany as any).mockResolvedValue(templates);
 
     const mockValues = vi.fn();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db.insert as any).mockReturnValue({ values: mockValues });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db.delete as any).mockReturnValue({ where: vi.fn() });
 
     await publishTemplateToSchedule(1);

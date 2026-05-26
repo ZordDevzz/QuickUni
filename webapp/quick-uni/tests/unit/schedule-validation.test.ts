@@ -28,6 +28,7 @@ describe('Schedule Validation Service', () => {
   };
 
   it('should return valid: true if no collisions exist', async () => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db.query.schedule.findMany as any).mockResolvedValue([]);
 
     const result = await validateManualEdit(baseParams);
@@ -35,6 +36,7 @@ describe('Schedule Validation Service', () => {
   });
 
   it('should detect teacher collisions', async () => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db.query.schedule.findMany as any)
       .mockResolvedValueOnce([
         { id: 10, period: 2, endPeriod: 4 } // Overlaps with 1-2
@@ -47,6 +49,7 @@ describe('Schedule Validation Service', () => {
   });
 
   it('should detect room collisions', async () => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db.query.schedule.findMany as any)
       .mockResolvedValueOnce([]) // No teacher collisions
       .mockResolvedValueOnce([
@@ -59,6 +62,7 @@ describe('Schedule Validation Service', () => {
   });
 
   it('should ignore the current schedule ID being edited', async () => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db.query.schedule.findMany as any).mockResolvedValue([]);
 
     const paramsWithId = { ...baseParams, scheduleId: 10 };
