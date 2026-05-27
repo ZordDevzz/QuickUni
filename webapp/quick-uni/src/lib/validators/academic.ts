@@ -43,3 +43,21 @@ export const departmentEmploymentSchema = z.object({
 });
 
 export type DepartmentEmploymentInput = z.infer<typeof departmentEmploymentSchema>;
+
+export const subjectSchema = z.object({
+  id: z.string().uuid().optional(),
+  code: z.string().min(1, "Code is required").max(30),
+  name: z.string().min(1, "Name is required").max(255),
+  credits: z.coerce.number().int().min(0, "Credits must be at least 0"),
+  des: z.string().max(255).optional().nullable(),
+  recommendedSemesterIndex: z.coerce.number().int().min(1).optional().nullable(),
+  prerequisites: z.array(
+    z.object({
+      prerequisiteId: z.string().uuid(),
+      type: z.string().min(1).max(50).default("PREREQUISITE")
+    })
+  ).default([])
+});
+
+export type SubjectInput = z.infer<typeof subjectSchema>;
+

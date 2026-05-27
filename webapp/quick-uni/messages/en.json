@@ -30,7 +30,8 @@
     "Operations": "Operations",
     "PersonnelMgmt": "Personnel Management",
     "StudentMgmt": "Student Management",
-    "ProfileConfig": "Profile Configuration"
+    "ProfileConfig": "Profile Configuration",
+    "Subjects": "Subjects"
   },
   "Admin": {
     "Dashboard": "Dashboard",
@@ -494,5 +495,34 @@
         "approved": "Request has been approved",
         "rejected": "Request has been rejected"
       }
+    },
+    "Subject": {
+      "Subjects": "System Subjects",
+      "AddSubject": "Add Subject",
+      "EditSubject": "Edit Subject",
+      "Code": "Subject Code",
+      "Name": "Subject Name",
+      "Credits": "Credits",
+      "Description": "Description",
+      "RecommendedSemester": "Recommended Semester",
+      "Prerequisites": "Prerequisites / Corequisites",
+      "PrerequisiteType": "Prerequisite Type",
+      "Prerequisite": "Prerequisite",
+      "Corequisite": "Corequisite",
+      "NoPrerequisites": "None",
+      "Save": "Save",
+      "Cancel": "Cancel",
+      "Saving": "Saving...",
+      "DeleteTitle": "Confirm Delete",
+      "DeleteDescription": "Are you sure you want to delete subject {name}? This will perform a soft delete to avoid disrupting schedules.",
+      "DeleteSuccess": "Subject deleted successfully",
+      "CreateSuccess": "Subject created successfully",
+      "UpdateSuccess": "Subject updated successfully",
+      "CodePlaceholder": "e.g. INT1301",
+      "NamePlaceholder": "e.g. Database Systems",
+      "CreditsPlaceholder": "Enter number of credits",
+      "SemesterPlaceholder": "e.g. 3",
+      "DesPlaceholder": "Enter subject description..."
     }
 }
+

@@ -12,7 +12,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  X
+  X,
+  GraduationCap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { key: "Dashboard", href: "/academic", icon: LayoutDashboard },
   { key: "Semesters", href: "/academic/semesters", icon: Calendar, category: "Academic" },
+  { key: "Subjects", href: "/academic/subjects", icon: GraduationCap },
   { 
     key: "Facilities", 
     href: "/academic/buildings", 

@@ -65,6 +65,21 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      try {
+        const urlObj = new URL(url);
+        const baseUrlObj = new URL(baseUrl);
+        if (urlObj.origin === baseUrlObj.origin) return url;
+        // Fail-safe for production if NEXTAUTH_URL is misconfigured as localhost
+        if (process.env.NODE_ENV === "production" && baseUrlObj.hostname === "localhost" && urlObj.hostname !== "localhost") {
+          return url;
+        }
+      } catch (e) {
+        // Fallback
+      }
+      return baseUrl;
+    },
   },
 };
 export const getAuthSession = async (req?: Request) => {

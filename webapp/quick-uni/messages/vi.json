@@ -30,7 +30,8 @@
     "Operations": "Vận hành",
     "PersonnelMgmt": "Quản lý Nhân sự",
     "StudentMgmt": "Quản lý Sinh viên",
-    "ProfileConfig": "Cấu hình Hồ sơ"
+    "ProfileConfig": "Cấu hình Hồ sơ",
+    "Subjects": "Môn học"
   },
   "Admin": {
     "Dashboard": "Bảng điều khiển",
@@ -492,5 +493,34 @@
         "approved": "Yêu cầu đã được chấp thuận",
         "rejected": "Yêu cầu đã bị từ chối"
       }
+    },
+    "Subject": {
+      "Subjects": "Môn học hệ thống",
+      "AddSubject": "Thêm môn học",
+      "EditSubject": "Chỉnh sửa môn học",
+      "Code": "Mã môn học",
+      "Name": "Tên môn học",
+      "Credits": "Số tín chỉ",
+      "Description": "Mô tả",
+      "RecommendedSemester": "Học kỳ khuyến nghị",
+      "Prerequisites": "Môn tiên quyết/song hành",
+      "PrerequisiteType": "Loại điều kiện",
+      "Prerequisite": "Tiên quyết",
+      "Corequisite": "Song hành",
+      "NoPrerequisites": "Không có",
+      "Save": "Lưu",
+      "Cancel": "Hủy",
+      "Saving": "Đang lưu...",
+      "DeleteTitle": "Xác nhận xóa môn học",
+      "DeleteDescription": "Bạn có chắc chắn muốn xóa môn học {name}? Hành động này sẽ được thực hiện dưới dạng soft delete để không ảnh hưởng dữ liệu lịch học.",
+      "DeleteSuccess": "Xóa môn học thành công",
+      "CreateSuccess": "Tạo môn học thành công",
+      "UpdateSuccess": "Cập nhật môn học thành công",
+      "CodePlaceholder": "VD: INT1301",
+      "NamePlaceholder": "VD: Cơ sở dữ liệu",
+      "CreditsPlaceholder": "Nhập số tín chỉ",
+      "SemesterPlaceholder": "VD: 3",
+      "DesPlaceholder": "Nhập mô tả môn học..."
     }
 }
+

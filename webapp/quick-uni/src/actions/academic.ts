@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "../db";
-import { semester, department, major } from "../db/schemas/academic";
+import { semester, department, major, subject, subjectPrerequisite } from "../db/schemas/academic";
 import { departmentEmployment } from "../db/schemas/system";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { eq, ne, desc, asc, isNull, sql } from "drizzle-orm";
@@ -14,6 +14,8 @@ import {
   MajorInput,
   departmentEmploymentSchema,
   DepartmentEmploymentInput,
+  subjectSchema,
+  SubjectInput,
 } from "../lib/validators/academic";
 import { revalidatePath } from "next/cache";
 
@@ -179,4 +181,74 @@ export async function assignStaffToDepartment(data: DepartmentEmploymentInput) {
 
   revalidatePath("/[locale]/admin/academic/departments/[id]", "page");
   return result;
+}
+
+export async function getSubjects() {
+  return await db.query.subject.findMany({
+    where: isNull(subject.deletedAt),
+    orderBy: [asc(subject.code)],
+    with: {
+      subjectPrerequisites_subjectId: {
+        with: {
+          subject_prerequisiteId: true,
+        },
+      },
+    },
+  });
+}
+
+export async function upsertSubject(data: SubjectInput) {
+  const validated = subjectSchema.parse(data);
+  const { id, prerequisites, ...values } = validated;
+
+  return await db.transaction(async (tx) => {
+    let subjectId: string;
+    
+    if (id) {
+      subjectId = id;
+      await tx
+        .update(subject)
+        .set({ ...values, updateAt: sql`CURRENT_TIMESTAMP` })
+        .where(eq(subject.id, id));
+        
+      await tx
+        .delete(subjectPrerequisite)
+        .where(eq(subjectPrerequisite.subjectId, id));
+    } else {
+      subjectId = crypto.randomUUID();
+      await tx
+        .insert(subject)
+        .values({
+          id: subjectId,
+          ...values,
+        });
+    }
+
+    if (prerequisites && prerequisites.length > 0) {
+      await tx
+        .insert(subjectPrerequisite)
+        .values(
+          prerequisites.map((p) => ({
+            subjectId,
+            prerequisiteId: p.prerequisiteId,
+            type: p.type,
+          }))
+        );
+    }
+
+    revalidatePath("/[locale]/academic/subjects", "page");
+    revalidatePath("/academic/subjects");
+    return { success: true };
+  });
+}
+
+export async function deleteSubject(id: string) {
+  await db
+    .update(subject)
+    .set({ deletedAt: sql`CURRENT_TIMESTAMP` })
+    .where(eq(subject.id, id));
+
+  revalidatePath("/[locale]/academic/subjects", "page");
+  revalidatePath("/academic/subjects");
+  return { success: true };
 }
