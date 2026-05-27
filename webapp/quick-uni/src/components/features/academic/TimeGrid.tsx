@@ -6,8 +6,13 @@ import { useTranslations } from "next-intl";
 import { Loader2, RefreshCw, BookOpen } from "lucide-react";
 import { hasCollision, createMask } from "@/lib/scheduling/bitmask";
 import { cn, stringToHslColor } from "@/lib/utils";
+import { format, addDays, parseISO } from "date-fns";
 
-export type AssignmentWithRelations = Awaited<ReturnType<typeof getWeeklyTemplateByEntity>>[number];
+export type AssignmentWithRelations = Awaited<ReturnType<typeof getWeeklyTemplateByEntity>>[number] & {
+  startDate?: string | null;
+  endDate?: string | null;
+  schDate?: string;
+};
 
 interface TimeGridProps {
   assignments: AssignmentWithRelations[];
@@ -21,6 +26,7 @@ interface TimeGridProps {
   onToggleBlock?: (dayIndex: number, period: number) => void;
   emptyStateMessage?: string;
   showEmptyState?: boolean;
+  weekStartDate?: string; // YYYY-MM-DD for current week Monday
 }
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -38,7 +44,8 @@ export function TimeGrid({
   onAssignmentClick,
   onToggleBlock,
   emptyStateMessage,
-  showEmptyState
+  showEmptyState,
+  weekStartDate
 }: TimeGridProps) {
   const t = useTranslations("Admin");
 
@@ -49,6 +56,25 @@ export function TimeGrid({
       </div>
     );
   }
+
+  // Pre-process to group overlapping templates side-by-side
+  const slotGroups: Record<string, typeof assignments> = {};
+  assignments.forEach(a => {
+    const dayIndex = (a.dayOfWeek + 6) % 7; 
+    const key = `${dayIndex}-${a.startPeriod}`;
+    if (!slotGroups[key]) slotGroups[key] = [];
+    slotGroups[key].push(a);
+  });
+
+  const getDayLabel = (day: string, index: number) => {
+    if (!weekStartDate) return t(day);
+    try {
+      const date = addDays(parseISO(weekStartDate), index);
+      return `${t(day)} (${format(date, "dd/MM")})`;
+    } catch (e) {
+      return t(day);
+    }
+  };
 
   return (
     <div className="flex flex-col border rounded-lg bg-background overflow-hidden h-[calc(100vh-250px)] relative">
@@ -65,13 +91,13 @@ export function TimeGrid({
             <div className="p-2 border-r text-center text-xs font-bold uppercase tracking-wider text-muted-foreground bg-muted/50 sticky left-0 z-50">
               {t("Period")}
             </div>
-            {DAYS.map((day) => (
+            {DAYS.map((day, index) => (
               <div key={day} className="p-2 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground border-r last:border-r-0">
-                {t(day)}
+                {getDayLabel(day, index)}
               </div>
             ))}
           </div>
-
+ 
           {/* Grid Content */}
           <div className="grid grid-cols-8 relative" style={{ height: `${PERIODS.length * PERIOD_HEIGHT}px` }}>
             {/* Background Grid Lines */}
@@ -116,7 +142,7 @@ export function TimeGrid({
                 })}
               </div>
             ))}
-
+ 
             {/* Assignments Overlay */}
             {assignments.map((assignment) => {
               // Mapping DB Sunday-start (0) to UI Monday-start (Mon=0, Sun=6)
@@ -124,20 +150,29 @@ export function TimeGrid({
               const start = assignment.startPeriod;
               const end = assignment.endPeriod;
               const duration = end - start + 1;
-
+ 
               const subjectId = assignment.courseClass?.subject?.id;
               const bgColor = subjectId ? stringToHslColor(subjectId, 70, 90) : "hsl(var(--muted))";
               const borderColor = subjectId ? stringToHslColor(subjectId, 70, 60) : "hsl(var(--primary))";
               const textColor = subjectId ? stringToHslColor(subjectId, 80, 20) : "hsl(var(--primary))";
 
+              // Calculate width and left offset for side-by-side rendering
+              const key = `${dayIndex}-${start}`;
+              const group = slotGroups[key] || [assignment];
+              const groupIndex = group.indexOf(assignment);
+              const groupCount = group.length;
+
+              const widthPercent = 12.5 / groupCount;
+              const leftPercent = (dayIndex + 1) * 12.5 + groupIndex * widthPercent;
+ 
               return (
                 <div
                   key={assignment.id}
                   className="absolute p-1 z-10"
                   style={{
-                    left: `${((dayIndex + 1) * 12.5)}%`,
+                    left: `${leftPercent}%`,
                     top: `${((start - 1) * PERIOD_HEIGHT)}px`,
-                    width: "12.5%",
+                    width: `${widthPercent}%`,
                     height: `${(duration * PERIOD_HEIGHT)}px`,
                   }}
                   onClick={(e) => {
@@ -171,13 +206,21 @@ export function TimeGrid({
                     <div className="text-[9px] font-medium leading-tight line-clamp-2 mt-1">
                         {assignment.courseClass?.subject?.name}
                     </div>
+                    
+                    {/* Active Period / Week range display */}
+                    {assignment.courseClass?.startDate && (
+                      <div className="text-[8px] font-semibold mt-1 opacity-70 truncate" style={{ color: borderColor }}>
+                        📅 {assignment.courseClass.startDate.substring(5)} → {assignment.courseClass.endDate?.substring(5)}
+                      </div>
+                    )}
+
                     {type !== 'rooms' && (
-                      <div className="text-[9px] mt-1 truncate opacity-80">
+                      <div className="text-[9px] mt-0.5 truncate opacity-80">
                         📍 {assignment.room?.code}
                       </div>
                     )}
                     {type !== 'teachers' && (
-                      <div className="text-[9px] mt-1 truncate opacity-80">
+                      <div className="text-[9px] mt-0.5 truncate opacity-80">
                         👤 {assignment.courseClass?.employee?.profile?.fullname}
                       </div>
                     )}
@@ -188,6 +231,11 @@ export function TimeGrid({
                       <p>{assignment.courseClass?.subject?.name}</p>
                       <p>📍 {assignment.room?.code}</p>
                       <p>👤 {assignment.courseClass?.employee?.profile?.fullname}</p>
+                      {assignment.courseClass?.startDate && (
+                        <p className="mt-1 text-[10px] text-emerald-600 font-semibold">
+                          Hiệu lực: {assignment.courseClass.startDate} đến {assignment.courseClass.endDate}
+                        </p>
+                      )}
                       <p className="mt-1 text-[10px] text-muted-foreground">
                           {t(DAYS[dayIndex])}, {t("Period")} {start}-{end}
                       </p>

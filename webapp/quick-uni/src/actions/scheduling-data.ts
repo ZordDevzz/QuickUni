@@ -194,6 +194,9 @@ export async function validateWeeklyTemplateEdit(params: {
   const semesterId = targetClass.semesterId;
   const teacherId = targetClass.teacherId;
 
+  const targetStart = targetClass.startDate || "0000-00-00";
+  const targetEnd = targetClass.endDate || "9999-99-99";
+
   // 1. Check for Room collisions in weeklyTemplate (scoped to semester)
   const roomConflicts = await db.query.weeklyTemplate.findMany({
     where: (template, { and, eq, ne, exists }) => and(
@@ -208,12 +211,20 @@ export async function validateWeeklyTemplateEdit(params: {
             eq(courseClass.semesterId, semesterId)
           ))
       )
-    )
+    ),
+    with: {
+      courseClass: true
+    }
   });
 
   for (const conflict of roomConflicts) {
     if (hasCollision(newMask, conflict.occupyMask)) {
-      return { valid: false, reason: "Room is already occupied in this time slot" };
+      const conflictStart = conflict.courseClass?.startDate || "0000-00-00";
+      const conflictEnd = conflict.courseClass?.endDate || "9999-99-99";
+      
+      if (targetStart <= conflictEnd && conflictStart <= targetEnd) {
+        return { valid: false, reason: "Room is already occupied in this time slot during this period" };
+      }
     }
   }
 
@@ -231,12 +242,20 @@ export async function validateWeeklyTemplateEdit(params: {
             eq(courseClass.semesterId, semesterId)
           ))
       )
-    )
+    ),
+    with: {
+      courseClass: true
+    }
   });
 
   for (const conflict of teacherConflicts) {
     if (hasCollision(newMask, conflict.occupyMask)) {
-      return { valid: false, reason: "Teacher is already busy in this time slot" };
+      const conflictStart = conflict.courseClass?.startDate || "0000-00-00";
+      const conflictEnd = conflict.courseClass?.endDate || "9999-99-99";
+      
+      if (targetStart <= conflictEnd && conflictStart <= targetEnd) {
+        return { valid: false, reason: "Teacher is already busy in this time slot during this period" };
+      }
     }
   }
 

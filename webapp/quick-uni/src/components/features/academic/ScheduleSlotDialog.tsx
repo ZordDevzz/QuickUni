@@ -22,6 +22,7 @@ import {
   deleteWeeklyTemplate,
   validateWeeklyTemplateEdit
 } from "@/actions/scheduling-data";
+import { upsertActualScheduleAction, deleteActualScheduleAction } from "@/actions/actual-schedule";
 import { weeklyTemplateValidator, WeeklyTemplateInput } from "@/lib/validators/scheduling";
 import { Loader2, Trash2, RefreshCw, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -29,9 +30,10 @@ import { cn } from "@/lib/utils";
 interface ScheduleSlotDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  initialData: Partial<WeeklyTemplateInput & { scheduleTypeId?: number }> | null;
+  initialData: Partial<WeeklyTemplateInput & { scheduleTypeId?: number; schDate?: string }> | null;
   semesterId: number | null;
   onSuccess: () => void;
+  viewMode?: 'template' | 'actual';
 }
 
 type RoomOption = Awaited<ReturnType<typeof getRooms>>[number];
@@ -43,7 +45,8 @@ export function ScheduleSlotDialog({
   onClose, 
   initialData, 
   semesterId,
-  onSuccess 
+  onSuccess,
+  viewMode
 }: ScheduleSlotDialogProps) {
   const t = useTranslations("Admin");
   const [loading, setLoading] = useState(false);
@@ -103,6 +106,33 @@ export function ScheduleSlotDialog({
           return;
         }
 
+        if (viewMode === 'actual') {
+          const schDate = (initialData as any)?.schDate;
+          if (!schDate) {
+            toast.error("Ngày học thực tế không hợp lệ");
+            return;
+          }
+
+          const result = await upsertActualScheduleAction({
+            id: initialData?.id,
+            courseClassId: validation.data.courseClassId,
+            roomId: validation.data.roomId,
+            schDate,
+            startPeriod: validation.data.startPeriod,
+            endPeriod: validation.data.endPeriod,
+            scheduleType: validation.data.scheduleType
+          });
+
+          if (result.success) {
+            toast.success(initialData?.id ? t("UpdateSuccess") : t("CreateSuccess"));
+            onSuccess();
+            onClose();
+          } else {
+            toast.error(result.error || "Không thể lưu lịch học thực tế");
+          }
+          return;
+        }
+
         const validationResult = await validateWeeklyTemplateEdit(validation.data);
         if (!validationResult.valid) {
           toast.error(validationResult.reason);
@@ -127,6 +157,18 @@ export function ScheduleSlotDialog({
 
     setIsDeleting(true);
     try {
+      if (viewMode === 'actual') {
+        const result = await deleteActualScheduleAction(initialData.id);
+        if (result.success) {
+          toast.success(t("DeleteSuccess"));
+          onSuccess();
+          onClose();
+        } else {
+          toast.error(result.error || "Không thể xóa lịch thực tế");
+        }
+        return;
+      }
+
       const result = await deleteWeeklyTemplate(initialData.id);
       if (result.success) {
         toast.success(t("DeleteSuccess"));
@@ -164,6 +206,12 @@ export function ScheduleSlotDialog({
             {initialData?.id ? t("EditScheduleSlot") : t("AddScheduleSlot")}
           </DialogTitle>
         </DialogHeader>
+
+        {viewMode === 'actual' && (initialData as any)?.schDate && (
+          <div className="bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20 px-3 py-2 rounded-md text-xs font-semibold text-center flex items-center justify-center gap-1.5">
+            📅 Ngày học thực tế: <span className="underline font-bold">{(initialData as any).schDate}</span>
+          </div>
+        )}
 
         {loading ? (
           <div className="flex items-center justify-center p-8">

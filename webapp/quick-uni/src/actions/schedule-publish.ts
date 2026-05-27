@@ -39,7 +39,10 @@ export async function publishTemplateToSchedule(semesterId: number) {
             eq(courseClass.id, t.courseClassId),
             eq(courseClass.semesterId, semesterId)
           ))
-      )
+      ),
+      with: {
+        courseClass: true
+      }
     });
 
     // 4. Iterate through each day in semester
@@ -57,7 +60,19 @@ export async function publishTemplateToSchedule(semesterId: number) {
       if (!isHoliday) {
         const dayOfWeek = currentDate.getDay(); // 0 (Sun) - 6 (Sat)
         const dateStr = format(currentDate, 'yyyy-MM-dd');
-        const dayTemplates = templates.filter(t => t.dayOfWeek === dayOfWeek);
+        
+        // Filter templates: only run if currentDate falls within courseClass's active dates!
+        const dayTemplates = templates.filter(t => {
+          if (t.dayOfWeek !== dayOfWeek) return false;
+          
+          const cc = t.courseClass;
+          if (!cc) return true; // Fallback if no courseClass loaded
+          
+          const classStart = cc.startDate ? parseISO(cc.startDate) : startDate;
+          const classEnd = cc.endDate ? parseISO(cc.endDate) : endDate;
+          
+          return currentDate >= classStart && currentDate <= classEnd;
+        });
 
         for (const t of dayTemplates) {
           scheduleEntries.push({

@@ -182,4 +182,29 @@ describe('Scheduler Service', () => {
     const day = result![0].dayOfWeek;
     expect(day >= 1 && day <= 5).toBe(true);
   });
+
+  it('should allow overlapping room and teacher time slots if date intervals do not overlap (gối đầu)', () => {
+    const request: ScheduleRequest = {
+      classes: [
+        // Class_A and Class_B share same room & teacher, but their date ranges are completely distinct
+        { id: 'Class_A', teacherId: 'Teacher_1', periods: 4, startDate: '2026-01-01', endDate: '2026-03-31' },
+        { id: 'Class_B', teacherId: 'Teacher_1', periods: 4, startDate: '2026-04-01', endDate: '2026-06-30' },
+      ],
+      rooms: [{ id: 101 }], // Only 1 room available
+      availability: new Map<string, number[]>(),
+    };
+
+    const result = solveWeekly(request);
+    expect(result).not.toBeNull();
+    expect(result?.length).toBe(2);
+
+    const a = result!.find(r => r.courseClassId === 'Class_A')!;
+    const b = result!.find(r => r.courseClassId === 'Class_B')!;
+
+    // Since they don't overlap in dates, they can be scheduled on the EXACT SAME day, room, and periods!
+    expect(a.dayOfWeek).toBe(b.dayOfWeek);
+    expect(a.roomId).toBe(b.roomId);
+    expect(a.startPeriod).toBe(b.startPeriod);
+    expect(a.occupyMask).toBe(b.occupyMask);
+  });
 });

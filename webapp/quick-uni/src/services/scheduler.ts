@@ -9,6 +9,8 @@ export interface ClassRequest {
   allowEvening?: boolean;
   allowWeekend?: boolean;
   preferredConsecutiveDays?: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface RoomRequest {
@@ -33,21 +35,41 @@ export interface Assignment {
   occupyMask: number;
 }
 
+interface AssignedSlot {
+  mask: number;
+  startDate: string;
+  endDate: string;
+}
+
 export function solveWeekly(request: ScheduleRequest): Assignment[] | null {
   const assignments: Assignment[] = [];
   
-  // 1. Initialize occupancy maps for teachers and rooms (7 days each)
-  const teacherOccupancy = new Map<string, number[]>();
-  const roomOccupancy = new Map<number, number[]>();
+  // Initialize tracked assignments maps
+  const teacherAssignments = new Map<string, AssignedSlot[][]>();
+  const roomAssignments = new Map<number, AssignedSlot[][]>();
   
-  // Initialize with zeros for each entity across 7 days
   request.classes.forEach(c => {
-    if (!teacherOccupancy.has(c.teacherId)) {
-      teacherOccupancy.set(c.teacherId, (request.availability.get(c.teacherId) || new Array(DAYS_IN_WEEK).fill(0)).slice());
+    if (!teacherAssignments.has(c.teacherId)) {
+      const days: AssignedSlot[][] = Array.from({ length: DAYS_IN_WEEK }, () => []);
+      const initAvail = request.availability.get(c.teacherId) || new Array(DAYS_IN_WEEK).fill(0);
+      for (let d = 0; d < DAYS_IN_WEEK; d++) {
+        if (initAvail[d] !== 0) {
+          days[d].push({ mask: initAvail[d], startDate: "0000-00-00", endDate: "9999-99-99" });
+        }
+      }
+      teacherAssignments.set(c.teacherId, days);
     }
   });
+
   request.rooms.forEach(r => {
-    roomOccupancy.set(r.id, (request.availability.get(r.id.toString()) || new Array(DAYS_IN_WEEK).fill(0)).slice());
+    const days: AssignedSlot[][] = Array.from({ length: DAYS_IN_WEEK }, () => []);
+    const initAvail = request.availability.get(r.id.toString()) || new Array(DAYS_IN_WEEK).fill(0);
+    for (let d = 0; d < DAYS_IN_WEEK; d++) {
+      if (initAvail[d] !== 0) {
+        days[d].push({ mask: initAvail[d], startDate: "0000-00-00", endDate: "9999-99-99" });
+      }
+    }
+    roomAssignments.set(r.id, days);
   });
 
   const globalAvailability = request.availability.get('global') || new Array(DAYS_IN_WEEK).fill(0);
@@ -58,13 +80,14 @@ export function solveWeekly(request: ScheduleRequest): Assignment[] | null {
     const currentClass = sortedClasses[classIndex];
     const teacherId = currentClass.teacherId;
     const periods = currentClass.periods;
-    const initialTeacherAvail = request.availability.get(teacherId) || new Array(DAYS_IN_WEEK).fill(0);
     
     // Heuristic for consecutive teaching days:
     // Determine which days the teacher is already assigned to teach in this schedule run
     const assignedDays: number[] = [];
     for (let d = 0; d < DAYS_IN_WEEK; d++) {
-      if (teacherOccupancy.get(teacherId)![d] !== initialTeacherAvail[d]) {
+      const daySlots = teacherAssignments.get(teacherId)![d];
+      const hasClassAssigned = daySlots.some(slot => slot.startDate !== "0000-00-00");
+      if (hasClassAssigned) {
         assignedDays.push(d);
       }
     }
@@ -107,10 +130,27 @@ export function solveWeekly(request: ScheduleRequest): Assignment[] | null {
       for (const room of request.rooms) {
         const roomId = room.id;
         
-        // Combine all constraints for this specific teacher-room-day combination
+        // Combine occupancy for this class's specific date range
+        const classStart = currentClass.startDate || "0000-00-00";
+        const classEnd = currentClass.endDate || "9999-99-99";
+        
+        let teacherMaskForClass = 0;
+        teacherAssignments.get(teacherId)![day].forEach(slot => {
+          if (slot.startDate <= classEnd && classStart <= slot.endDate) {
+            teacherMaskForClass |= slot.mask;
+          }
+        });
+
+        let roomMaskForClass = 0;
+        roomAssignments.get(roomId)![day].forEach(slot => {
+          if (slot.startDate <= classEnd && classStart <= slot.endDate) {
+            roomMaskForClass |= slot.mask;
+          }
+        });
+
         let combinedOccupancy = 
-          teacherOccupancy.get(teacherId)![day] | 
-          roomOccupancy.get(roomId)![day] | 
+          teacherMaskForClass | 
+          roomMaskForClass | 
           globalAvailability[day];
         
         // Enforce evening block: default to no-evening unless allowEvening is marked
@@ -130,8 +170,13 @@ export function solveWeekly(request: ScheduleRequest): Assignment[] | null {
           const mask = createMask(start, start + periods - 1);
           
           // Apply assignment
-          teacherOccupancy.get(teacherId)![day] |= mask;
-          roomOccupancy.get(roomId)![day] |= mask;
+          const slotItem = {
+            mask,
+            startDate: classStart,
+            endDate: classEnd
+          };
+          teacherAssignments.get(teacherId)![day].push(slotItem);
+          roomAssignments.get(roomId)![day].push(slotItem);
           
           assignments.push({
             courseClassId: currentClass.id,
@@ -146,8 +191,8 @@ export function solveWeekly(request: ScheduleRequest): Assignment[] | null {
           
           // Backtrack
           assignments.pop();
-          teacherOccupancy.get(teacherId)![day] &= ~mask;
-          roomOccupancy.get(roomId)![day] &= ~mask;
+          teacherAssignments.get(teacherId)![day].pop();
+          roomAssignments.get(roomId)![day].pop();
         }
       }
     }

@@ -75,6 +75,8 @@ describe("Teacher Workspace Server Actions", () => {
         minSessionPeriods: 2,
         allowEvening: false,
         allowWeekend: false,
+        startDate: null,
+        endDate: null,
         createAt: new Date().toISOString(),
         updateAt: null,
         deletedAt: null

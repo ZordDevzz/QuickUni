@@ -36,7 +36,9 @@ export async function autoGenerateWeeklyAction(semesterId: number, teacherPrefs?
         periods: c.minSessionPeriods || 4, // custom period duration
         allowEvening: c.allowEvening, // allow evening flag
         allowWeekend: c.allowWeekend, // allow weekend flag
-        preferredConsecutiveDays: teacherPrefs?.[c.teacherId] ?? 2 // state-only consecutive teaching days preference
+        preferredConsecutiveDays: teacherPrefs?.[c.teacherId] ?? 2, // state-only consecutive teaching days preference
+        startDate: c.startDate || undefined,
+        endDate: c.endDate || undefined
       })),
       rooms: rooms.filter(r => r.isAvailable).map(r => ({ id: r.id })), // only available rooms
       availability: availabilityMap

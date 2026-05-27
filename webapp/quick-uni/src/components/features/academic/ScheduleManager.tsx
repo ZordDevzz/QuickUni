@@ -29,6 +29,8 @@ import {
 import { autoGenerateWeeklyAction } from "@/actions/schedule-generate";
 import { publishTemplateToSchedule } from "@/actions/schedule-publish";
 import { getSemesters, toggleAvailabilityAction, getWeeklyTemplateByEntity, getAvailability } from "@/actions/scheduling-data";
+import { getActualScheduleByEntity } from "@/actions/actual-schedule";
+import { parseISO, format, addDays, startOfWeek } from "date-fns";
 import { toast } from "sonner";
 import { Loader2, Play, Send, Calendar, ChevronDown, Lock, Unlock } from "lucide-react";
 import { useSemester } from "@/components/providers/semester-provider";
@@ -44,13 +46,15 @@ export function ScheduleManager() {
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isHolidayDialogOpen, setIsHolidayDialogOpen] = useState(false);
-  const [dialogData, setDialogData] = useState<Partial<WeeklyTemplateInput> | null>(null);
+  const [dialogData, setDialogData] = useState<any>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const [semesterId, setSemesterId] = useState<number | null>(selectedSemesterId);
-  // Track previous values to reset state when dependencies change during render
   const [prevSelectedSemesterId, setPrevSelectedSemesterId] = useState<number | null>(selectedSemesterId);
   const [prevSemesterId, setPrevSemesterId] = useState<number | null>(semesterId);
+
+  const [viewMode, setViewMode] = useState<"template" | "actual">("template");
+  const [selectedWeekIndex, setSelectedWeekIndex] = useState<number>(0);
 
   if (selectedSemesterId !== prevSelectedSemesterId) {
     setPrevSelectedSemesterId(selectedSemesterId);
@@ -60,14 +64,13 @@ export function ScheduleManager() {
   if (semesterId !== prevSemesterId) {
     setPrevSemesterId(semesterId);
     setSelectedId(null);
+    setSelectedWeekIndex(0);
   }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [semesters, setSemesters] = useState<any[]>([]);
   const [isPending, startTransition] = useTransition();
   const [isEditAvailabilityMode, setIsEditAvailabilityMode] = useState(false);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [assignments, setAssignments] = useState<any[]>([]);
   const [availability, setAvailability] = useState<number[]>(new Array(7).fill(0));
   const [isLoading, setIsLoading] = useState(false);
@@ -75,6 +78,33 @@ export function ScheduleManager() {
   useEffect(() => {
     getSemesters().then(setSemesters);
   }, []);
+
+  const selectedSemester = semesters.find(s => s.id === semesterId);
+
+  // Compute weeks dynamically
+  const weeks: { index: number; label: string; start: string; end: string }[] = [];
+  if (selectedSemester) {
+    try {
+      const start = parseISO(selectedSemester.startDate);
+      const end = parseISO(selectedSemester.endDate);
+      let currentMonday = startOfWeek(start, { weekStartsOn: 1 });
+      let index = 1;
+      while (currentMonday <= end) {
+        const weekStartStr = format(currentMonday, "yyyy-MM-dd");
+        const weekEndStr = format(addDays(currentMonday, 6), "yyyy-MM-dd");
+        weeks.push({
+          index,
+          label: `Tuần ${index} (${format(currentMonday, "dd/MM")} - ${format(addDays(currentMonday, 6), "dd/MM")})`,
+          start: weekStartStr,
+          end: weekEndStr
+        });
+        currentMonday = addDays(currentMonday, 7);
+        index++;
+      }
+    } catch (e) {
+      console.error("Error computing weeks:", e);
+    }
+  }
 
   useEffect(() => {
     async function loadData() {
@@ -87,20 +117,41 @@ export function ScheduleManager() {
       setIsLoading(true);
       try {
         const mappedType = activeTab === "rooms" ? "room" : activeTab === "teachers" ? "teacher" : "class";
-        const [templates, availData] = await Promise.all([
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-          getWeeklyTemplateByEntity(selectedId, mappedType as any, semesterId),
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-          getAvailability(selectedId, mappedType as any)
-        ]);
         
-        setAssignments(templates || []);
-        
-        const availMasks = new Array(7).fill(0);
-        availData.forEach(a => {
-          availMasks[a.dayOfWeek] = a.occupiedMask;
-        });
-        setAvailability(availMasks);
+        if (viewMode === "template") {
+          const [templates, availData] = await Promise.all([
+            getWeeklyTemplateByEntity(selectedId, mappedType as any, semesterId),
+            getAvailability(selectedId, mappedType as any)
+          ]);
+          
+          setAssignments(templates || []);
+          
+          const availMasks = new Array(7).fill(0);
+          availData.forEach(a => {
+            availMasks[a.dayOfWeek] = a.occupiedMask;
+          });
+          setAvailability(availMasks);
+        } else {
+          // Actual Mode
+          const currentWeek = weeks[selectedWeekIndex];
+          if (!currentWeek) {
+            setAssignments([]);
+            setIsLoading(false);
+            return;
+          }
+          const [actuals, availData] = await Promise.all([
+            getActualScheduleByEntity(selectedId, mappedType as any, currentWeek.start, currentWeek.end),
+            getAvailability(selectedId, mappedType as any)
+          ]);
+          
+          setAssignments(actuals || []);
+          
+          const availMasks = new Array(7).fill(0);
+          availData.forEach(a => {
+            availMasks[a.dayOfWeek] = a.occupiedMask;
+          });
+          setAvailability(availMasks);
+        }
       } catch (error) {
         console.error("Failed to load data", error);
         setAssignments([]);
@@ -109,25 +160,30 @@ export function ScheduleManager() {
       }
     }
     loadData();
-  }, [selectedId, activeTab, semesterId, refreshKey]);
+  }, [selectedId, activeTab, semesterId, refreshKey, viewMode, selectedWeekIndex, weeks.length]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value as EntityType);
-    setSelectedId(null); // Reset selection when switching tabs
+    setSelectedId(null);
   };
 
   const handleCellClick = (dayIndex: number, period: number) => {
     if (isEditAvailabilityMode) return;
     
-    // dayIndex is 0-6 (Mon-Sun), we need to map to DB Sunday-start (0=Sun, 1=Mon...)
     const dbDayOfWeek = (dayIndex + 1) % 7;
     
+    let schDate: string | undefined = undefined;
+    if (viewMode === "actual" && weeks[selectedWeekIndex]) {
+      schDate = format(addDays(parseISO(weeks[selectedWeekIndex].start), dayIndex), "yyyy-MM-dd");
+    }
+
     setDialogData({
       dayOfWeek: dbDayOfWeek,
       startPeriod: period,
       endPeriod: Math.min(period + 1, 15),
       roomId: activeTab === "rooms" && selectedId ? parseInt(selectedId) : undefined,
       courseClassId: activeTab === "classes" && selectedId ? selectedId : undefined,
+      schDate,
     });
     setIsDialogOpen(true);
   };
@@ -141,7 +197,6 @@ export function ScheduleManager() {
     
     const result = await toggleAvailabilityAction({
       entityId: selectedId,
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
       entityType: mappedType as any,
       dayOfWeek: dbDayOfWeek,
       slotMask
@@ -154,7 +209,6 @@ export function ScheduleManager() {
     }
   };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleAssignmentClick = (assignment: any) => {
     if (isEditAvailabilityMode) return;
     
@@ -165,9 +219,9 @@ export function ScheduleManager() {
       dayOfWeek: assignment.dayOfWeek,
       startPeriod: assignment.startPeriod,
       endPeriod: assignment.endPeriod,
-      // Pass the stored type so the dialog can pre-select it
       scheduleTypeId: assignment.scheduleTypeId ?? 1,
-    } as any);
+      schDate: assignment.schDate,
+    });
     setIsDialogOpen(true);
   };
 
@@ -200,18 +254,75 @@ export function ScheduleManager() {
     });
   };
 
-  const selectedSemester = semesters.find(s => s.id === semesterId);
-
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">{t("Schedule")}</h1>
-        <div className="flex gap-2">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{t("Schedule")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Quản lý lịch giảng dạy của giảng viên, phòng học và lớp học phần.
+          </p>
+        </div>
+        
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Mode Switcher */}
+          <div className="flex bg-muted p-1 rounded-lg border">
+            <Button
+              variant={viewMode === "template" ? "default" : "ghost"}
+              size="sm"
+              className="h-7 text-xs px-3"
+              onClick={() => {
+                setViewMode("template");
+                setSelectedId(null);
+              }}
+            >
+              Bản mẫu tuần
+            </Button>
+            <Button
+              variant={viewMode === "actual" ? "default" : "ghost"}
+              size="sm"
+              className="h-7 text-xs px-3"
+              onClick={() => {
+                setViewMode("actual");
+                setSelectedId(null);
+              }}
+            >
+              Lịch thực tế
+            </Button>
+          </div>
+
+          {/* Week Selector for Actual Mode */}
+          {viewMode === "actual" && weeks.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 gap-1 pr-2">
+                  <Calendar className="h-4 w-4" />
+                  <span className="text-xs font-semibold">
+                    {weeks[selectedWeekIndex]?.label || "Chọn tuần"}
+                  </span>
+                  <ChevronDown className="h-4 w-4 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="max-h-[300px] overflow-y-auto">
+                {weeks.map((w, idx) => (
+                  <DropdownMenuItem 
+                    key={w.index} 
+                    onClick={() => setSelectedWeekIndex(idx)}
+                    className={idx === selectedWeekIndex ? "bg-accent" : ""}
+                  >
+                    {w.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
           <Button 
             variant={isEditAvailabilityMode ? "secondary" : "outline"} 
             size="sm"
             onClick={() => setIsEditAvailabilityMode(!isEditAvailabilityMode)}
             className="gap-2"
+            disabled={viewMode === "actual"} // Availability blocking only in template/setup
           >
             {isEditAvailabilityMode ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
             <span className="hidden sm:inline-block">
@@ -252,38 +363,42 @@ export function ScheduleManager() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Link href="/academic/schedule/wizard">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              disabled={!semesterId || isPending}
-              className="gap-2"
-            >
-              {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-              <span>Thiết lập & Xếp lịch tự động</span>
-            </Button>
-          </Link>
+          {viewMode === "template" && (
+            <>
+              <Link href="/academic/schedule/wizard">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  disabled={!semesterId || isPending}
+                  className="gap-2"
+                >
+                  {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+                  <span>Thiết lập & Xếp lịch tự động</span>
+                </Button>
+              </Link>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="default" size="sm" disabled={!semesterId || isPending}>
-                {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                {t("Publish")}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t("ConfirmPublish")}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t("PublishDescription")}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
-                <AlertDialogAction onClick={handlePublish}>{t("Continue")}</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="default" size="sm" disabled={!semesterId || isPending}>
+                    {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                    {t("Publish")}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t("ConfirmPublish")}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("PublishDescription")}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
+                    <AlertDialogAction onClick={handlePublish}>{t("Continue")}</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </>
+          )}
         </div>
       </div>
       
@@ -315,6 +430,7 @@ export function ScheduleManager() {
                 onAssignmentClick={handleAssignmentClick}
                 onToggleBlock={handleToggleBlock}
                 showEmptyState={!selectedId}
+                weekStartDate={viewMode === "actual" && weeks[selectedWeekIndex] ? weeks[selectedWeekIndex].start : undefined}
             />
           </div>
         </div>
@@ -332,6 +448,7 @@ export function ScheduleManager() {
         initialData={dialogData}
         semesterId={semesterId}
         onSuccess={handleSuccess}
+        viewMode={viewMode}
       />
     </div>
   );

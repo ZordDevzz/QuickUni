@@ -17,6 +17,8 @@ interface DependencyItem {
   profile?: {
     fullname?: string | null;
   } | null;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface Dependencies {
@@ -35,6 +37,8 @@ export interface CourseClass {
   semesterId: string;
   type: number;
   status: string;
+  startDate?: string | null;
+  endDate?: string | null;
 }
 
 interface CourseClassFormProps {
@@ -57,6 +61,8 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
       type: courseClass?.type || (types.length > 0 ? types[0].id : ""),
       semesterId: courseClass?.semesterId || (semesters.length > 0 ? semesters[0].id : ""),
       status: courseClass?.status || "opened",
+      startDate: courseClass?.startDate || "",
+      endDate: courseClass?.endDate || "",
     },
     onSubmit: async ({ value }) => {
       try {
@@ -252,6 +258,56 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
           </Field>
         )}
       </form.Field>
+
+      <div className="grid grid-cols-2 gap-4">
+        <form.Field name="startDate">
+          {(field) => {
+            const selectedSemesterId = form.getFieldValue("semesterId");
+            const selectedSemester = semesters.find(s => s.id === Number(selectedSemesterId));
+            return (
+              <Field>
+                <FieldLabel htmlFor={field.name}>Start Date (Optional)</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    type="date"
+                    min={selectedSemester?.startDate || undefined}
+                    max={selectedSemester?.endDate || undefined}
+                    value={field.state.value || ""}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                  />
+                </FieldContent>
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <form.Field name="endDate">
+          {(field) => {
+            const selectedSemesterId = form.getFieldValue("semesterId");
+            const selectedSemester = semesters.find(s => s.id === Number(selectedSemesterId));
+            return (
+              <Field>
+                <FieldLabel htmlFor={field.name}>End Date (Optional)</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    type="date"
+                    min={selectedSemester?.startDate || undefined}
+                    max={selectedSemester?.endDate || undefined}
+                    value={field.state.value || ""}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                  />
+                </FieldContent>
+              </Field>
+            );
+          }}
+        </form.Field>
+      </div>
 
       <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
         {([canSubmit, isSubmitting]) => (
