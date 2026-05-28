@@ -49,7 +49,7 @@ export async function GET(
       isRequired: sf.isRequired,
     })) || [];
 
-    const buffer = await generateOnboardingTemplate(fields);
+    const buffer = await generateOnboardingTemplate(fields, session.entityType as any);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return new NextResponse(buffer as any, {

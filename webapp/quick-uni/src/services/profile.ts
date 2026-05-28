@@ -8,7 +8,23 @@ export const getProfiles = async () => {
     orderBy: (profile, { desc }) => [desc(profile.createAt)],
     with: {
       account: true,
-      students: true,
+      students: {
+        with: {
+          mainClassMembers: {
+            with: {
+              mainClass: {
+                with: {
+                  major: {
+                    with: {
+                      department: true,
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       employees: true,
       profileSchema: true,
     }

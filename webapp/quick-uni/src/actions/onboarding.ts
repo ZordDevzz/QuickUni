@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { onboardingSession, systemAuditLog, profileSchemaField } from "@/db/schema";
+import { onboardingSession, systemAuditLog, profileSchemaField, mainClass } from "@/db/schema";
 import { getAuthSession } from "@/services/auth";
 import { parseAndValidateOnboardingExcel } from "@/services/excel";
 import { 
@@ -200,8 +200,22 @@ export async function executeOnboardingSession(sessionId: string): Promise<Actio
         });
 
         // 2. Link Profile to Entity
+        let classId = null;
+        if (session.entityType === "student" && rowData["Class Code"]) {
+          const cCode = rowData["Class Code"].toString().trim();
+          const foundClass = await db.query.mainClass.findFirst({
+            where: eq(mainClass.code, cCode),
+          });
+          if (foundClass) {
+            classId = foundClass.id;
+          } else {
+            throw new Error(`Class Code "${cCode}" not found in system.`);
+          }
+        }
+
         await linkProfileToEntity(profile.id, session.entityType as "student" | "employee", {
           code: rowData["Entity Code"]?.toString() || "",
+          classId,
         });
 
         // 3. Issue Account

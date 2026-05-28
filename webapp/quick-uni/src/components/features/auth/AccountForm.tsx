@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { Account, Profile } from "@/types/profile";
 import { useTranslations } from "next-intl";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface AccountFormProps {
   account?: Account; // If provided, we are in edit mode
@@ -170,23 +171,25 @@ export function AccountForm({ account, onSuccess, profiles = [], restrictType }:
             <Field>
               <FieldLabel htmlFor={field.name}>{t("Type")}</FieldLabel>
               <FieldContent>
-                <select
-                  id={field.name}
-                  name={field.name}
+                <Select
+                  onValueChange={(val) => field.handleChange(val as "student" | "employee" | "tech" | "dev")}
                   value={field.state.value}
                   disabled={restrictType === "student" && !isEdit}
-                  onChange={(e) => field.handleChange(e.target.value as "student" | "employee" | "tech" | "dev")}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30"
                 >
-                  {(!restrictType || restrictType === "student") && <option value="student">{t("TypeStudent")}</option>}
-                  {(!restrictType || restrictType === "personnel") && (
-                    <>
-                      <option value="employee">{t("TypeEmployee")}</option>
-                      <option value="tech">{t("TypeTech")}</option>
-                      <option value="dev">{t("TypeDev")}</option>
-                    </>
-                  )}
-                </select>
+                  <SelectTrigger id={field.name} className="w-full">
+                    <SelectValue placeholder={t("SelectType") || "Select type"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(!restrictType || restrictType === "student") && <SelectItem value="student">{t("TypeStudent")}</SelectItem>}
+                    {(!restrictType || restrictType === "personnel") && (
+                      <>
+                        <SelectItem value="employee">{t("TypeEmployee")}</SelectItem>
+                        <SelectItem value="tech">{t("TypeTech")}</SelectItem>
+                        <SelectItem value="dev">{t("TypeDev")}</SelectItem>
+                      </>
+                    )}
+                  </SelectContent>
+                </Select>
                 <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
               </FieldContent>
             </Field>
@@ -198,18 +201,20 @@ export function AccountForm({ account, onSuccess, profiles = [], restrictType }:
             <Field>
               <FieldLabel htmlFor={field.name}>{t("Status")}</FieldLabel>
               <FieldContent>
-                <select
-                  id={field.name}
-                  name={field.name}
+                <Select
+                  onValueChange={(val) => field.handleChange(val as "active" | "suspended" | "banned" | "expired")}
                   value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value as "active" | "suspended" | "banned" | "expired")}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30"
                 >
-                  <option value="active">{t("StatusActive")}</option>
-                  <option value="suspended">{t("StatusSuspended")}</option>
-                  <option value="banned">{t("StatusBanned")}</option>
-                  <option value="expired">{t("StatusExpired")}</option>
-                </select>
+                  <SelectTrigger id={field.name} className="w-full">
+                    <SelectValue placeholder={t("SelectStatus") || "Select status"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">{t("StatusActive")}</SelectItem>
+                    <SelectItem value="suspended">{t("StatusSuspended")}</SelectItem>
+                    <SelectItem value="banned">{t("StatusBanned")}</SelectItem>
+                    <SelectItem value="expired">{t("StatusExpired")}</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
               </FieldContent>
             </Field>
@@ -225,32 +230,33 @@ export function AccountForm({ account, onSuccess, profiles = [], restrictType }:
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t("LinkToProfile")}</FieldLabel>
                   <FieldContent>
-                    <select
-                      id={field.name}
-                      name={field.name}
+                    <Select
+                      onValueChange={(val) => field.handleChange(val)}
                       value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30"
                     >
-                      <option value="">{t("SelectProfile")}</option>
-                      {profiles
-                        .filter((p: any) => {
-                          if (p.accountId) return false;
-                          const isStudent = (p.students && p.students.length > 0) || p.profileSchema?.schemaCode?.startsWith("STD");
-                          if (restrictType === "student") {
-                            return isStudent;
-                          }
-                          if (restrictType === "personnel") {
-                            return !isStudent;
-                          }
-                          return true;
-                        })
-                        .map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.fullname} ({p.nationalId})
-                          </option>
-                        ))}
-                    </select>
+                      <SelectTrigger id={field.name} className="w-full">
+                        <SelectValue placeholder={t("SelectProfile")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {profiles
+                          .filter((p: any) => {
+                            if (p.accountId) return false;
+                            const isStudent = (p.students && p.students.length > 0) || p.profileSchema?.schemaCode?.startsWith("STD");
+                            if (restrictType === "student") {
+                              return isStudent;
+                            }
+                            if (restrictType === "personnel") {
+                              return !isStudent;
+                            }
+                            return true;
+                          })
+                          .map((p) => (
+                            <SelectItem key={p.id} value={p.id}>
+                              {p.fullname} ({p.nationalId})
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
                     <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
                   </FieldContent>
                 </Field>

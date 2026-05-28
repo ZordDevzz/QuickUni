@@ -5,6 +5,7 @@ import {
   student, 
   employee,
   profileSchemaField,
+  mainClassMember,
 } from "@/db/schema";
 import { userSystemRole } from "@/db/schemas/auth";
 import { eq, isNull } from "drizzle-orm";
@@ -103,11 +104,20 @@ export const linkProfileToEntity = async (
     });
     if (existingStudent) throw new Error("Profile is already linked to a Student");
 
+    const studentId = randomUUID();
     const [newStudent] = await db.insert(student).values({
-      id: randomUUID(),
+      id: studentId,
       code: data.code,
       profileId: profileId,
     }).returning();
+
+    if (data.classId) {
+      await db.insert(mainClassMember).values({
+        studentId,
+        classId: data.classId as string,
+        roleId: 3, // Default role 'Member'
+      });
+    }
     return { type: "student", entity: newStudent };
   } else if (type === "employee") {
      // Check if profile is already linked to an employee (Optional constraint enforcement)

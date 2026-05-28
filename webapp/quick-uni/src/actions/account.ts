@@ -47,7 +47,7 @@ export async function changePasswordAction(data: ChangePasswordInput) {
 }
 
 /**
- * Updates the personal profile dynamic data.
+ * Updates the personal profile standard and dynamic data.
  * Protected fields like 'msv', 'employee_id', etc. are filtered out for safety.
  */
 export async function updatePersonalProfileAction(data: ProfileUpdateInput) {
@@ -57,20 +57,59 @@ export async function updatePersonalProfileAction(data: ProfileUpdateInput) {
   try {
     const validated = profileUpdateSchema.parse(data);
     
-    // Hardcoded protected fields for safety
-    const protectedFields = ["msv", "employee_id", "username", "role", "code"];
-    const filteredData = { ...validated };
-    protectedFields.forEach(field => {
-      if (field in filteredData) {
-        delete (filteredData as Record<string, unknown>)[field];
+    const coreFields = ["fullname", "gender", "dob", "address", "ethnic", "religious"];
+    const updateData: Record<string, any> = {
+      updateAt: new Date().toISOString()
+    };
+    const dynamicData: Record<string, any> = {};
+
+    Object.entries(validated).forEach(([key, value]) => {
+      if (coreFields.includes(key)) {
+        if (key === "gender") {
+          if (value === "male" || value === "female" || value === "others") {
+            updateData[key] = value;
+          }
+        } else if (key === "dob") {
+          if (value && typeof value === "string") {
+            updateData[key] = value.split("T")[0];
+          }
+        } else {
+          updateData[key] = value;
+        }
+      } else {
+        const protectedFields = [
+          "msv", "employee_id", "username", "role", "code", "id", "accountId", 
+          "schemaId", "sessionId", "createAt", "updateAt", "deletedAt"
+        ];
+        if (!protectedFields.includes(key)) {
+          dynamicData[key] = value;
+        }
       }
     });
 
+    const existingProfile = await db.query.profile.findFirst({
+      where: eq(profile.accountId, session.user.id),
+    });
+
+    if (existingProfile) {
+      const mergedDynamicData = {
+        ...(existingProfile.dynamicData as Record<string, any> || {}),
+        ...dynamicData
+      };
+      
+      coreFields.forEach(field => {
+        if (field in mergedDynamicData) {
+          delete mergedDynamicData[field];
+        }
+      });
+      
+      updateData.dynamicData = mergedDynamicData;
+    } else {
+      updateData.dynamicData = dynamicData;
+    }
+
     await db.update(profile)
-      .set({ 
-        dynamicData: filteredData, 
-        updateAt: new Date().toISOString() 
-      })
+      .set(updateData)
       .where(eq(profile.accountId, session.user.id));
 
     revalidatePath("/account");
