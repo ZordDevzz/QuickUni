@@ -1,4 +1,5 @@
 {
+  "Close": "Close",
   "Navigation": {
     "Dashboard": "Dashboard",
     "Overview": "Overview",
@@ -10,6 +11,7 @@
     "People": "People",
     "Teachers": "Teachers",
     "Students": "Students",
+    "MainClasses": "Homeroom Classes",
     "MySchedule": "My Schedule",
     "MyClasses": "My Classes",
     "Requests": "Requests",
@@ -31,12 +33,17 @@
     "PersonnelMgmt": "Personnel Management",
     "StudentMgmt": "Student Management",
     "ProfileConfig": "Profile Configuration",
-    "Subjects": "Subjects"
+    "Subjects": "Subjects",
+    "Structure": "Structure Workspace",
+    "ProfileSchema": "Profile Structures",
+    "ProfileField": "Profile Fields"
   },
   "Admin": {
     "Dashboard": "Dashboard",
     "Overview": "Overview",
     "UserManagement": "User Management",
+    "PersonnelMgmt": "Personnel Management",
+    "StudentMgmt": "Student Management",
     "TotalPersonnel": "Total Personnel",
     "TotalStudents": "Total Students",
     "LinkedAccounts": "Linked Accounts",
@@ -148,6 +155,7 @@
     "SelectTeacher": "Select Teacher",
     "SelectBuilding": "Select Building",
     "SelectType": "Select Type",
+    "SelectStatus": "Select status",
     "ClassCode": "Class Code",
     "Capacity": "Capacity",
     "Subject": "Subject",
@@ -266,11 +274,14 @@
     "StatusActive": "Active",
     "StatusSuspended": "Suspended",
     "StatusBanned": "Banned",
-    "StatusExpired": "Expired"
+    "StatusExpired": "Expired",
+    "SelectType": "Select account type",
+    "SelectStatus": "Select status"
   },
   "Profile": {
     "EditTitle": "Edit Profile: {name}",
     "FullName": "Full Name",
+    "Code": "Code",
     "Gender": "Gender",
     "DateOfBirth": "Date of Birth",
     "NationalID": "National ID",
@@ -335,7 +346,9 @@
     "EthnicPlaceholder": "e.g. Caucasian",
     "ReligiousPlaceholder": "e.g. None",
     "FieldNamePlaceholder": "e.g. graduation_year",
-    "LabelPlaceholder": "e.g. Graduation Year"
+    "LabelPlaceholder": "e.g. Graduation Year",
+    "SelectDataType": "Select data type",
+    "SelectUISection": "Select UI section"
   },
   "Role": {
     "Roles": "System Roles",
@@ -358,17 +371,22 @@
     "Status": "Status"
   },
   "Teacher": {
+    "Dashboard": "Dashboard",
+    "TodaySchedule": "Today's Schedule",
+    "YouHaveClasses": "You have {count} class(es) scheduled for today.",
+    "NoClassesToday": "You have no classes scheduled for today.",
+    "WeeklyOverview": "Weekly Overview",
     "ClassCode": "Class Code",
     "Subject": "Subject",
     "Capacity": "Capacity",
     "Status": "Status",
     "ClassesTitle": "My Classes",
-    "ClassesDescription": "View and manage your assigned course classes.",
+    "ClassesDescription": "Manage your assigned course classes and student enrollment list.",
     "StudentRoster": "Student Roster",
     "ExportExcel": "Export to Excel",
     "Schedule": {
-      "Title": "My Schedule",
-      "Description": "View your teaching assignments"
+      "Title": "Schedule",
+      "Description": "View your weekly personal teaching schedule"
     },
     "Classes": {
       "Title": "Classes",
@@ -429,7 +447,40 @@
     "ProfileNotFound": "Profile not found. Please contact support.",
     "ThemeLight": "Light",
     "ThemeDark": "Dark",
-    "ThemeSystem": "System"
+    "ThemeSystem": "System",
+    "BiographicalInfo": "Biographical Information",
+    "ContactInfo": "Contact Information",
+    "AcademicInfo": "Academic & Employment Info",
+    "Username": "Username",
+    "OfficialEmail": "Official Email",
+    "LastLogin": "Last Login",
+    "AccountStatus": "Account Status",
+    "StudentId": "Student ID",
+    "EmployeeId": "Employee ID",
+    "ClassCode": "Homeroom Class",
+    "Major": "Major",
+    "Department": "Department",
+    "EducationType": "Education Type",
+    "Role": "Role",
+    "FullName": "Full Name",
+    "Gender": "Gender",
+    "DateOfBirth": "Date of Birth",
+    "Address": "Address",
+    "Ethnic": "Ethnic",
+    "Religious": "Religion",
+    "NationalId": "National ID",
+    "CountryCode": "Country Code",
+    "SecurityAudit": "Security Activity Log",
+    "SecurityAuditDesc": "Review recent security and authentication events for your account.",
+    "AuditAction": "Action",
+    "AuditTime": "Time",
+    "AuditIP": "IP Address",
+    "AuditUserAgent": "Device/Browser",
+    "PreferencesDesc": "Customize how the LMS platform looks and feels.",
+    "ThemeLightDesc": "Clean light appearance",
+    "ThemeDarkDesc": "Modern slate styling",
+    "ThemeSystemDesc": "Sync with operating system",
+    "SelectGender": "Select Gender"
   },
   "Onboarding": {
     "NewOnboardingTitle": "Onboarding Wizard",
@@ -529,6 +580,11 @@
     "Close": "Close"
   },
   "Student": {
+    "Dashboard": "Dashboard",
+    "TodaySchedule": "Today's Schedule",
+    "YouHaveClasses": "You have {count} class(es) scheduled for today.",
+    "NoClassesToday": "You have no classes scheduled for today.",
+    "WeeklyOverview": "Weekly Overview",
     "Classes": {
       "Title": "My Classes",
       "Description": "View your enrolled classes for the selected semester.",
@@ -567,9 +623,9 @@
         "Step1Description": "Choose the type of request you want to submit.",
         "Step2Title": "Request Details",
         "Step2Description": "Provide necessary information for your request.",
-        "SelectType": "Select Type",
-        "StudentAbsence": "Student Absence",
-        "ClassCancellation": "Class Cancellation",
+        "SelectType": "Select Request Type",
+        "StudentAbsence": "Xin nghỉ học (vắng học)",
+        "ClassCancellation": "Xin hủy lớp học phần (rút môn)",
         "Class": "Class",
         "SelectClass": "Select a class",
         "Date": "Date",
@@ -577,30 +633,35 @@
         "ReasonPlaceholder": "Describe the reason for your request...",
         "Submit": "Submit Request",
         "Submitting": "Submitting...",
-        "Success": "Request submitted successfully",
-        "Error": "Failed to submit request",
+        "Success": "Request submitted successfully!",
+        "Error": "Failed to submit request. Please try again.",
         "Next": "Next",
-        "Previous": "Previous"
+        "Previous": "Previous",
+        "SelectSlot": "Select Absence Session",
+        "SelectSlotPlaceholder": "Select a specific session..."
       }
     }
   },
   "Workflow": {
+    "Close": "Close",
+    "Submit": "Create Request",
     "ReviewTitle": "Review Request",
     "TypeHeader": "Request Type",
     "StatusHeader": "Status",
     "Sender": "Sender",
     "Type": {
-      "student_absence": "Student Absence",
-      "class_cancellation": "Class Cancellation"
+      "student_absence": "Xin nghỉ học (vắng học)",
+      "class_cancellation": "Xin hủy lớp học phần (rút môn)",
+      "teacher_schedule_change": "Xin đổi lịch dạy (Giảng viên)"
     },
     "Status": {
-      "approved": "Request has been approved",
+      "approved": "Request has been approved successfully",
       "rejected": "Request has been rejected"
     },
     "CreatedAt": "Created At",
     "Actions": "Actions",
-    "Details": "Details",
-    "Comment": "Reviewer Comment",
+    "Details": "Request Details",
+    "Comment": "Reviewer Feedback",
     "CommentPlaceholder": "Enter your feedback or reason for rejection...",
     "Approve": "Approve",
     "Reject": "Reject",
@@ -609,6 +670,35 @@
       "approved": "Approved",
       "rejected": "Rejected",
       "cancelled": "Cancelled"
+    },
+    "Tabs": {
+      "ReviewRequests": "Review Student Absence Requests",
+      "MyRequests": "My Schedule Change Requests"
+    },
+    "Form": {
+      "SelectClass": "Select Course Class",
+      "SelectSlot": "Select Session to Change",
+      "SelectSlotPlaceholder": "Select a specific session...",
+      "NewDate": "Proposed Date",
+      "NewPeriod": "Proposed Periods (Start - End)",
+      "NewRoom": "Proposed Room (optional)",
+      "Reason": "Reason for Change",
+      "ReasonPlaceholder": "Describe the reason for the schedule change..."
+    },
+    "DetailLabels": {
+      "ClassCode": "Class Code",
+      "ClassName": "Course Name",
+      "AbsenceDate": "Date of Absence",
+      "OldSchedule": "Old Schedule",
+      "NewSchedule": "Proposed New Schedule",
+      "Reason": "Reason",
+      "ProcessedBy": "Processed By",
+      "ProcessedAt": "Processed At",
+      "WithdrawClass": "Class to Withdraw",
+      "CurrentSlots": "Current Class Size",
+      "Date": "Date",
+      "Periods": "Periods",
+      "Room": "Room"
     }
   },
   "Subject": {
@@ -707,6 +797,7 @@
     "Code": "Code",
     "Description": "Description",
     "SearchPlaceholder": "Search departments...",
+    "SearchMajorsPlaceholder": "Search majors by code...",
     "NoDepartments": "No departments found"
   },
   "Semesters": {
@@ -816,7 +907,22 @@
     "Thu": "Thu",
     "Fri": "Fri",
     "Sat": "Sat",
-    "Sun": "Sun"
+    "Sun": "Sun",
+    "ErrorLoadRooms": "Failed to load rooms details",
+    "ErrorLoadTeachers": "Failed to load teachers details",
+    "ErrorLoadClasses": "Failed to load course classes details",
+    "SuccessUpdateRoom": "Room updated successfully",
+    "ErrorUpdateRoom": "Failed to update room",
+    "UpdatingAllRooms": "Updating all rooms...",
+    "ErrorBulkUpdate": "Failed to perform bulk update",
+    "SuccessSaveClass": "Class saved successfully",
+    "ErrorSaveClass": "Failed to save class config",
+    "SuccessScheduling": "Timetable generated successfully!",
+    "ErrorNoSolution": "Could not find a feasible scheduling solution under constraints.",
+    "ErrorScheduling": "An error occurred during auto-scheduling computation.",
+    "DefaultNoEvening": "Standard (No evenings)",
+    "DefaultNoWeekend": "Standard (No weekends)",
+    "Total": "Total"
   },
   "ScheduleManager": {
     "Description": "Manage teaching schedules for teachers, rooms, and course classes.",
@@ -830,18 +936,55 @@
     "Makeup": "Makeup",
     "EffectiveRange": "Effective:",
     "RangeTo": "to",
-    "Week": "Week"
+    "Week": "Week",
+    "SelectWeek": "Select week",
+    "InvalidActualDate": "Invalid date for the selected semester",
+    "ErrorSaveActual": "Failed to save schedule slot",
+    "ErrorDeleteActual": "Failed to delete schedule slot",
+    "MainSchedule": "Main Schedule"
   },
-  "Teacher": {
-    "Schedule": {
-      "Title": "Schedule",
-      "Description": "View your weekly personal teaching schedule"
-    },
-    "ClassesTitle": "My Classes",
-    "ClassesDescription": "Manage your assigned course classes and student enrollment list.",
-    "ClassCode": "Class Code",
-    "Subject": "Subject",
-    "Capacity": "Capacity",
-    "Status": "Status"
+
+  "MainClasses": {
+    "Title": "Homeroom Classes",
+    "NoClassSelected": "No Homeroom Class Selected",
+    "NoClassSelectedDesc": "Select a homeroom class from the list on the left to view its details and student roster.",
+    "NotFoundError": "Homeroom class not found or error loading details.",
+    "Class": "Homeroom Class",
+    "EditClass": "Edit Class",
+    "AddClass": "Add Class",
+    "DeleteClass": "Delete Class",
+    "ClassRoster": "Student Roster",
+    "GeneralInfo": "General Information",
+    "Code": "Class Code",
+    "Teacher": "Homeroom Advisor",
+    "Major": "Major",
+    "EducationType": "Education Type",
+    "AcademicYear": "Academic Year",
+    "SearchPlaceholder": "Search homeroom classes...",
+    "NoClassesFound": "No homeroom classes found",
+    "NoMajor": "No Major",
+    "ToastFailedToLoad": "Failed to load class details",
+    "DeleteConfirm": "Are you sure you want to delete this homeroom class? This action cannot be undone.",
+    "ToastDeleteSuccess": "Class deleted successfully",
+    "ToastDeleteFailed": "Failed to delete class",
+    "RosterCount": "Class size: {count} student(s)",
+    "SearchStudentPlaceholder": "Search students by name...",
+    "RoleLeader": "Class Leader",
+    "RoleMember": "Member",
+    "Role": "Role",
+    "ToastUpdateSuccess": "Class updated successfully",
+    "ToastCreateSuccess": "Class created successfully",
+    "ToastSaveFailed": "Failed to save class",
+    "CodePlaceholder": "e.g. 21CNTT1",
+    "SelectTeacher": "Select homeroom advisor",
+    "SelectMajor": "Select major",
+    "SelectEduType": "Select education type",
+    "AcademicYearSuffix": "(Admission Year)",
+    "ClassAndDeptInfo": "Class & Faculty Information",
+    "Department": "Department/Faculty",
+    "SelectDepartment": "Select department/faculty",
+    "SelectMajorFirst": "Select department first",
+    "SelectClassFirst": "Select major first",
+    "SelectClass": "Select homeroom class"
   }
 }

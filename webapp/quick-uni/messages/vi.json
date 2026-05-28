@@ -1,4 +1,5 @@
 {
+  "Close": "Đóng",
   "Navigation": {
     "Dashboard": "Bảng điều khiển",
     "Overview": "Tổng quan",
@@ -10,6 +11,7 @@
     "People": "Nhân sự",
     "Teachers": "Giảng viên",
     "Students": "Sinh viên",
+    "MainClasses": "Lớp hành chính",
     "MySchedule": "Lịch của tôi",
     "MyClasses": "Lớp của tôi",
     "Requests": "Yêu cầu",
@@ -31,12 +33,17 @@
     "PersonnelMgmt": "Quản lý Nhân sự",
     "StudentMgmt": "Quản lý Sinh viên",
     "ProfileConfig": "Cấu hình Hồ sơ",
-    "Subjects": "Môn học"
+    "Subjects": "Môn học",
+    "Structure": "Không gian cấu trúc",
+    "ProfileSchema": "Cấu trúc hồ sơ",
+    "ProfileField": "Trường dữ liệu"
   },
   "Admin": {
     "Dashboard": "Bảng điều khiển",
     "Overview": "Tổng quan",
     "UserManagement": "Quản lý người dùng",
+    "PersonnelMgmt": "Quản lý Nhân sự",
+    "StudentMgmt": "Quản lý Sinh viên",
     "TotalPersonnel": "Tổng số nhân sự",
     "TotalStudents": "Tổng số sinh viên",
     "LinkedAccounts": "Tài khoản đã liên kết",
@@ -148,6 +155,7 @@
     "SelectTeacher": "Chọn giảng viên",
     "SelectBuilding": "Chọn Tòa nhà",
     "SelectType": "Chọn loại",
+    "SelectStatus": "Chọn trạng thái",
     "ClassCode": "Mã lớp học phần",
     "Capacity": "Sức chứa",
     "Subject": "Môn học",
@@ -266,11 +274,14 @@
     "StatusActive": "Hoạt động",
     "StatusSuspended": "Tạm ngưng",
     "StatusBanned": "Bị khóa",
-    "StatusExpired": "Hết hạn"
+    "StatusExpired": "Hết hạn",
+    "SelectType": "Chọn loại tài khoản",
+    "SelectStatus": "Chọn trạng thái"
   },
   "Profile": {
     "EditTitle": "Chỉnh sửa hồ sơ: {name}",
     "FullName": "Họ và tên",
+    "Code": "Mã",
     "Gender": "Giới tính",
     "DateOfBirth": "Ngày sinh",
     "NationalID": "CCCD/CMND",
@@ -335,7 +346,9 @@
     "EthnicPlaceholder": "VD: Kinh",
     "ReligiousPlaceholder": "VD: Không",
     "FieldNamePlaceholder": "VD: graduation_year",
-    "LabelPlaceholder": "VD: Năm tốt nghiệp"
+    "LabelPlaceholder": "VD: Năm tốt nghiệp",
+    "SelectDataType": "Chọn kiểu dữ liệu",
+    "SelectUISection": "Chọn phần hiển thị"
   },
   "Role": {
     "Roles": "Vai trò hệ thống",
@@ -357,17 +370,22 @@
     "UpdateAuthoritiesSuccess": "Cập nhật quyền hạn thành công"
   },
   "Teacher": {
+    "Dashboard": "Bảng điều khiển",
+    "TodaySchedule": "Lịch dạy hôm nay",
+    "YouHaveClasses": "Bạn có {count} lớp học được lên lịch hôm nay.",
+    "NoClassesToday": "Bạn không có lớp học nào được lên lịch hôm nay.",
+    "WeeklyOverview": "Tổng quan hàng tuần",
     "ClassCode": "Mã lớp",
     "Subject": "Môn học",
     "Capacity": "Sĩ số",
     "Status": "Trạng thái",
     "ClassesTitle": "Lớp học của tôi",
-    "ClassesDescription": "Xem và quản lý các lớp học phần bạn được phân công giảng dạy.",
-    "StudentRoster": "Danh sách lớp",
-    "ExportExcel": "Xuất file Excel",
+    "ClassesDescription": "Quản lý các lớp học phần được phân công và danh sách sinh viên.",
+    "StudentRoster": "Danh sách sinh viên",
+    "ExportExcel": "Xuất Excel",
     "Schedule": {
-      "Title": "Thời khóa biểu",
-      "Description": "Xem lịch giảng dạy của bạn"
+      "Title": "Lịch giảng dạy",
+      "Description": "Xem lịch dạy cá nhân hàng tuần của bạn"
     },
     "Classes": {
       "Title": "Lớp học",
@@ -428,7 +446,40 @@
     "ProfileNotFound": "Không tìm thấy hồ sơ. Vui lòng liên hệ bộ phận hỗ trợ.",
     "ThemeLight": "Sáng",
     "ThemeDark": "Tối",
-    "ThemeSystem": "Hệ thống"
+    "ThemeSystem": "Hệ thống",
+    "BiographicalInfo": "Thông tin lý lịch",
+    "ContactInfo": "Thông tin liên hệ",
+    "AcademicInfo": "Thông tin học vụ & công tác",
+    "Username": "Tên đăng nhập",
+    "OfficialEmail": "Email trường cấp",
+    "LastLogin": "Đăng nhập lần cuối",
+    "AccountStatus": "Trạng thái tài khoản",
+    "StudentId": "Mã sinh viên",
+    "EmployeeId": "Mã cán bộ",
+    "ClassCode": "Lớp hành chính",
+    "Major": "Chuyên ngành",
+    "Department": "Khoa/Phòng trực thuộc",
+    "EducationType": "Hệ đào tạo",
+    "Role": "Vai trò",
+    "FullName": "Họ và tên",
+    "Gender": "Giới tính",
+    "DateOfBirth": "Ngày sinh",
+    "Address": "Địa chỉ",
+    "Ethnic": "Dân tộc",
+    "Religious": "Tôn giáo",
+    "NationalId": "Số CCCD/CMND",
+    "CountryCode": "Mã quốc gia",
+    "SecurityAudit": "Nhật ký hoạt động bảo mật",
+    "SecurityAuditDesc": "Xem lại lịch sử các sự kiện bảo mật và xác thực gần đây của tài khoản.",
+    "AuditAction": "Hành động",
+    "AuditTime": "Thời gian",
+    "AuditIP": "Địa chỉ IP",
+    "AuditUserAgent": "Thiết bị/Trình duyệt",
+    "PreferencesDesc": "Tùy chỉnh giao diện hiển thị và ngôn ngữ hệ thống.",
+    "ThemeLightDesc": "Giao diện sáng tiêu chuẩn",
+    "ThemeDarkDesc": "Giao diện tối slate hiện đại",
+    "ThemeSystemDesc": "Đồng bộ theo hệ điều hành",
+    "SelectGender": "Chọn giới tính"
   },
   "Onboarding": {
     "NewOnboardingTitle": "Trình hướng dẫn Onboarding",
@@ -525,6 +576,11 @@
     "Close": "Đóng"
   },
   "Student": {
+    "Dashboard": "Bảng điều khiển",
+    "TodaySchedule": "Lịch học hôm nay",
+    "YouHaveClasses": "Bạn có {count} lớp học được lên lịch hôm nay.",
+    "NoClassesToday": "Bạn không có lịch học nào hôm nay.",
+    "WeeklyOverview": "Tổng quan hàng tuần",
     "Classes": {
       "Title": "Lớp học của tôi",
       "Description": "Xem các lớp học bạn đã đăng ký trong học kỳ đã chọn.",
@@ -563,48 +619,82 @@
         "Step1Description": "Chọn loại yêu cầu bạn muốn gửi.",
         "Step2Title": "Chi tiết yêu cầu",
         "Step2Description": "Cung cấp các thông tin cần thiết cho yêu cầu của bạn.",
-        "SelectType": "Chọn loại",
-        "StudentAbsence": "Xin nghỉ học",
-        "ClassCancellation": "Hủy lớp học",
-        "Class": "Lớp học",
-        "SelectClass": "Chọn một lớp học",
-        "Date": "Ngày",
-        "Reason": "Lý do",
-        "ReasonPlaceholder": "Mô tả lý do gửi yêu cầu của bạn...",
+        "SelectType": "Chọn loại yêu cầu",
+        "StudentAbsence": "Xin nghỉ học (vắng học)",
+        "ClassCancellation": "Xin hủy lớp học phần (rút môn)",
+        "Class": "Lớp học phần",
+        "SelectClass": "Chọn một lớp học phần",
+        "Date": "Chọn ngày học",
+        "Reason": "Lý do xin gửi yêu cầu",
+        "ReasonPlaceholder": "Mô tả chi tiết lý do gửi yêu cầu của bạn...",
         "Submit": "Gửi yêu cầu",
         "Submitting": "Đang gửi...",
-        "Success": "Gửi yêu cầu thành công",
-        "Error": "Gửi yêu cầu thất bại",
+        "Success": "Gửi yêu cầu thành công!",
+        "Error": "Gửi yêu cầu thất bại. Vui lòng thử lại.",
         "Next": "Tiếp theo",
-        "Previous": "Quay lại"
+        "Previous": "Quay lại",
+        "SelectSlot": "Chọn buổi học xin vắng",
+        "SelectSlotPlaceholder": "Chọn một buổi học cụ thể..."
       }
     }
   },
   "Workflow": {
-    "ReviewTitle": "Xem xét yêu cầu",
+    "Close": "Đóng",
+    "Submit": "Tạo yêu cầu mới",
+    "ReviewTitle": "Xét duyệt yêu cầu",
     "TypeHeader": "Loại yêu cầu",
     "StatusHeader": "Trạng thái",
     "Sender": "Người gửi",
     "Type": {
-      "student_absence": "Xin nghỉ học",
-      "class_cancellation": "Xin hủy lớp"
+      "student_absence": "Xin nghỉ học (vắng học)",
+      "class_cancellation": "Xin hủy lớp học phần (rút môn)",
+      "teacher_schedule_change": "Xin đổi lịch dạy (Giảng viên)"
     },
     "Status": {
-      "approved": "Yêu cầu đã được chấp thuận",
+      "approved": "Yêu cầu đã được chấp thuận thành công",
       "rejected": "Yêu cầu đã bị từ chối"
     },
-    "CreatedAt": "Ngày tạo",
+    "CreatedAt": "Ngày tạo đơn",
     "Actions": "Hành động",
-    "Details": "Chi tiết",
-    "Comment": "Ghi chú của người duyệt",
-    "CommentPlaceholder": "Nhập phản hồi hoặc lý do từ chối...",
-    "Approve": "Duyệt",
+    "Details": "Chi tiết yêu cầu",
+    "Comment": "Ý kiến phản hồi của người duyệt",
+    "CommentPlaceholder": "Nhập ý kiến phản hồi hoặc lý do từ chối...",
+    "Approve": "Phê duyệt",
     "Reject": "Từ chối",
     "StatusLabel": {
       "pending": "Chờ duyệt",
       "approved": "Đã duyệt",
       "rejected": "Từ chối",
       "cancelled": "Đã hủy"
+    },
+    "Tabs": {
+      "ReviewRequests": "Duyệt yêu cầu của Sinh viên",
+      "MyRequests": "Yêu cầu đổi lịch của tôi"
+    },
+    "Form": {
+      "SelectClass": "Chọn lớp học phần",
+      "SelectSlot": "Chọn buổi dạy cần thay đổi",
+      "SelectSlotPlaceholder": "Chọn một buổi dạy cụ thể...",
+      "NewDate": "Ngày dạy mới",
+      "NewPeriod": "Thời gian dạy mới (Tiết)",
+      "NewRoom": "Phòng học mới đề xuất (tùy chọn)",
+      "Reason": "Lý do thay đổi",
+      "ReasonPlaceholder": "Mô tả lý do xin thay đổi lịch giảng dạy..."
+    },
+    "DetailLabels": {
+      "ClassCode": "Mã lớp học phần",
+      "ClassName": "Tên môn học",
+      "AbsenceDate": "Ngày xin nghỉ học",
+      "OldSchedule": "Thời khóa biểu cũ",
+      "NewSchedule": "Thời khóa biểu mới đề xuất",
+      "Reason": "Lý do xin gửi",
+      "ProcessedBy": "Cán bộ phê duyệt",
+      "ProcessedAt": "Thời gian phê duyệt",
+      "WithdrawClass": "Lớp học phần xin hủy (rút môn)",
+      "CurrentSlots": "Sĩ số hiện tại của lớp",
+      "Date": "Ngày",
+      "Periods": "Tiết",
+      "Room": "Phòng"
     }
   },
   "Subject": {
@@ -703,6 +793,7 @@
     "Code": "Mã",
     "Description": "Mô tả",
     "SearchPlaceholder": "Tìm kiếm khoa/phòng...",
+    "SearchMajorsPlaceholder": "Tìm kiếm chuyên ngành bằng mã...",
     "NoDepartments": "Không tìm thấy khoa/phòng"
   },
   "Semesters": {
@@ -812,7 +903,22 @@
     "Thu": "Thứ 5",
     "Fri": "Thứ 6",
     "Sat": "Thứ 7",
-    "Sun": "Chủ nhật"
+    "Sun": "Chủ nhật",
+    "ErrorLoadRooms": "Tải thông tin phòng học thất bại",
+    "ErrorLoadTeachers": "Tải thông tin giảng viên thất bại",
+    "ErrorLoadClasses": "Tải thông tin lớp học phần thất bại",
+    "SuccessUpdateRoom": "Cập nhật phòng học thành công",
+    "ErrorUpdateRoom": "Cập nhật phòng học thất bại",
+    "UpdatingAllRooms": "Đang cập nhật toàn bộ phòng...",
+    "ErrorBulkUpdate": "Cập nhật hàng loạt thất bại",
+    "SuccessSaveClass": "Lưu lớp học thành công",
+    "ErrorSaveClass": "Lưu cấu hình lớp thất bại",
+    "SuccessScheduling": "Tạo thời khóa biểu thành công!",
+    "ErrorNoSolution": "Không tìm thấy phương án xếp lịch khả thi với các ràng buộc hiện tại.",
+    "ErrorScheduling": "Có lỗi xảy ra trong quá trình tự động xếp lịch.",
+    "DefaultNoEvening": "Tiêu chuẩn (Không có ca tối)",
+    "DefaultNoWeekend": "Tiêu chuẩn (Không xếp cuối tuần)",
+    "Total": "Tổng số"
   },
   "ScheduleManager": {
     "Description": "Quản lý lịch giảng dạy của giảng viên, phòng học và lớp học phần.",
@@ -826,18 +932,55 @@
     "Makeup": "Bù",
     "EffectiveRange": "Hiệu lực:",
     "RangeTo": "đến",
-    "Week": "Tuần"
+    "Week": "Tuần",
+    "SelectWeek": "Chọn tuần",
+    "InvalidActualDate": "Ngày không hợp lệ trong học kỳ đã chọn",
+    "ErrorSaveActual": "Lưu lịch học thất bại",
+    "ErrorDeleteActual": "Xóa lịch học thất bại",
+    "MainSchedule": "Lịch chính thức"
   },
-  "Teacher": {
-    "Schedule": {
-      "Title": "Lịch giảng dạy",
-      "Description": "Xem lịch dạy cá nhân hàng tuần của bạn"
-    },
-    "ClassesTitle": "Lớp học của tôi",
-    "ClassesDescription": "Quản lý các lớp học phần được phân công và danh sách sinh viên.",
-    "ClassCode": "Mã lớp",
-    "Subject": "Môn học",
-    "Capacity": "Sĩ số",
-    "Status": "Trạng thái"
+
+  "MainClasses": {
+    "Title": "Lớp hành chính",
+    "NoClassSelected": "Chưa chọn Lớp hành chính",
+    "NoClassSelectedDesc": "Chọn một lớp hành chính từ danh sách bên trái để xem thông tin chi tiết và danh sách sinh viên.",
+    "NotFoundError": "Không tìm thấy lớp hành chính hoặc lỗi khi tải.",
+    "Class": "Lớp hành chính",
+    "EditClass": "Sửa Lớp",
+    "AddClass": "Thêm Lớp",
+    "DeleteClass": "Xóa Lớp",
+    "ClassRoster": "Danh sách sinh viên",
+    "GeneralInfo": "Thông tin chung",
+    "Code": "Mã lớp",
+    "Teacher": "Cố vấn học tập",
+    "Major": "Chuyên ngành",
+    "EducationType": "Hệ đào tạo",
+    "AcademicYear": "Khóa học",
+    "SearchPlaceholder": "Tìm kiếm lớp hành chính...",
+    "NoClassesFound": "Không tìm thấy lớp hành chính nào",
+    "NoMajor": "Chưa xếp chuyên ngành",
+    "ToastFailedToLoad": "Tải thông tin chi tiết lớp học thất bại",
+    "DeleteConfirm": "Bạn có chắc chắn muốn xóa lớp hành chính này không? Hành động này sẽ không thể hoàn tác.",
+    "ToastDeleteSuccess": "Xóa lớp học thành công",
+    "ToastDeleteFailed": "Xóa lớp học thất bại",
+    "RosterCount": "Sĩ số lớp: {count} sinh viên",
+    "SearchStudentPlaceholder": "Tìm kiếm sinh viên bằng họ tên...",
+    "RoleLeader": "Lớp trưởng",
+    "RoleMember": "Thành viên",
+    "Role": "Vai trò",
+    "ToastUpdateSuccess": "Cập nhật lớp học thành công",
+    "ToastCreateSuccess": "Tạo lớp học thành công",
+    "ToastSaveFailed": "Lưu lớp học thất bại",
+    "CodePlaceholder": "VD: 21CNTT1",
+    "SelectTeacher": "Chọn cố vấn học tập",
+    "SelectMajor": "Chọn chuyên ngành",
+    "SelectEduType": "Chọn hệ đào tạo",
+    "AcademicYearSuffix": "(Năm tuyển sinh)",
+    "ClassAndDeptInfo": "Thông tin Lớp & Khoa",
+    "Department": "Khoa/Phân khoa",
+    "SelectDepartment": "Chọn khoa/phân khoa",
+    "SelectMajorFirst": "Chọn khoa trước",
+    "SelectClassFirst": "Chọn chuyên ngành trước",
+    "SelectClass": "Chọn lớp hành chính"
   }
 }
