@@ -104,7 +104,7 @@ export function ProfileFieldForm({ initialData, onSuccess }: ProfileFieldFormPro
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="e.g. graduation_year"
+                placeholder={t("FieldNamePlaceholder")}
               />
               {field.state.meta.errors ? (
                 <em className="text-sm text-destructive">{field.state.meta.errors.join(", ")}</em>
@@ -128,7 +128,7 @@ export function ProfileFieldForm({ initialData, onSuccess }: ProfileFieldFormPro
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="e.g. Graduation Year"
+                placeholder={t("LabelPlaceholder")}
               />
               {field.state.meta.errors ? (
                 <em className="text-sm text-destructive">{field.state.meta.errors.join(", ")}</em>

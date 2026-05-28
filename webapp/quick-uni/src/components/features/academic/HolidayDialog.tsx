@@ -150,7 +150,7 @@ export function HolidayDialog({ isOpen, onClose, semesterId }: HolidayDialogProp
                     <p className="font-medium text-sm">{h.name || t("UnnamedHoliday")}</p>
                     <p className="text-xs text-muted-foreground">
                       {format(new Date(h.startDate), "dd/MM/yyyy")} - {format(new Date(h.endDate), "dd/MM/yyyy")}
-                      {h.semesterId && <span className="ml-2 text-primary">(Semester specific)</span>}
+                      {h.semesterId && <span className="ml-2 text-primary">{t("SemesterSpecific")}</span>}
                     </p>
                   </div>
                   <Button variant="ghost" size="icon" onClick={() => handleDelete(h.id)}>

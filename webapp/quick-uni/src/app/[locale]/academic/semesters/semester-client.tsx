@@ -14,8 +14,10 @@ import { toast } from "sonner";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useTranslations } from "next-intl";
 
 export function SemesterClient({ data }: { data: Semester[] }) {
+  const t = useTranslations("Semesters");
   const [isOpen, setIsOpen] = useState(false);
   const [editingSemester, setEditingSemester] = useState<Semester | null>(null);
 
@@ -64,7 +66,7 @@ export function SemesterClient({ data }: { data: Semester[] }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Semesters</h2>
+        <h2 className="text-2xl font-bold">{t("Title")}</h2>
         <Button onClick={() => { 
           setEditingSemester(null); 
           form.reset({
@@ -77,7 +79,7 @@ export function SemesterClient({ data }: { data: Semester[] }) {
           }); 
           setIsOpen(true); 
         }}>
-          <Plus className="mr-2 h-4 w-4" /> Add Semester
+          <Plus className="mr-2 h-4 w-4" /> {t("AddSemester")}
         </Button>
       </div>
 
@@ -86,24 +88,24 @@ export function SemesterClient({ data }: { data: Semester[] }) {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>{editingSemester ? "Edit Semester" : "Add Semester"}</DialogTitle>
+            <DialogTitle>{editingSemester ? t("Edit") + " " + t("Title").toLowerCase().slice(0, -1) : t("AddSemester")}</DialogTitle>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField control={form.control} name="code" render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Code</FormLabel>
+                  <FormLabel>{t("Code")}</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="e.g. 20231" />
+                    <Input {...field} placeholder={t("CodePlaceholder")} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
               <FormField control={form.control} name="name" render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{t("Name")}</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="e.g. Fall 2023" />
+                    <Input {...field} placeholder={t("NamePlaceholder")} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -111,7 +113,7 @@ export function SemesterClient({ data }: { data: Semester[] }) {
               <div className="grid grid-cols-2 gap-4">
                 <FormField control={form.control} name="academicYear" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Year</FormLabel>
+                    <FormLabel>{t("Year")}</FormLabel>
                     <FormControl>
                       <Input {...field} type="number" />
                     </FormControl>
@@ -123,14 +125,14 @@ export function SemesterClient({ data }: { data: Semester[] }) {
                     <FormControl>
                       <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
-                    <FormLabel>Is Current</FormLabel>
+                    <FormLabel>{t("IsCurrent")}</FormLabel>
                   </FormItem>
                 )} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <FormField control={form.control} name="startDate" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Start Date</FormLabel>
+                    <FormLabel>{t("StartDate")}</FormLabel>
                     <FormControl>
                       <Input {...field} type="date" />
                     </FormControl>
@@ -139,7 +141,7 @@ export function SemesterClient({ data }: { data: Semester[] }) {
                 )} />
                 <FormField control={form.control} name="endDate" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>End Date</FormLabel>
+                    <FormLabel>{t("EndDate")}</FormLabel>
                     <FormControl>
                       <Input {...field} type="date" />
                     </FormControl>
@@ -147,7 +149,7 @@ export function SemesterClient({ data }: { data: Semester[] }) {
                   </FormItem>
                 )} />
               </div>
-              <Button type="submit" className="w-full">Save</Button>
+              <Button type="submit" className="w-full">{t("Save")}</Button>
             </form>
           </Form>
         </DialogContent>

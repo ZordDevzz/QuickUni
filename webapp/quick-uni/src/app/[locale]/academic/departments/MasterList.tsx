@@ -7,6 +7,7 @@ import { Plus, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 interface Department {
   id: string;
@@ -25,6 +26,7 @@ export function MasterList({ departments, selectedId, onAdd }: MasterListProps) 
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState('');
+  const t = useTranslations("Departments");
 
   const filteredDepartments = departments.filter(dept =>
     dept.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -41,7 +43,7 @@ export function MasterList({ departments, selectedId, onAdd }: MasterListProps) 
     <div className="w-80 border-r flex flex-col bg-muted/5 h-full">
       <div className="p-4 border-b space-y-4 bg-background">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-lg">Departments</h2>
+          <h2 className="font-semibold text-lg">{t("Title")}</h2>
           <Button size="icon" variant="ghost" className="h-8 w-8" onClick={onAdd}>
             <Plus className="h-4 w-4" />
           </Button>
@@ -49,7 +51,7 @@ export function MasterList({ departments, selectedId, onAdd }: MasterListProps) 
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search departments..."
+            placeholder={t("SearchPlaceholder")}
             className="pl-8 h-9"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -80,7 +82,7 @@ export function MasterList({ departments, selectedId, onAdd }: MasterListProps) 
           ))}
           {filteredDepartments.length === 0 && (
             <div className="p-8 text-center text-sm text-muted-foreground">
-              No departments found
+              {t("NoDepartments")}
             </div>
           )}
         </div>

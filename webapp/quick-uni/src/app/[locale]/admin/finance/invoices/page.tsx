@@ -1,5 +1,7 @@
 import AdminSkeleton from "@/components/shared/AdminSkeleton";
+import { getTranslations } from "next-intl/server";
 
-export default function InvoicesPage() {
-  return <AdminSkeleton title="Finance & Invoices" />;
+export default async function InvoicesPage() {
+  const t = await getTranslations("Navigation");
+  return <AdminSkeleton title={t("Finance")} />;
 }

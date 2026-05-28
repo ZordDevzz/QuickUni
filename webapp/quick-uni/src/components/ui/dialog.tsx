@@ -56,6 +56,7 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
+  const t = useTranslations()
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
@@ -100,6 +101,7 @@ function DialogFooter({
 }: React.ComponentProps<"div"> & {
   showCloseButton?: boolean
 }) {
+  const t = useTranslations()
   return (
     <div
       data-slot="dialog-footer"
@@ -112,7 +114,7 @@ function DialogFooter({
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close asChild>
-          <Button variant="outline">Close</Button>
+          <Button variant="outline">{t('Close')}</Button>
         </DialogPrimitive.Close>
       )}
     </div>

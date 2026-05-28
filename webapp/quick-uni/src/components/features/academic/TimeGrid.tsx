@@ -48,6 +48,7 @@ export function TimeGrid({
   weekStartDate
 }: TimeGridProps) {
   const t = useTranslations("Admin");
+  const tSM = useTranslations("ScheduleManager");
 
   if (showEmptyState) {
     return (
@@ -192,11 +193,11 @@ export function TimeGrid({
                     {assignment.scheduleTypeId === 2 && (
                       <div className="absolute top-1 right-1">
                         <span
-                          title="Lịch dạy bù"
+                          title={tSM("MakeupClass")}
                           className="inline-flex items-center gap-0.5 text-[8px] font-bold uppercase px-1 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/20"
                         >
                           <RefreshCw className="h-2 w-2" />
-                          Bù
+                          {tSM("Makeup")}
                         </span>
                       </div>
                     )}
@@ -233,7 +234,7 @@ export function TimeGrid({
                       <p>👤 {assignment.courseClass?.employee?.profile?.fullname}</p>
                       {assignment.courseClass?.startDate && (
                         <p className="mt-1 text-[10px] text-emerald-600 font-semibold">
-                          Hiệu lực: {assignment.courseClass.startDate} đến {assignment.courseClass.endDate}
+                          {tSM("EffectiveRange")} {assignment.courseClass.startDate} {tSM("RangeTo")} {assignment.courseClass.endDate}
                         </p>
                       )}
                       <p className="mt-1 text-[10px] text-muted-foreground">

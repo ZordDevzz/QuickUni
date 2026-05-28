@@ -46,6 +46,8 @@ export function RoleHeader({ setIsMobileOpen }: { setIsMobileOpen: (open: boolea
     title = lastSegment ? lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1) : "Dashboard";
   }
 
+  const tCommon = useTranslations("Common");
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:px-6">
       <Button
@@ -55,7 +57,7 @@ export function RoleHeader({ setIsMobileOpen }: { setIsMobileOpen: (open: boolea
         onClick={() => setIsMobileOpen(true)}
       >
         <Menu className="h-5 w-5" />
-        <span className="sr-only">Toggle Menu</span>
+        <span className="sr-only">{tCommon("ToggleMenu")}</span>
       </Button>
       
       <div className="flex flex-1 items-center gap-4 md:gap-8">

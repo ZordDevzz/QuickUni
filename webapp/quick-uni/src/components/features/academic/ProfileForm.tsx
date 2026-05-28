@@ -132,7 +132,7 @@ export function ProfileForm({ profile, onSuccess, schemas = [] }: ProfileFormPro
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="John Doe"
+                placeholder={t("FullNamePlaceholder")}
               />
               <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
             </FieldContent>
@@ -206,7 +206,7 @@ export function ProfileForm({ profile, onSuccess, schemas = [] }: ProfileFormPro
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="123456789"
+                  placeholder={t("NationalIDPlaceholder")}
                 />
                 <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
               </FieldContent>
@@ -228,7 +228,7 @@ export function ProfileForm({ profile, onSuccess, schemas = [] }: ProfileFormPro
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="US"
+                  placeholder={t("CountryCodePlaceholder")}
                   maxLength={2}
                 />
                 <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
@@ -252,7 +252,7 @@ export function ProfileForm({ profile, onSuccess, schemas = [] }: ProfileFormPro
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="123 Main St, City, Country"
+                placeholder={t("AddressPlaceholder")}
               />
               <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
             </FieldContent>
@@ -275,7 +275,7 @@ export function ProfileForm({ profile, onSuccess, schemas = [] }: ProfileFormPro
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="e.g. Caucasian"
+                  placeholder={t("EthnicPlaceholder")}
                 />
                 <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
               </FieldContent>
@@ -297,7 +297,7 @@ export function ProfileForm({ profile, onSuccess, schemas = [] }: ProfileFormPro
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="e.g. None"
+                  placeholder={t("ReligiousPlaceholder")}
                 />
                 <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
               </FieldContent>

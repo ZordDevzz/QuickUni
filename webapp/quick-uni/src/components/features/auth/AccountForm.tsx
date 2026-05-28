@@ -107,7 +107,7 @@ export function AccountForm({ account, onSuccess, profiles = [], restrictType }:
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="johndoe"
+                placeholder={t("UsernamePlaceholder")}
               />
               <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
             </FieldContent>
@@ -132,7 +132,7 @@ export function AccountForm({ account, onSuccess, profiles = [], restrictType }:
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="john@example.com"
+                placeholder={t("EmailPlaceholder")}
               />
               <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
             </FieldContent>
@@ -156,7 +156,7 @@ export function AccountForm({ account, onSuccess, profiles = [], restrictType }:
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="+1234567890"
+                placeholder={t("PhonePlaceholder")}
               />
               <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
             </FieldContent>
@@ -178,12 +178,12 @@ export function AccountForm({ account, onSuccess, profiles = [], restrictType }:
                   onChange={(e) => field.handleChange(e.target.value as "student" | "employee" | "tech" | "dev")}
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30"
                 >
-                  {(!restrictType || restrictType === "student") && <option value="student">Student</option>}
+                  {(!restrictType || restrictType === "student") && <option value="student">{t("TypeStudent")}</option>}
                   {(!restrictType || restrictType === "personnel") && (
                     <>
-                      <option value="employee">Employee</option>
-                      <option value="tech">Tech</option>
-                      <option value="dev">Dev</option>
+                      <option value="employee">{t("TypeEmployee")}</option>
+                      <option value="tech">{t("TypeTech")}</option>
+                      <option value="dev">{t("TypeDev")}</option>
                     </>
                   )}
                 </select>
@@ -205,10 +205,10 @@ export function AccountForm({ account, onSuccess, profiles = [], restrictType }:
                   onChange={(e) => field.handleChange(e.target.value as "active" | "suspended" | "banned" | "expired")}
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30"
                 >
-                  <option value="active">Active</option>
-                  <option value="suspended">Suspended</option>
-                  <option value="banned">Banned</option>
-                  <option value="expired">Expired</option>
+                  <option value="active">{t("StatusActive")}</option>
+                  <option value="suspended">{t("StatusSuspended")}</option>
+                  <option value="banned">{t("StatusBanned")}</option>
+                  <option value="expired">{t("StatusExpired")}</option>
                 </select>
                 <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
               </FieldContent>

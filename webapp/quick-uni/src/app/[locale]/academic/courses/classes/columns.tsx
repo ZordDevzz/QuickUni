@@ -6,6 +6,7 @@ import { Dependencies } from "@/components/features/academic/CourseClassForm";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useTranslations } from "next-intl";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getColumns = (dependencies: Dependencies): ColumnDef<any>[] => [

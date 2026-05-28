@@ -32,6 +32,7 @@ interface ProfileSchemaRowActionsProps {
 
 export function ProfileSchemaRowActions({ schema }: ProfileSchemaRowActionsProps) {
   const t = useTranslations("Profile");
+  const tCommon = useTranslations("Common");
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -59,7 +60,7 @@ export function ProfileSchemaRowActions({ schema }: ProfileSchemaRowActionsProps
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">{tCommon("OpenMenu")}</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>

@@ -14,9 +14,10 @@ export default async function TeacherSchedulePage() {
   const currentSemester = await getCurrentSemester();
   
   if (!currentSemester) {
+    const tCommon = await getTranslations('Common');
     return (
       <div className="p-8 text-center">
-        <h1 className="text-2xl font-bold">No active semester found</h1>
+        <h1 className="text-2xl font-bold">{tCommon('NoActiveSemester')}</h1>
       </div>
     );
   }

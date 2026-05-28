@@ -2,41 +2,43 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, User, ShieldCheck, Database } from "lucide-react";
 import { getAccounts } from "@/services/user";
 import { getProfiles } from "@/services/profile";
+import { getTranslations } from "next-intl/server";
 
 export default async function AdminDashboard() {
   const accounts = await getAccounts();
   const profiles = await getProfiles();
+  const t = await getTranslations("Admin");
 
   const stats = [
     {
-      title: "Total Accounts",
+      title: t("TotalAccounts"),
       value: accounts.length,
       icon: Users,
-      description: "Registered system accounts",
+      description: t("RegisteredAccounts"),
     },
     {
-      title: "Total Profiles",
+      title: t("TotalProfiles"),
       value: profiles.length,
       icon: User,
-      description: "Personal data records",
+      description: t("PersonalDataRecords"),
     },
     {
-      title: "Admin Users",
+      title: t("AdminUsers"),
       value: accounts.filter(a => a.type === 'tech' || a.type === 'dev').length,
       icon: ShieldCheck,
-      description: "Users with system privileges",
+      description: t("SystemPrivileges"),
     },
     {
-        title: "Database Status",
-        value: "Healthy",
+        title: t("DatabaseStatus"),
+        value: t("Healthy"),
         icon: Database,
-        description: "PostgreSQL Connection",
+        description: t("PostgreSQLConnection"),
     }
   ];
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold tracking-tight">Overview</h2>
+      <h2 className="text-3xl font-bold tracking-tight">{t("Overview")}</h2>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (

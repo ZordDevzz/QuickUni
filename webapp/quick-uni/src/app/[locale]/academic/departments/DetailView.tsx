@@ -12,6 +12,7 @@ import { Loader2, Users, BookOpen, Info, Edit, Plus, UserPlus } from 'lucide-rea
 import { ColumnDef } from '@tanstack/react-table';
 import { DepartmentDialog, MajorDialog, StaffAssignmentDialog } from '@/components/features/academic/DepartmentDialogs';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 interface DetailViewProps {
   departmentId: string;
@@ -19,6 +20,9 @@ interface DetailViewProps {
 
 export function DetailView({ departmentId }: DetailViewProps) {
   const router = useRouter();
+  const t = useTranslations("Departments");
+  const tAdmin = useTranslations("Admin");
+  const tProfile = useTranslations("Profile");
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -59,7 +63,7 @@ export function DetailView({ departmentId }: DetailViewProps) {
 
   if (!data) return (
     <div className="h-full flex flex-col items-center justify-center text-center p-8">
-      <div className="text-muted-foreground">Department not found or error loading details.</div>
+      <div className="text-muted-foreground">{t("NotFoundError")}</div>
     </div>
   );
 
@@ -67,12 +71,12 @@ export function DetailView({ departmentId }: DetailViewProps) {
   const majorColumns: ColumnDef<any>[] = [
     { 
       accessorKey: 'code', 
-      header: 'Code',
+      header: () => t("Code"),
       cell: ({ row }) => <span className="font-mono">{row.original.code}</span>
     },
     { 
       accessorKey: 'des', 
-      header: 'Description',
+      header: () => t("Description"),
       cell: ({ row }) => <span className="text-muted-foreground">{row.original.des || 'No description'}</span>
     },
   ];
@@ -81,17 +85,17 @@ export function DetailView({ departmentId }: DetailViewProps) {
   const personnelColumns: ColumnDef<any>[] = [
     { 
       id: 'fullname',
-      header: 'Full Name',
+      header: () => tProfile("FullName"),
       cell: ({ row }) => row.original.employee?.profile?.fullname || 'N/A'
     },
     { 
       accessorKey: 'roleName', 
-      header: 'Role',
+      header: () => tAdmin("RoleName") || "Role",
       cell: ({ row }) => row.original.roleName || row.original.roleCode || 'Staff'
     },
     { 
       accessorKey: 'assignDate', 
-      header: 'Assign Date',
+      header: () => tAdmin("AssignDate") || "Assign Date",
     },
   ];
 
@@ -111,7 +115,7 @@ export function DetailView({ departmentId }: DetailViewProps) {
         </div>
         <Button onClick={() => setIsEditDialogOpen(true)} variant="outline">
           <Edit className="h-4 w-4 mr-2" />
-          Edit Department
+          {t("EditDepartment")}
         </Button>
       </div>
 
@@ -119,25 +123,25 @@ export function DetailView({ departmentId }: DetailViewProps) {
         <TabsList className="grid w-full grid-cols-3 max-w-[400px]">
           <TabsTrigger value="majors" className="flex items-center gap-2">
             <BookOpen className="h-4 w-4" />
-            Majors
+            {t("Majors")}
           </TabsTrigger>
           <TabsTrigger value="personnel" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            Personnel
+            {t("Personnel")}
           </TabsTrigger>
           <TabsTrigger value="about" className="flex items-center gap-2">
             <Info className="h-4 w-4" />
-            About
+            {t("About")}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="majors" className="mt-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-              <CardTitle className="text-xl font-semibold">Chuyên ngành</CardTitle>
+              <CardTitle className="text-xl font-semibold">{t("MajorsList")}</CardTitle>
               <Button size="sm" onClick={() => setIsMajorDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                Add Major
+                {t("AddMajor")}
               </Button>
             </CardHeader>
             <CardContent>
@@ -145,7 +149,7 @@ export function DetailView({ departmentId }: DetailViewProps) {
                  columns={majorColumns} 
                  data={data.majors || []} 
                  searchKey="code"
-                 searchPlaceholder="Search majors by code..."
+                 searchPlaceholder={t("SearchMajorsPlaceholder") || "Search majors by code..."}
                />
             </CardContent>
           </Card>
@@ -154,10 +158,10 @@ export function DetailView({ departmentId }: DetailViewProps) {
         <TabsContent value="personnel" className="mt-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-              <CardTitle className="text-xl font-semibold">Personnel</CardTitle>
+              <CardTitle className="text-xl font-semibold">{t("PersonnelList")}</CardTitle>
               <Button size="sm" onClick={() => setIsStaffDialogOpen(true)}>
                 <UserPlus className="h-4 w-4 mr-2" />
-                Assign Staff
+                {t("AssignStaff")}
               </Button>
             </CardHeader>
             <CardContent>
@@ -172,19 +176,19 @@ export function DetailView({ departmentId }: DetailViewProps) {
         <TabsContent value="about" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-xl font-semibold">General Information</CardTitle>
+              <CardTitle className="text-xl font-semibold">{t("GeneralInfo")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">{t("Name")}</Label>
                 <Input id="name" value={data.name} readOnly className="bg-muted/50" />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="code">Code</Label>
+                <Label htmlFor="code">{t("Code")}</Label>
                 <Input id="code" value={data.code || ''} readOnly className="bg-muted/50" />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t("Description")}</Label>
                 <textarea 
                   id="description" 
                   value={data.des || ''} 

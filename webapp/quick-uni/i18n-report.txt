@@ -1,5 +1,5 @@
 === I18N SCANNER REPORT ===
-Date: 2026-05-28T08:58:14.434Z
+Date: 2026-05-28T09:20:47.755Z
 
 --- HARDCODED TEXT ---
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/shared/AcademicSidebar.tsx:97 - "QuickUni"
@@ -12,8 +12,7 @@ Date: 2026-05-28T08:58:14.434Z
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/shared/TeacherSidebar.tsx:68 - "QuickUni"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/shared/UserMenu.tsx:123 - "English"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/shared/UserMenu.tsx:127 - "Tiếng Việt"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/ui/dialog.tsx:76 - "Close"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/ui/dialog.tsx:114 - "Close"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/ui/dialog.tsx:116 - "Close"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/tests/integration/academic/MasterList.test.tsx:6 - "Test"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/account/page.tsx:19 - "Profile not found. Please contact support."
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/account/page.tsx:32 - "Account Settings"
@@ -213,4 +212,4 @@ Date: 2026-05-28T08:58:14.434Z
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/system/settings/page.tsx:4 - Prop 'title': "System Settings"
 
 --- MISSING KEYS ---
-None found.
+[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/ui/dialog.tsx:78 - Key "Close" is missing in: en.json, vi.json

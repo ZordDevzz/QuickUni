@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { useSemester } from "@/components/providers/semester-provider";
+import { useTranslations } from "next-intl";
 import { 
   getRoomsSetup, 
   updateRoomAvailabilityAction,
@@ -32,34 +33,32 @@ import {
   AlertTriangle,
   Lock,
   Search,
-  CheckCircle,
-  HelpCircle,
-  Eye,
-  Slash
+  CheckCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STEPS = [
-  { title: "Phòng học khả dụng", description: "Mở hoặc khóa phòng học", icon: Building },
-  { title: "Điều kiện Giảng viên", description: "Lịch bận và số ngày dạy liền kề", icon: Users },
-  { title: "Thời lượng Lớp học", description: "Thiết lập tiết dạy & buổi tối", icon: BookOpen },
-  { title: "Khởi chạy tối ưu", description: "Xem tổng hợp và chạy bộ giải", icon: Play }
+  { key: "Rooms", icon: Building },
+  { key: "Teachers", icon: Users },
+  { key: "Classes", icon: BookOpen },
+  { key: "Launch", icon: Play }
 ];
 
 const DAYS = [
-  { name: "Thứ 2", dbIndex: 1 },
-  { name: "Thứ 3", dbIndex: 2 },
-  { name: "Thứ 4", dbIndex: 3 },
-  { name: "Thứ 5", dbIndex: 4 },
-  { name: "Thứ 6", dbIndex: 5 },
-  { name: "Thứ 7", dbIndex: 6 },
-  { name: "Chủ nhật", dbIndex: 0 }
+  { key: "Mon", dbIndex: 1 },
+  { key: "Tue", dbIndex: 2 },
+  { key: "Wed", dbIndex: 3 },
+  { key: "Thu", dbIndex: 4 },
+  { key: "Fri", dbIndex: 5 },
+  { key: "Sat", dbIndex: 6 },
+  { key: "Sun", dbIndex: 0 }
 ];
 
 const PERIODS = Array.from({ length: 15 }, (_, i) => i + 1);
 
 export function SchedulingWizardWorkspace() {
   const { selectedSemesterId } = useSemester();
+  const t = useTranslations("SchedulingWizard");
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -99,7 +98,7 @@ export function SchedulingWizardWorkspace() {
       const data = await getRoomsSetup();
       setRooms(data);
     } catch (error) {
-      toast.error("Không thể tải danh sách phòng học");
+      toast.error(t("ErrorLoadRooms") || "Failed to load rooms");
     } finally {
       setLoading(false);
     }
@@ -120,7 +119,7 @@ export function SchedulingWizardWorkspace() {
         selectTeacher(data[0], defaultPrefs);
       }
     } catch (error) {
-      toast.error("Không thể tải cấu hình giảng viên");
+      toast.error(t("ErrorLoadTeachers") || "Failed to load teachers");
     }
   }
 
@@ -129,7 +128,7 @@ export function SchedulingWizardWorkspace() {
       const data = await getCourseClassesSetup(semId);
       setClasses(data);
     } catch (error) {
-      toast.error("Không thể tải cấu hình lớp học phần");
+      toast.error(t("ErrorLoadClasses") || "Failed to load classes");
     }
   }
 
@@ -151,12 +150,12 @@ export function SchedulingWizardWorkspace() {
     try {
       const res = await updateRoomAvailabilityAction(roomId, nextStatus);
       if (res.success) {
-        toast.success(`Đã cập nhật trạng thái phòng ${rooms.find(r => r.id === roomId)?.code}`);
+        toast.success(t("SuccessUpdateRoom", { code: rooms.find(r => r.id === roomId)?.code }) || `Updated room ${rooms.find(r => r.id === roomId)?.code}`);
       } else {
         throw new Error(res.error);
       }
     } catch (error) {
-      toast.error("Không thể cập nhật trạng thái phòng");
+      toast.error(t("ErrorUpdateRoom") || "Failed to update room");
       // Rollback
       setRooms(prev => prev.map(r => r.id === roomId ? { ...r, isAvailable: currentStatus } : r));
     } finally {
@@ -173,12 +172,12 @@ export function SchedulingWizardWorkspace() {
     );
 
     toast.promise(promise, {
-      loading: `Đang cập nhật trạng thái tất cả phòng của tòa nhà...`,
+      loading: t("UpdatingAllRooms") || "Updating all rooms...",
       success: () => {
         setRooms(prev => prev.map(r => r.buildingId === buildingId ? { ...r, isAvailable: targetStatus } : r));
         return `Đã cập nhật trạng thái toàn bộ phòng trong tòa nhà thành công!`;
       },
-      error: "Không thể cập nhật trạng thái đồng loạt"
+      error: t("ErrorBulkUpdate") || "Failed to bulk update rooms"
     });
   };
 
@@ -208,12 +207,12 @@ export function SchedulingWizardWorkspace() {
       const res = await updateCourseClassSetupAction(classId, minPeriods, allowEvening, allowWeekend);
       if (res.success) {
         setClasses(prev => prev.map(c => c.id === classId ? { ...c, minSessionPeriods: minPeriods, allowEvening, allowWeekend: allowWeekend ?? false } : c));
-        toast.success("Đã lưu cài đặt lớp học phần", { duration: 1000 });
+        toast.success(t("SuccessSaveClass") || "Class settings saved", { duration: 1000 });
       } else {
-        toast.error(res.error || "Không thể lưu cấu hình lớp");
+        toast.error(res.error || t("ErrorSaveClass") || "Failed to save class");
       }
     } catch (error) {
-      toast.error("Lỗi khi lưu cấu hình lớp");
+      toast.error(t("ErrorSaveClass") || "Failed to save class");
     } finally {
       setClassSavingId(null);
     }
@@ -226,16 +225,16 @@ export function SchedulingWizardWorkspace() {
       const promise = autoGenerateWeeklyAction(selectedSemesterId, teacherPrefs);
       
       toast.promise(promise, {
-        loading: "Hệ thống đang chạy thuật toán xếp lịch tự động. Vui lòng chờ trong giây lát...",
+        loading: t("Processing") || "Processing optimization scheduling...",
         success: (res) => {
           if (res.success) {
             onSuccessRedirect();
-            return "Đã xếp lịch tự động thành công!";
+            return t("SuccessScheduling") || "Scheduling successful!";
           } else {
-            throw new Error(res.error || "Không tìm thấy lời giải phù hợp.");
+            throw new Error(res.error || t("ErrorNoSolution") || "No optimal solution found.");
           }
         },
-        error: (err) => err.message || "Xếp lịch thất bại. Vui lòng nới lỏng các ràng buộc lịch bận giảng viên."
+        error: (err) => err.message || t("ErrorScheduling") || "Scheduling failed."
       });
     });
   };
@@ -312,12 +311,12 @@ export function SchedulingWizardWorkspace() {
           </Link>
           <div>
             <h1 className="text-lg font-extrabold tracking-tight flex items-center gap-2">
-              Trình thiết lập Xếp lịch Tối ưu
+              {t("Title")}
               <span className="hidden sm:inline-block text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/15">
-                Bản nâng cấp
+                {t("Upgrade")}
               </span>
             </h1>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Workspace điều phối ràng buộc và tự động phân lịch biểu cho Học kỳ hiện tại.</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{t("Subtitle")}</p>
           </div>
         </div>
 
@@ -328,7 +327,7 @@ export function SchedulingWizardWorkspace() {
             const isCompleted = idx < currentStep;
             const isCurrent = idx === currentStep;
             return (
-              <div key={step.title} className="flex items-center">
+              <div key={step.key} className="flex items-center">
                 <button
                   disabled={isPending}
                   onClick={() => setCurrentStep(idx)}
@@ -351,7 +350,7 @@ export function SchedulingWizardWorkspace() {
                   )}>
                     {isCompleted ? <Check className="h-3 w-3" /> : <Icon className="h-3 w-3" />}
                   </div>
-                  <span className="truncate max-w-[120px]">{step.title}</span>
+                  <span className="truncate max-w-[120px]">{t(`Step${step.key}`)}</span>
                 </button>
                 {idx < STEPS.length - 1 && (
                   <ChevronRight className="h-3.5 w-3.5 mx-1 text-muted-foreground/30 shrink-0" />
@@ -367,7 +366,7 @@ export function SchedulingWizardWorkspace() {
         {loading && (
           <div className="absolute inset-0 bg-background/80 backdrop-blur-xs flex flex-col items-center justify-center z-50 space-y-3">
             <Loader2 className="h-10 w-10 animate-spin text-emerald-500" />
-            <p className="text-xs text-muted-foreground font-semibold">Đang liên kết dữ liệu thời khóa biểu...</p>
+            <p className="text-xs text-muted-foreground font-semibold">{t("LoadingData")}</p>
           </div>
         )}
 
@@ -378,14 +377,14 @@ export function SchedulingWizardWorkspace() {
             <div className="space-y-6 max-w-7xl mx-auto">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-border/20 pb-4">
                 <div>
-                  <h2 className="text-base font-bold text-foreground">Không gian Phòng học khả dụng</h2>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">Bật hoặc khóa các phòng học sẽ tham gia vào đợt phân bổ thời khóa biểu tự động.</p>
+                  <h2 className="text-base font-bold text-foreground">{t("RoomsTitle")}</h2>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{t("RoomsDescription")}</p>
                 </div>
                 <div className="relative w-80">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="text"
-                    placeholder="Tìm phòng học hoặc tòa nhà..."
+                    placeholder={t("SearchRooms")}
                     value={roomSearch}
                     onChange={e => setRoomSearch(e.target.value)}
                     className="pl-9 h-9 text-xs rounded-lg"
@@ -410,7 +409,7 @@ export function SchedulingWizardWorkspace() {
                           </div>
                           <div>
                             <h3 className="font-extrabold text-sm text-foreground">Tòa nhà {building.code} - {building.name}</h3>
-                            <p className="text-[10px] text-muted-foreground mt-0.5">Cấu hình sử dụng: <strong className="text-emerald-600 dark:text-emerald-400">{activeRoomsCount} / {building.rooms.length} phòng</strong> hoạt động.</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">{t("BuildingConfig")} <strong className="text-emerald-600 dark:text-emerald-400">{activeRoomsCount} / {building.rooms.length} phòng</strong> hoạt động.</p>
                           </div>
                         </div>
 
@@ -423,7 +422,7 @@ export function SchedulingWizardWorkspace() {
                             onClick={() => handleBulkToggleRoomsInBuilding(building.id, true)}
                             className="text-[10px] font-bold text-emerald-600 hover:text-emerald-500 hover:bg-emerald-500/5"
                           >
-                            Bật tất cả phòng
+                            {t("EnableAll")}
                           </Button>
                           <span className="text-muted-foreground/30 text-xs">|</span>
                           <Button
@@ -433,7 +432,7 @@ export function SchedulingWizardWorkspace() {
                             onClick={() => handleBulkToggleRoomsInBuilding(building.id, false)}
                             className="text-[10px] font-bold text-destructive hover:text-destructive/80 hover:bg-destructive/5"
                           >
-                            Khóa tất cả phòng
+                            {t("LockAll")}
                           </Button>
                         </div>
                       </div>
@@ -476,12 +475,12 @@ export function SchedulingWizardWorkspace() {
                                 </div>
 
                                 <div className="flex items-center justify-between text-[10px] border-t border-border/20 pt-2 text-muted-foreground mt-2">
-                                  <span>Ghế: <strong className="text-foreground">{room.capacity || "N/A"}</strong></span>
+                                  <span>{t("Seats")} <strong className="text-foreground">{room.capacity || "N/A"}</strong></span>
                                   <span className={cn(
                                     "font-bold text-[9px] px-1 rounded-sm",
                                     room.isAvailable ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-muted text-muted-foreground"
                                   )}>
-                                    {room.isAvailable ? "SẴN SÀNG" : "ĐÃ KHÓA"}
+                                    {room.isAvailable ? t("Available") : t("BusyLocked")}
                                   </span>
                                 </div>
                               </CardContent>
@@ -496,7 +495,7 @@ export function SchedulingWizardWorkspace() {
                 {filteredBuildings.length === 0 && (
                   <div className="flex flex-col items-center justify-center p-12 border border-dashed rounded-2xl bg-muted/5 text-muted-foreground text-center">
                     <Building className="h-10 w-10 text-muted-foreground/30 mb-2" />
-                    <p className="text-xs font-semibold">Không tìm thấy phòng hoặc tòa nhà nào</p>
+                    <p className="text-xs font-semibold">{t("NoRoomsFound")}</p>
                   </div>
                 )}
               </div>
@@ -510,12 +509,12 @@ export function SchedulingWizardWorkspace() {
               {/* Left Column: Teacher List Sidebar */}
               <div className="w-full lg:w-80 border-r border-border/40 bg-muted/10 flex flex-col h-full shrink-0">
                 <div className="p-4 border-b border-border/30 bg-background/50 space-y-2 shrink-0">
-                  <h3 className="text-xs font-extrabold text-foreground uppercase tracking-wider">Danh sách Giảng viên</h3>
+                  <h3 className="text-xs font-extrabold text-foreground uppercase tracking-wider">{t("TeacherList")}</h3>
                   <div className="relative">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                       type="text"
-                      placeholder="Tìm giảng viên..."
+                      placeholder={t("SearchTeachers")}
                       value={teacherSearch}
                       onChange={e => setTeacherSearch(e.target.value)}
                       className="pl-9 h-9 text-xs rounded-lg bg-background"
@@ -554,7 +553,7 @@ export function SchedulingWizardWorkspace() {
 
                           <div className="truncate">
                             <p className="font-bold truncate text-foreground text-xs">{teacher.name}</p>
-                            <p className="text-[9px] text-muted-foreground truncate mt-0.5">Mã GV: {teacher.code}</p>
+                            <p className="text-[9px] text-muted-foreground truncate mt-0.5">{t("TeacherCode")} {teacher.code}</p>
                           </div>
                         </div>
 
@@ -566,7 +565,7 @@ export function SchedulingWizardWorkspace() {
                               ? "bg-amber-500/15 text-amber-600 dark:text-amber-400" 
                               : "bg-muted text-muted-foreground/60"
                           )}>
-                            {busyCount > 0 ? `Bận: ${busyCount} tiết` : "Rảnh cả tuần"}
+                            {busyCount > 0 ? t("BusyPeriodsCount", { count: busyCount }) : t("FreeAllWeek")}
                           </span>
                         </div>
                       </button>
@@ -576,7 +575,7 @@ export function SchedulingWizardWorkspace() {
                   {filteredTeachers.length === 0 && (
                     <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
                       <Users className="h-8 w-8 text-muted-foreground/30 mb-2" />
-                      <p className="text-xs">Không tìm thấy giảng viên</p>
+                      <p className="text-xs">{t("NoTeachersFound")}</p>
                     </div>
                   )}
                 </div>
@@ -594,14 +593,14 @@ export function SchedulingWizardWorkspace() {
                         </div>
                         <div>
                           <h4 className="font-extrabold text-sm text-foreground leading-none">{selectedTeacher.name}</h4>
-                          <p className="text-[10px] text-muted-foreground mt-1">Mã GV: {selectedTeacher.code} | Tổng số lịch bận hiện tại: <strong className="text-amber-600 dark:text-amber-400">{getBusySlotsCount(busyMasks)} tiết</strong>.</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">Mã GV: {selectedTeacher.code} | {t("TotalBusyPeriods")} <strong className="text-amber-600 dark:text-amber-400">{getBusySlotsCount(busyMasks)} tiết</strong>.</p>
                         </div>
                       </div>
 
                       {/* Controls inside Detail Header */}
                       <div className="flex items-center gap-4 shrink-0 w-full md:w-auto justify-between md:justify-end">
                         <div className="flex items-center gap-2.5">
-                          <Label className="text-xs font-bold shrink-0">Ưu tiên số ngày dạy liền kề:</Label>
+                          <Label className="text-xs font-bold shrink-0">{t("PrefConsecutiveDays")}</Label>
                           <select
                             value={prefDays}
                             onChange={e => {
@@ -611,16 +610,16 @@ export function SchedulingWizardWorkspace() {
                             }}
                             className="h-8 w-24 rounded-lg border border-border/40 text-xs px-2 focus:ring-1 focus:ring-emerald-500 outline-none bg-background cursor-pointer"
                           >
-                            <option value={1}>1 ngày</option>
-                            <option value={2}>2 ngày</option>
-                            <option value={3}>3 ngày</option>
-                            <option value={4}>4 ngày</option>
-                            <option value={5}>5 ngày</option>
+                            <option value={1}>{t("Day1")}</option>
+                            <option value={2}>{t("Day2")}</option>
+                            <option value={3}>{t("Day3")}</option>
+                            <option value={4}>{t("Day4")}</option>
+                            <option value={5}>{t("Day5")}</option>
                           </select>
                         </div>
 
                         <span className="text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/15 tracking-wider shrink-0 select-none">
-                          Tự động lưu
+                          {t("AutoSave")}
                         </span>
                       </div>
                     </div>
@@ -631,10 +630,10 @@ export function SchedulingWizardWorkspace() {
                         <table className="w-full border-collapse text-left table-fixed text-[11px]">
                           <thead className="bg-muted/80 sticky top-0 z-20 border-b border-border/30 backdrop-blur-xs">
                             <tr>
-                              <th className="p-3 border-r border-border/30 font-bold bg-muted/90 w-20 text-muted-foreground text-center">Tiết học</th>
+                              <th className="p-3 border-r border-border/30 font-bold bg-muted/90 w-20 text-muted-foreground text-center">{t("PeriodHeader")}</th>
                               {DAYS.map(day => (
-                                <th key={day.name} className="p-3 border-r last:border-r-0 border-border/30 font-bold text-muted-foreground text-center uppercase tracking-wider">
-                                  {day.name}
+                                <th key={day.key} className="p-3 border-r last:border-r-0 border-border/30 font-bold text-muted-foreground text-center uppercase tracking-wider">
+                                  {t(day.key)}
                                 </th>
                               ))}
                             </tr>
@@ -645,9 +644,9 @@ export function SchedulingWizardWorkspace() {
                               return (
                                 <tr key={p} className={cn("hover:bg-muted/5 transition-colors", isEvening && "bg-muted/10")}>
                                   <td className="p-2 border-r border-border/30 font-extrabold bg-muted/40 text-muted-foreground text-center relative h-12 flex flex-col items-center justify-center">
-                                    <span>Tiết {p}</span>
+                                    <span>{t("PeriodLabel")} {p}</span>
                                     {isEvening && (
-                                      <span className="text-[7.5px] font-bold uppercase text-amber-600 dark:text-amber-500 bg-amber-500/10 px-1 py-0.2 rounded mt-0.5">Tối</span>
+                                      <span className="text-[7.5px] font-bold uppercase text-amber-600 dark:text-amber-500 bg-amber-500/10 px-1 py-0.2 rounded mt-0.5">{t("Evening")}</span>
                                     )}
                                   </td>
                                   {DAYS.map(day => {
@@ -666,13 +665,13 @@ export function SchedulingWizardWorkspace() {
                                         {isBlocked ? (
                                           <div className="h-full w-full flex items-center justify-center p-1">
                                             <span className="flex items-center justify-center gap-1 text-red-600 font-extrabold text-[8.5px] bg-red-100 dark:bg-red-950/80 w-full h-full rounded border border-red-300/20 shadow-xs uppercase">
-                                              <Lock className="h-2.5 w-2.5" /> BẬN/KHÓA
+                                              <Lock className="h-2.5 w-2.5" /> {t("BusyLocked")}
                                             </span>
                                           </div>
                                         ) : (
                                           <div className="h-full w-full flex items-center justify-center opacity-0 group-hover/cell:opacity-100 transition-opacity">
                                             <span className="text-[8px] text-emerald-600 font-extrabold uppercase border border-emerald-500/20 px-1.5 py-0.5 rounded bg-emerald-500/5">
-                                              KHÓA TIẾT
+                                              {t("LockPeriod")}
                                             </span>
                                           </div>
                                         )}
@@ -690,8 +689,8 @@ export function SchedulingWizardWorkspace() {
                 ) : (
                   <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground text-xs">
                     <Users className="h-12 w-12 text-muted-foreground/20 mb-3 animate-pulse" />
-                    <p className="font-bold">Chưa chọn Giảng viên</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">Vui lòng chọn một giảng viên từ danh sách bên trái để cấu hình.</p>
+                    <p className="font-bold">{t("NoTeacherSelected")}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{t("NoTeacherSelectedDesc")}</p>
                   </div>
                 )}
               </div>
@@ -704,14 +703,14 @@ export function SchedulingWizardWorkspace() {
             <div className="space-y-6 max-w-7xl mx-auto">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-border/20 pb-4">
                 <div>
-                  <h2 className="text-base font-bold text-foreground">Cấu hình Lớp học phần</h2>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">Thiết lập thời lượng tối thiểu của một buổi học và cho phép xếp lịch học vào buổi tối.</p>
+                  <h2 className="text-base font-bold text-foreground">{t("ClassConfigTitle")}</h2>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{t("ClassConfigDesc")}</p>
                 </div>
                 <div className="relative w-80">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="text"
-                    placeholder="Tìm theo mã lớp, tên môn học hoặc giảng viên..."
+                    placeholder={t("SearchClasses")}
                     value={classSearch}
                     onChange={e => setClassSearch(e.target.value)}
                     className="pl-9 h-9 text-xs rounded-lg"
@@ -724,12 +723,12 @@ export function SchedulingWizardWorkspace() {
                 <table className="w-full text-xs text-left">
                   <thead className="bg-muted/50 border-b border-border/30">
                     <tr>
-                      <th className="p-4 font-bold text-muted-foreground w-36">Mã lớp</th>
-                      <th className="p-4 font-bold text-muted-foreground">Môn học</th>
-                      <th className="p-4 font-bold text-muted-foreground">Giảng viên phụ trách</th>
-                      <th className="p-4 font-bold text-muted-foreground w-48">Số tiết tối thiểu / buổi học</th>
-                      <th className="p-4 font-bold text-muted-foreground text-right w-56">Cho phép dạy ca tối?</th>
-                      <th className="p-4 font-bold text-muted-foreground text-right w-56">Cho phép dạy cuối tuần?</th>
+                      <th className="p-4 font-bold text-muted-foreground w-36">{t("ClassCodeCol")}</th>
+                      <th className="p-4 font-bold text-muted-foreground">{t("SubjectCol")}</th>
+                      <th className="p-4 font-bold text-muted-foreground">{t("TeacherCol")}</th>
+                      <th className="p-4 font-bold text-muted-foreground w-48">{t("MinPeriodsCol")}</th>
+                      <th className="p-4 font-bold text-muted-foreground text-right w-56">{t("AllowEveningCol")}</th>
+                      <th className="p-4 font-bold text-muted-foreground text-right w-56">{t("AllowWeekendCol")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/20">
@@ -748,11 +747,11 @@ export function SchedulingWizardWorkspace() {
                                 onChange={e => handleUpdateClassSettings(c.id, parseInt(e.target.value), c.allowEvening, c.allowWeekend)}
                                 className="h-8 w-24 rounded-lg border border-border/40 text-xs px-2 focus:ring-1 focus:ring-emerald-500 outline-none bg-background cursor-pointer"
                               >
-                                <option value={1}>1 tiết</option>
-                                <option value={2}>2 tiết</option>
-                                <option value={3}>3 tiết</option>
-                                <option value={4}>4 tiết</option>
-                                <option value={5}>5 tiết</option>
+                                <option value={1}>{t("Period1")}</option>
+                                <option value={2}>{t("Period2")}</option>
+                                <option value={3}>{t("Period3")}</option>
+                                <option value={4}>{t("Period4")}</option>
+                                <option value={5}>{t("Period5")}</option>
                               </select>
                               {isSaving && <Loader2 className="h-4 w-4 animate-spin text-emerald-500" />}
                             </div>
@@ -765,7 +764,7 @@ export function SchedulingWizardWorkspace() {
                                   ? "bg-amber-500/15 text-amber-600 dark:text-amber-500 border border-amber-500/10" 
                                   : "bg-muted text-muted-foreground/60"
                               )}>
-                                {c.allowEvening ? "Cho phép dạy Tối (Tiết 11-15)" : "Mặc định không dạy Tối"}
+                                {c.allowEvening ? t("AllowEvening") : (t("DefaultNoEvening") || "Default no evening")}
                               </span>
                               <Switch
                                 disabled={isSaving}
@@ -782,7 +781,7 @@ export function SchedulingWizardWorkspace() {
                                   ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/10" 
                                   : "bg-muted text-muted-foreground/60"
                               )}>
-                                {c.allowWeekend ? "Cho phép dạy cuối tuần" : "Mặc định không dạy cuối tuần"}
+                                {c.allowWeekend ? t("AllowWeekendClasses") : (t("DefaultNoWeekend") || "Default no weekend")}
                               </span>
                               <Switch
                                 disabled={isSaving}
@@ -797,7 +796,7 @@ export function SchedulingWizardWorkspace() {
                     {filteredClasses.length === 0 && (
                       <tr>
                         <td colSpan={6} className="p-12 text-center text-muted-foreground font-semibold bg-muted/5">
-                          Không tìm thấy lớp học phần nào phù hợp
+                          {t("NoClassesFound")}
                         </td>
                       </tr>
                     )}
@@ -818,9 +817,9 @@ export function SchedulingWizardWorkspace() {
                   <div className="absolute inset-0 rounded-full border border-emerald-500/20 animate-ping"></div>
                 </div>
 
-                <h2 className="text-xl font-black text-foreground tracking-tight">Sẵn sàng Khởi chạy Thuật toán Tối ưu hóa!</h2>
+                <h2 className="text-xl font-black text-foreground tracking-tight">{t("ReadyTitle")}</h2>
                 <p className="text-xs text-muted-foreground leading-relaxed max-w-xl mx-auto">
-                  Tất cả các điều kiện biên và dữ liệu cấu hình đã được đồng bộ hóa thành công. Thuật toán lập lịch tự động đã sẵn sàng phân tích và thiết lập phương án thời khóa biểu tối ưu nhất cho học kỳ này.
+                  {t("ReadyDescription")}
                 </p>
               </div>
 
@@ -830,7 +829,7 @@ export function SchedulingWizardWorkspace() {
                 {/* Available Rooms Doughnut Card */}
                 <Card className="border border-border/40 shadow-xs bg-background/50 backdrop-blur-md">
                   <CardContent className="p-6 flex flex-col items-center justify-center space-y-4">
-                    <p className="text-[10px] text-muted-foreground font-extrabold uppercase tracking-wider">Phòng khả dụng</p>
+                    <p className="text-[10px] text-muted-foreground font-extrabold uppercase tracking-wider">{t("AvailableRooms")}</p>
                     
                     {/* SVG Doughnut Ring */}
                     <div className="relative h-28 w-28 flex items-center justify-center">
@@ -859,7 +858,7 @@ export function SchedulingWizardWorkspace() {
                             </svg>
                             <div className="text-center z-10">
                               <p className="text-xl font-black text-foreground">{pct}%</p>
-                              <p className="text-[8px] text-muted-foreground uppercase font-bold">Khả dụng</p>
+                              <p className="text-[8px] text-muted-foreground uppercase font-bold">{t("Available")}</p>
                             </div>
                           </>
                         );
@@ -867,7 +866,7 @@ export function SchedulingWizardWorkspace() {
                     </div>
 
                     <p className="text-[11px] font-bold text-foreground text-center">
-                      Sử dụng <span className="text-emerald-500">{rooms.filter(r => r.isAvailable).length} / {rooms.length} phòng học</span>.
+                      {t("Using")} <span className="text-emerald-500">{rooms.filter(r => r.isAvailable).length} / {rooms.length} phòng học</span>.
                     </p>
                   </CardContent>
                 </Card>
@@ -875,7 +874,7 @@ export function SchedulingWizardWorkspace() {
                 {/* Teachers Preferences Card */}
                 <Card className="border border-border/40 shadow-xs bg-background/50 backdrop-blur-md">
                   <CardContent className="p-6 flex flex-col items-center justify-center space-y-4">
-                    <p className="text-[10px] text-muted-foreground font-extrabold uppercase tracking-wider">Cấu hình Giảng viên</p>
+                    <p className="text-[10px] text-muted-foreground font-extrabold uppercase tracking-wider">{t("TeacherConfig")}</p>
                     
                     <div className="relative h-28 w-28 flex items-center justify-center">
                       {(() => {
@@ -908,7 +907,7 @@ export function SchedulingWizardWorkspace() {
                             </svg>
                             <div className="text-center z-10">
                               <p className="text-xl font-black text-foreground">{avg} ngày</p>
-                              <p className="text-[8px] text-muted-foreground uppercase font-bold">Ưu tiên trung bình</p>
+                              <p className="text-[8px] text-muted-foreground uppercase font-bold">{t("AvgPreference")}</p>
                             </div>
                           </>
                         );
@@ -916,7 +915,7 @@ export function SchedulingWizardWorkspace() {
                     </div>
 
                     <p className="text-[11px] font-bold text-foreground text-center">
-                      Liên kết lịch bận của <span className="text-teal-500">{teachers.length} giảng viên</span>.
+                      {t("LinkedBusy")} <span className="text-teal-500">{teachers.length} {t("TeachersUnit")}</span>.
                     </p>
                   </CardContent>
                 </Card>
@@ -924,7 +923,7 @@ export function SchedulingWizardWorkspace() {
                 {/* Course Classes Card */}
                 <Card className="border border-border/40 shadow-xs bg-background/50 backdrop-blur-md">
                   <CardContent className="p-6 flex flex-col items-center justify-center space-y-4">
-                    <p className="text-[10px] text-muted-foreground font-extrabold uppercase tracking-wider">Quy mô Lớp học phần</p>
+                    <p className="text-[10px] text-muted-foreground font-extrabold uppercase tracking-wider">{t("ClassScale")}</p>
                     
                     <div className="relative h-28 w-28 flex items-center justify-center">
                       {(() => {
@@ -952,7 +951,7 @@ export function SchedulingWizardWorkspace() {
                             </svg>
                             <div className="text-center z-10">
                               <p className="text-xl font-black text-foreground">{pct}%</p>
-                              <p className="text-[8px] text-muted-foreground uppercase font-bold">Cho phép học tối</p>
+                              <p className="text-[8px] text-muted-foreground uppercase font-bold">{t("AllowEvening")}</p>
                             </div>
                           </>
                         );
@@ -960,10 +959,10 @@ export function SchedulingWizardWorkspace() {
                     </div>
 
                     <p className="text-[11px] font-bold text-foreground text-center">
-                      Tổng số: <span className="text-amber-500">{classes.length} lớp học phần</span>.
+                      {t("Total")} <span className="text-amber-500">{classes.length} {t("CourseClassesUnit")}</span>.
                       {classes.filter(c => c.allowWeekend).length > 0 && (
                         <span className="block text-[9px] text-emerald-600 dark:text-emerald-400 mt-1 uppercase font-extrabold tracking-wider">
-                          Có {classes.filter(c => c.allowWeekend).length} lớp cho phép dạy cuối tuần
+                          {t("HasLabel")} {classes.filter(c => c.allowWeekend).length} {t("AllowWeekendClasses")}
                         </span>
                       )}
                     </p>
@@ -976,9 +975,9 @@ export function SchedulingWizardWorkspace() {
               <div className="p-4 rounded-xl border border-amber-500/15 bg-amber-500/5 text-amber-700 dark:text-amber-400 text-xs flex items-start gap-3">
                 <AlertTriangle className="h-5 w-5 shrink-0 text-amber-500 mt-0.5" />
                 <div className="space-y-1 text-left">
-                  <p className="font-extrabold text-foreground text-xs">Lưu ý trước khi khởi chạy</p>
+                  <p className="font-extrabold text-foreground text-xs">{t("WarningTitle")}</p>
                   <p className="text-[10px] text-muted-foreground leading-relaxed">
-                    Hành động này sẽ giải phóng và xóa bỏ toàn bộ bản nháp xếp lịch trước đó của học kỳ này. Thuật toán tối ưu hóa sẽ hoạt động ngầm để tính toán giải pháp tốt nhất. Lịch được tạo ra sẽ ở dạng Bản nháp và cần được duyệt lại trước khi xuất bản.
+                    {t("WarningDescription")}
                   </p>
                 </div>
               </div>
@@ -994,12 +993,12 @@ export function SchedulingWizardWorkspace() {
                   {isPending ? (
                     <>
                       <Loader2 className="h-5 w-5 animate-spin" />
-                      Đang xử lý thuật toán xếp lịch tối ưu...
+                      {t("Processing")}
                     </>
                   ) : (
                     <>
                       <Play className="h-5 w-5 fill-white" />
-                      Bắt đầu tự động tối ưu xếp lịch ngay
+                      {t("LaunchButton")}
                     </>
                   )}
                 </Button>
@@ -1020,7 +1019,7 @@ export function SchedulingWizardWorkspace() {
           disabled={currentStep === 0 || isPending}
           className="gap-1 text-xs rounded-lg font-semibold"
         >
-          <ChevronLeft className="h-4 w-4" /> Quay lại Bước {currentStep}
+          <ChevronLeft className="h-4 w-4" /> {t("BackToStep")} {currentStep}
         </Button>
 
         <div className="flex items-center gap-2">
@@ -1031,7 +1030,7 @@ export function SchedulingWizardWorkspace() {
               disabled={isPending}
               className="text-xs text-muted-foreground rounded-lg"
             >
-              Hủy bỏ & Thoát
+              {t("CancelExit")}
             </Button>
           </Link>
           
@@ -1043,7 +1042,7 @@ export function SchedulingWizardWorkspace() {
               disabled={isPending || loading}
               className="bg-emerald-600 hover:bg-emerald-500 gap-1 text-xs text-white rounded-lg font-bold shadow-xs"
             >
-              Tiếp theo <ChevronRight className="h-4 w-4" />
+              {t("Next")} <ChevronRight className="h-4 w-4" />
             </Button>
           )}
         </div>

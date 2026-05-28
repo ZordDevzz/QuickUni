@@ -46,6 +46,7 @@ export function AccountRowActions({ account, restrictType }: AccountRowActionsPr
   const t = useTranslations("Account");
   const tr = useTranslations("Role");
   const toastT = useTranslations("Toast");
+  const tCommon = useTranslations("Common");
 
   const loadRoles = async () => {
     setIsLoadingRoles(true);
@@ -149,7 +150,7 @@ export function AccountRowActions({ account, restrictType }: AccountRowActionsPr
                   ))}
                 {allRoles.length === 0 && !isLoadingRoles && (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    No roles found.
+                    {tCommon("NoRolesFound")}
                   </p>
                 )}
               </div>

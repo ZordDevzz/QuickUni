@@ -41,7 +41,7 @@ export default async function PersonnelPage() {
               {t("PersonnelMgmt")}
             </h1>
             <p className="text-muted-foreground text-sm max-w-2xl">
-              Quản lý danh sách hồ sơ, cấu hình vai trò hệ thống, và cấp phát tài khoản bảo mật dành cho toàn thể giảng viên, cán bộ, và nhân viên kỹ thuật.
+              {t("Personnel.Description")}
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -64,7 +64,7 @@ export default async function PersonnelPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold tracking-tight">{totalPersonnel}</div>
-            <p className="text-xs text-muted-foreground mt-1">Cán bộ hoạt động toàn hệ thống</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("Personnel.ActivePersonnel")}</p>
           </CardContent>
         </Card>
 
@@ -79,7 +79,7 @@ export default async function PersonnelPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold tracking-tight">{linkedAccounts}</div>
-            <p className="text-xs text-muted-foreground mt-1">Đã được cấp tài khoản đăng nhập</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("Personnel.AccountsIssued")}</p>
           </CardContent>
         </Card>
 
@@ -94,7 +94,7 @@ export default async function PersonnelPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold tracking-tight">{unlinkedProfiles}</div>
-            <p className="text-xs text-muted-foreground mt-1">Hồ sơ chờ cấp phát tài khoản</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("Personnel.PendingProfiles")}</p>
           </CardContent>
         </Card>
 
@@ -102,14 +102,14 @@ export default async function PersonnelPage() {
         <Card className="relative overflow-hidden border-rose-500/10 bg-background/50 backdrop-blur-md transition-all hover:shadow-md hover:-translate-y-0.5 duration-300">
           <div className="absolute top-0 left-0 h-full w-1 bg-rose-500"></div>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Tài khoản bị khóa</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("Personnel.LockedAccounts")}</CardTitle>
             <div className="rounded-lg p-2 bg-rose-500/10 text-rose-500">
               <ShieldAlert className="h-4 w-4" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold tracking-tight">{suspendedAccounts}</div>
-            <p className="text-xs text-muted-foreground mt-1">Đang tạm ngưng hoạt động</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("Personnel.SuspendedAccounts")}</p>
           </CardContent>
         </Card>
       </div>
@@ -133,7 +133,7 @@ export default async function PersonnelPage() {
                 <div>
                   <CardTitle className="text-lg font-bold">{t("PersonnelProfiles")}</CardTitle>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Quản lý thông tin lý lịch cá nhân của cán bộ giảng viên.
+                    {t("Personnel.ProfilesDescription")}
                   </p>
                 </div>
               </div>
@@ -152,7 +152,7 @@ export default async function PersonnelPage() {
                 <div>
                   <CardTitle className="text-lg font-bold">{t("PersonnelAccounts")}</CardTitle>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Quản lý thông tin đăng nhập, trạng thái khóa, và vai trò truy cập (RBAC).
+                    {t("Personnel.AccountsDescription")}
                   </p>
                 </div>
               </div>

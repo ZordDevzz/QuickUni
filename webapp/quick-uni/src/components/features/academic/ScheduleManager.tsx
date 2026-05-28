@@ -40,6 +40,7 @@ export type EntityType = "rooms" | "teachers" | "classes";
 
 export function ScheduleManager() {
   const t = useTranslations("Admin");
+  const tSM = useTranslations("ScheduleManager");
   const { selectedSemesterId } = useSemester();
   const [activeTab, setActiveTab] = useState<EntityType>("rooms");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -94,7 +95,7 @@ export function ScheduleManager() {
         const weekEndStr = format(addDays(currentMonday, 6), "yyyy-MM-dd");
         weeks.push({
           index,
-          label: `Tuần ${index} (${format(currentMonday, "dd/MM")} - ${format(addDays(currentMonday, 6), "dd/MM")})`,
+          label: `${tSM("Week")} ${index} (${format(currentMonday, "dd/MM")} - ${format(addDays(currentMonday, 6), "dd/MM")})`,
           start: weekStartStr,
           end: weekEndStr
         });
@@ -276,7 +277,7 @@ export function ScheduleManager() {
                 setSelectedId(null);
               }}
             >
-              Bản mẫu tuần
+              {tSM("WeeklyTemplate")}
             </Button>
             <Button
               variant={viewMode === "actual" ? "default" : "ghost"}
@@ -287,7 +288,7 @@ export function ScheduleManager() {
                 setSelectedId(null);
               }}
             >
-              Lịch thực tế
+              {tSM("ActualSchedule")}
             </Button>
           </div>
 
@@ -298,7 +299,7 @@ export function ScheduleManager() {
                 <Button variant="outline" size="sm" className="h-9 gap-1 pr-2">
                   <Calendar className="h-4 w-4" />
                   <span className="text-xs font-semibold">
-                    {weeks[selectedWeekIndex]?.label || "Chọn tuần"}
+                    {weeks[selectedWeekIndex]?.label || tSM("SelectWeek")}
                   </span>
                   <ChevronDown className="h-4 w-4 opacity-50" />
                 </Button>
@@ -373,7 +374,7 @@ export function ScheduleManager() {
                   className="gap-2"
                 >
                   {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-                  <span>Thiết lập & Xếp lịch tự động</span>
+                  <span>{tSM("SetupAutoSchedule")}</span>
                 </Button>
               </Link>
 

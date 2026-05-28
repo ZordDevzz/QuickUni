@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTransition } from "react";
+import { useTranslations } from "next-intl";
 
 export type Semester = typeof semester.$inferSelect;
 

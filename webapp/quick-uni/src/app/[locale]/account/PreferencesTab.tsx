@@ -41,9 +41,9 @@ export function PreferencesTab() {
                 <SelectValue placeholder={t("SelectTheme")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="light">Light</SelectItem>
-                <SelectItem value="dark">Dark</SelectItem>
-                <SelectItem value="system">System</SelectItem>
+                <SelectItem value="light">{t("ThemeLight")}</SelectItem>
+                <SelectItem value="dark">{t("ThemeDark")}</SelectItem>
+                <SelectItem value="system">{t("ThemeSystem")}</SelectItem>
               </SelectContent>
             </Select>
           </div>

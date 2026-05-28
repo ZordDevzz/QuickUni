@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const t = useTranslations("Auth");
   const toastT = useTranslations("Toast");
+  const tCommon = useTranslations("Common");
 
   const form = useForm({
     defaultValues: {
@@ -171,7 +172,7 @@ export default function LoginPage() {
           </div>
           <div className="text-muted-foreground text-center text-xs text-balance">
             &copy; {new Date().getFullYear()} QuickUNI. {t("Copyright")} <br />{" "}
-            Design and developed by{" "}
+            {tCommon("DesignedBy")}{" "}
             <a
               href="https://github.com/ZordDevzz/"
               className="hover:text-primary underline"

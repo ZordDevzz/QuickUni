@@ -5,6 +5,7 @@ import { profileSchemaField } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { AccountClient } from "./AccountClient";
+import { getTranslations } from "next-intl/server";
 
 export default async function AccountPage() {
   const session = await getAuthSession();
@@ -12,11 +13,12 @@ export default async function AccountPage() {
     redirect("/login");
   }
 
+  const t = await getTranslations("AccountSettings");
   const userProfile = await getProfileByAccountId(session.user.id);
   
   if (!userProfile) {
     // Should not happen for active users but handle it
-    return <div>Profile not found. Please contact support.</div>;
+    return <div className="p-6 text-center">{t("ProfileNotFound")}</div>;
   }
 
   // Fetch fields for this schema
@@ -29,7 +31,7 @@ export default async function AccountPage() {
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Account Settings</h1>
+      <h1 className="text-3xl font-bold mb-6">{t("Title")}</h1>
       <AccountClient 
         profile={userProfile} 
         schemaFields={schemaFields.map(sf => ({

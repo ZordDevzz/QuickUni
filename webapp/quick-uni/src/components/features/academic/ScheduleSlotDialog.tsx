@@ -49,6 +49,7 @@ export function ScheduleSlotDialog({
   viewMode
 }: ScheduleSlotDialogProps) {
   const t = useTranslations("Admin");
+  const tSM = useTranslations("ScheduleManager");
   const [loading, setLoading] = useState(false);
   const [rooms, setRooms] = useState<RoomOption[]>([]);
   const [courseClasses, setCourseClasses] = useState<CourseClassOption[]>([]);
@@ -109,7 +110,7 @@ export function ScheduleSlotDialog({
         if (viewMode === 'actual') {
           const schDate = (initialData as any)?.schDate;
           if (!schDate) {
-            toast.error("Ngày học thực tế không hợp lệ");
+            toast.error(tSM("InvalidActualDate") || "Invalid actual date");
             return;
           }
 
@@ -128,7 +129,7 @@ export function ScheduleSlotDialog({
             onSuccess();
             onClose();
           } else {
-            toast.error(result.error || "Không thể lưu lịch học thực tế");
+            toast.error(result.error || tSM("ErrorSaveActual") || "Failed to save actual schedule");
           }
           return;
         }
@@ -164,7 +165,7 @@ export function ScheduleSlotDialog({
           onSuccess();
           onClose();
         } else {
-          toast.error(result.error || "Không thể xóa lịch thực tế");
+          toast.error(result.error || tSM("ErrorDeleteActual") || "Failed to delete actual schedule");
         }
         return;
       }
@@ -209,7 +210,7 @@ export function ScheduleSlotDialog({
 
         {viewMode === 'actual' && (initialData as any)?.schDate && (
           <div className="bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20 px-3 py-2 rounded-md text-xs font-semibold text-center flex items-center justify-center gap-1.5">
-            📅 Ngày học thực tế: <span className="underline font-bold">{(initialData as any).schDate}</span>
+            {tSM("ActualDates")} <span className="underline font-bold">{(initialData as any).schDate}</span>
           </div>
         )}
 
@@ -230,7 +231,7 @@ export function ScheduleSlotDialog({
             <form.Field name="scheduleType">
               {(field) => (
                 <div className="space-y-2">
-                  <Label htmlFor={field.name}>Loại lịch học</Label>
+                  <Label htmlFor={field.name}>{tSM("ScheduleType")}</Label>
                   <div className="flex gap-2">
                     {scheduleTypes.map((type) => {
                       const isSelected = field.state.value === type.id;
@@ -254,13 +255,13 @@ export function ScheduleSlotDialog({
                   </div>
                   {/* Live preview badge */}
                   <div className="flex items-center gap-1.5 mt-1">
-                    <span className="text-[10px] text-muted-foreground">Hiển thị trên lịch:</span>
+                    <span className="text-[10px] text-muted-foreground">{tSM("DisplayOnCalendar")}</span>
                     <Badge
                       variant="outline"
                       className={cn("text-[9px] px-2 py-0 h-4 gap-1", getTypeColor(field.state.value as number))}
                     >
                       {getTypeIcon(field.state.value as number)}
-                      {scheduleTypes.find(t => t.id === field.state.value)?.name ?? "Lịch chính"}
+                      {scheduleTypes.find(t => t.id === field.state.value)?.name ?? (tSM("MainSchedule") || "Main Schedule")}
                     </Badge>
                   </div>
                 </div>

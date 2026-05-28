@@ -14,6 +14,9 @@ interface DepartmentClientProps {
   initialDepartments: Department[];
 }
 
+import { Search } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+
 export default function DepartmentClient({ initialDepartments }: DepartmentClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -21,6 +24,7 @@ export default function DepartmentClient({ initialDepartments }: DepartmentClien
   const pathname = usePathname();
   const selectedId = searchParams.get('id');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const t = useTranslations("Departments");
 
   return (
     <div className="flex h-[calc(100vh-120px)] overflow-hidden border rounded-lg bg-background">
@@ -39,9 +43,9 @@ export default function DepartmentClient({ initialDepartments }: DepartmentClien
             <div className="h-20 w-20 rounded-2xl bg-muted/50 flex items-center justify-center mb-6">
               <Search className="h-10 w-10 text-muted-foreground/40" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">No Department Selected</h3>
+            <h3 className="text-xl font-semibold mb-2">{t("NoDepartmentSelected")}</h3>
             <p className="text-muted-foreground max-w-xs mx-auto">
-              Select a department from the list on the left to view and manage its details, majors, and personnel.
+              {t("NoDepartmentSelectedDesc")}
             </p>
           </div>
         )}
@@ -55,5 +59,3 @@ export default function DepartmentClient({ initialDepartments }: DepartmentClien
     </div>
   );
 }
-
-import { Search } from 'lucide-react';

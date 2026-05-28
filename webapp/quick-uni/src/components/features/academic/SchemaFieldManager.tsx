@@ -22,6 +22,7 @@ interface SchemaFieldManagerProps {
 
 export function SchemaFieldManager({ schemaId }: SchemaFieldManagerProps) {
   const t = useTranslations("Profile");
+  const tCommon = useTranslations("Common");
   const [assignedFields, setAssignedFields] = useState<SchemaField[]>([]);
   const [availableFields, setAvailableFields] = useState<AvailableField[]>([]);
   const [loading, setLoading] = useState(true);
@@ -86,9 +87,9 @@ export function SchemaFieldManager({ schemaId }: SchemaFieldManagerProps) {
       <div className="space-y-4">
         <h3 className="font-medium text-sm text-muted-foreground">{t("AssignedFields")}</h3>
         {loading ? (
-          <div className="text-sm">Loading...</div>
+          <div className="text-sm">{tCommon("Loading")}</div>
         ) : assignedFields.length === 0 ? (
-          <div className="text-sm text-muted-foreground italic">No fields assigned</div>
+          <div className="text-sm text-muted-foreground italic">{tCommon("NoFieldsAssigned")}</div>
         ) : (
           <div className="border rounded-md divide-y">
             {assignedFields.map((field) => (
@@ -99,7 +100,7 @@ export function SchemaFieldManager({ schemaId }: SchemaFieldManagerProps) {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
-                    <Label className="text-xs" htmlFor={`req-${field.fieldId}`}>Required</Label>
+                    <Label className="text-xs" htmlFor={`req-${field.fieldId}`}>{tCommon("Required")}</Label>
                     <input 
                       type="checkbox" 
                       id={`req-${field.fieldId}`}
@@ -121,9 +122,9 @@ export function SchemaFieldManager({ schemaId }: SchemaFieldManagerProps) {
       <div className="space-y-4">
         <h3 className="font-medium text-sm text-muted-foreground">{t("AvailableFields")}</h3>
         {loading ? (
-          <div className="text-sm">Loading...</div>
+          <div className="text-sm">{tCommon("Loading")}</div>
         ) : availableFields.length === 0 ? (
-          <div className="text-sm text-muted-foreground italic">No more fields available</div>
+          <div className="text-sm text-muted-foreground italic">{tCommon("NoMoreFields")}</div>
         ) : (
           <div className="grid grid-cols-2 gap-2">
             {availableFields.map((field) => (

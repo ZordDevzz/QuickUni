@@ -41,7 +41,7 @@ export default async function StudentsPage() {
               {t("StudentMgmt")}
             </h1>
             <p className="text-muted-foreground text-sm max-w-2xl">
-              Quản lý thông tin hồ sơ lý lịch học sinh sinh viên, cấp phát và khóa tài khoản học tập trực tuyến trong phạm vi toàn trường.
+              {t("StudentsMgmt.Description")}
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -64,7 +64,7 @@ export default async function StudentsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold tracking-tight">{totalStudents}</div>
-            <p className="text-xs text-muted-foreground mt-1">Sinh viên chính quy đang học tập</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("StudentsMgmt.ActiveStudents")}</p>
           </CardContent>
         </Card>
 
@@ -79,7 +79,7 @@ export default async function StudentsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold tracking-tight">{linkedAccounts}</div>
-            <p className="text-xs text-muted-foreground mt-1">Tài khoản MSSV đã được kích hoạt</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("StudentsMgmt.AccountsActivated")}</p>
           </CardContent>
         </Card>
 
@@ -94,7 +94,7 @@ export default async function StudentsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold tracking-tight">{unlinkedProfiles}</div>
-            <p className="text-xs text-muted-foreground mt-1">Hồ sơ tân sinh viên chờ cấp tài khoản</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("StudentsMgmt.PendingAccounts")}</p>
           </CardContent>
         </Card>
 
@@ -102,14 +102,14 @@ export default async function StudentsPage() {
         <Card className="relative overflow-hidden border-rose-500/10 bg-background/50 backdrop-blur-md transition-all hover:shadow-md hover:-translate-y-0.5 duration-300">
           <div className="absolute top-0 left-0 h-full w-1 bg-rose-500"></div>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Tài khoản bị khóa</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("StudentsMgmt.LockedAccounts")}</CardTitle>
             <div className="rounded-lg p-2 bg-rose-500/10 text-rose-500">
               <ShieldAlert className="h-4 w-4" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold tracking-tight">{suspendedAccounts}</div>
-            <p className="text-xs text-muted-foreground mt-1">Đang tạm khóa hoặc bị hạn chế</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("StudentsMgmt.SuspendedAccounts")}</p>
           </CardContent>
         </Card>
       </div>
@@ -133,7 +133,7 @@ export default async function StudentsPage() {
                 <div>
                   <CardTitle className="text-lg font-bold">{t("StudentProfiles")}</CardTitle>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Quản lý thông tin hồ sơ lý lịch cá nhân và quá trình học tập của sinh viên.
+                    {t("StudentsMgmt.ProfilesDescription")}
                   </p>
                 </div>
               </div>
@@ -152,7 +152,7 @@ export default async function StudentsPage() {
                 <div>
                   <CardTitle className="text-lg font-bold">{t("StudentAccounts")}</CardTitle>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Quản lý tài khoản truy cập hệ thống của sinh viên, xem ngày tạo và đặt lại mật khẩu.
+                    {t("StudentsMgmt.AccountsDescription")}
                   </p>
                 </div>
               </div>
