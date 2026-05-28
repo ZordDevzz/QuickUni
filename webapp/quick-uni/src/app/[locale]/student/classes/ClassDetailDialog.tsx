@@ -10,9 +10,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getStudentClassDetails } from "@/actions/course";
 import { toast } from "sonner";
-import { Loader2, FileText, GraduationCap, Info } from "lucide-react";
+import { Loader2, FileText, Info } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { ClassEnrollment } from "./ClassCard";
@@ -67,7 +66,7 @@ export function ClassDetailDialog({
           </div>
         ) : (
           <Tabs defaultValue="overview" className="flex-1 flex flex-col">
-            <TabsList className="grid grid-cols-3 w-full">
+            <TabsList className="grid grid-cols-2 w-full">
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <Info className="w-4 h-4" />
                 {t("TabOverview")}
@@ -75,10 +74,6 @@ export function ClassDetailDialog({
               <TabsTrigger value="materials" className="flex items-center gap-2">
                 <FileText className="w-4 h-4" />
                 {t("TabMaterials")}
-              </TabsTrigger>
-              <TabsTrigger value="grades" className="flex items-center gap-2">
-                <GraduationCap className="w-4 h-4" />
-                {t("TabGrades")}
               </TabsTrigger>
             </TabsList>
 
@@ -115,33 +110,6 @@ export function ClassDetailDialog({
                   </div>
                 ) : (
                   <p className="text-center py-8 text-muted-foreground">{t("NoMaterials")}</p>
-                )}
-              </TabsContent>
-
-              <TabsContent value="grades" className="m-0">
-                {details?.studentGrades?.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>{t("GradeType")}</TableHead>
-                        <TableHead className="text-right">{t("GradeValue")}</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {details.studentGrades.map((g: unknown) => {
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        const grade = g as any;
-                        return (
-                          <TableRow key={grade.id}>
-                            <TableCell>{grade.gradeType?.name || "Regular"}</TableCell>
-                            <TableCell className="text-right font-bold">{grade.grade}</TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  <p className="text-center py-8 text-muted-foreground">{t("NoGrades")}</p>
                 )}
               </TabsContent>
             </ScrollArea>

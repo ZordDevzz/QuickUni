@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -30,14 +30,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { submitRequest } from "@/actions/workflow";
+import { submitRequest, getClassScheduleSlots } from "@/actions/workflow";
 import { notify } from "@/lib/custom-toast";
 
 const requestSchema = z.object({
   type: z.enum(["student_absence", "class_cancellation"]),
   classId: z.string().min(1, "Required"),
   date: z.string().optional(),
+  scheduleId: z.string().optional(),
   reason: z.string().min(10, "Reason must be at least 10 characters"),
 });
 
@@ -54,18 +54,46 @@ export default function RequestWizard({ enrollments }: RequestWizardProps) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [slots, setSlots] = useState<{ id: string; schDate: string; period: number; endPeriod: number; roomCode: string }[]>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
   const form = useForm<RequestFormValues>({
     resolver: zodResolver(requestSchema),
     defaultValues: {
       type: "student_absence",
       classId: "",
-      date: new Date().toISOString().split('T')[0],
+      date: "",
+      scheduleId: "",
       reason: "",
     },
   });
 
   const selectedType = form.watch("type");
+  const selectedClassId = form.watch("classId");
+
+  // Load schedule slots when a class is selected for student absence
+  useEffect(() => {
+    if (selectedClassId && selectedType === 'student_absence') {
+      setIsLoadingSlots(true);
+      getClassScheduleSlots(selectedClassId)
+        .then((data) => {
+          setSlots(data);
+          if (data.length > 0) {
+            form.setValue("scheduleId", data[0].id);
+            form.setValue("date", data[0].schDate);
+          } else {
+            form.setValue("scheduleId", "");
+            form.setValue("date", "");
+          }
+        })
+        .catch((err) => console.error(err))
+        .finally(() => setIsLoadingSlots(false));
+    } else {
+      setSlots([]);
+      form.setValue("scheduleId", "");
+      form.setValue("date", "");
+    }
+  }, [selectedClassId, selectedType, form]);
 
   async function onSubmit(data: RequestFormValues) {
     setIsSubmitting(true);
@@ -73,6 +101,7 @@ export default function RequestWizard({ enrollments }: RequestWizardProps) {
       await submitRequest(data.type, {
         classId: data.classId,
         date: data.date,
+        scheduleId: data.scheduleId,
         reason: data.reason
       });
       
@@ -171,16 +200,37 @@ export default function RequestWizard({ enrollments }: RequestWizardProps) {
                   )}
                 />
 
-                {selectedType === 'student_absence' && (
+                {selectedType === 'student_absence' && selectedClassId && (
                   <FormField
                     control={form.control}
-                    name="date"
+                    name="scheduleId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("Date")}</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
+                        <FormLabel>{t("SelectSlot")}</FormLabel>
+                        <Select 
+                          onValueChange={(val) => {
+                            field.onChange(val);
+                            const matched = slots.find(s => s.id === val);
+                            if (matched) {
+                              form.setValue("date", matched.schDate);
+                            }
+                          }} 
+                          value={field.value}
+                          disabled={isLoadingSlots || slots.length === 0}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={isLoadingSlots ? "Loading slots..." : (slots.length === 0 ? "No slots scheduled" : t("SelectSlotPlaceholder"))} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {slots.map((s) => (
+                              <SelectItem key={s.id} value={s.id}>
+                                {s.schDate} (Tiết {s.period}-{s.endPeriod}, Phòng {s.roomCode})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -217,7 +267,7 @@ export default function RequestWizard({ enrollments }: RequestWizardProps) {
                   <Button type="button" variant="outline" onClick={() => setStep(1)} disabled={isSubmitting}>
                     {t("Previous")}
                   </Button>
-                  <Button type="submit" disabled={isSubmitting}>
+                  <Button type="submit" disabled={isSubmitting || (selectedType === 'student_absence' && slots.length === 0)}>
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {t("Submit")}
                   </Button>

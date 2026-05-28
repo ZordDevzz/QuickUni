@@ -61,3 +61,14 @@ export const subjectSchema = z.object({
 
 export type SubjectInput = z.infer<typeof subjectSchema>;
 
+export const mainClassSchema = z.object({
+  id: z.string().uuid().optional(),
+  code: z.string().min(1, "Code is required").max(30),
+  teacher: z.string().uuid("Homeroom teacher is required"),
+  typeId: z.coerce.number().int().min(1, "Education type is required"),
+  majorId: z.string().uuid("Major is required"),
+  academicYear: z.coerce.number().int().min(2000).max(2100),
+});
+
+export type MainClassInput = z.infer<typeof mainClassSchema>;
+

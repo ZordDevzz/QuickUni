@@ -10,6 +10,7 @@ import { Field, FieldLabel, FieldError, FieldContent } from "@/components/ui/fie
 import { notify } from "@/lib/custom-toast";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface DependencyItem {
   id: string | number;
@@ -27,6 +28,8 @@ export interface Dependencies {
   subjects: DependencyItem[];
   semesters: DependencyItem[];
   types: DependencyItem[];
+  departments?: DependencyItem[];
+  majors?: DependencyItem[];
 }
 
 export interface CourseClass {
@@ -147,20 +150,21 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
           <Field>
             <FieldLabel htmlFor={field.name}>{t("Subject")}</FieldLabel>
             <FieldContent>
-              <select
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors"
-                >
-                  <option value="">{t("SelectSubject")}</option>
+              <Select
+                onValueChange={(val) => field.handleChange(val)}
+                value={field.state.value || ""}
+              >
+                <SelectTrigger id={field.name} className="w-full">
+                  <SelectValue placeholder={t("SelectSubject")} />
+                </SelectTrigger>
+                <SelectContent>
                   {subjects.map((s) => (
-                    <option key={s.id} value={s.id}>
+                    <SelectItem key={s.id} value={String(s.id)}>
                       {s.code} - {s.name}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
+                </SelectContent>
+              </Select>
             </FieldContent>
           </Field>
         )}
@@ -171,20 +175,21 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
           <Field>
             <FieldLabel htmlFor={field.name}>{t("Teacher")}</FieldLabel>
             <FieldContent>
-              <select
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors"
-                >
-                  <option value="">{t("SelectTeacher")}</option>
+              <Select
+                onValueChange={(val) => field.handleChange(val)}
+                value={field.state.value || ""}
+              >
+                <SelectTrigger id={field.name} className="w-full">
+                  <SelectValue placeholder={t("SelectTeacher")} />
+                </SelectTrigger>
+                <SelectContent>
                   {teachers.map((t) => (
-                    <option key={t.id} value={t.id}>
+                    <SelectItem key={t.id} value={String(t.id)}>
                       {t.profile?.fullname || t.code} ({t.code})
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
+                </SelectContent>
+              </Select>
             </FieldContent>
           </Field>
         )}
@@ -196,20 +201,21 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
             <Field>
               <FieldLabel htmlFor={field.name}>{t("Semester")}</FieldLabel>
               <FieldContent>
-                <select
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value}
-                    onChange={(e) => field.handleChange(Number(e.target.value))}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors"
-                  >
-                    <option value="">{t("SelectSemester")}</option>
-                    {semesters.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </select>
+              <Select
+                onValueChange={(val) => field.handleChange(Number(val))}
+                value={field.state.value ? String(field.state.value) : ""}
+              >
+                <SelectTrigger id={field.name} className="w-full">
+                  <SelectValue placeholder={t("SelectSemester")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {semesters.map((s) => (
+                    <SelectItem key={s.id} value={String(s.id)}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               </FieldContent>
             </Field>
           )}
@@ -220,20 +226,21 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
             <Field>
               <FieldLabel htmlFor={field.name}>{t("Type")}</FieldLabel>
               <FieldContent>
-                <select
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value}
-                    onChange={(e) => field.handleChange(Number(e.target.value))}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors"
-                  >
-                    <option value="">{t("SelectType")}</option>
-                    {types.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name || t.code}
-                      </option>
-                    ))}
-                  </select>
+              <Select
+                onValueChange={(val) => field.handleChange(Number(val))}
+                value={field.state.value ? String(field.state.value) : ""}
+              >
+                <SelectTrigger id={field.name} className="w-full">
+                  <SelectValue placeholder={t("SelectType")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {types.map((t) => (
+                    <SelectItem key={t.id} value={String(t.id)}>
+                      {t.name || t.code}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               </FieldContent>
             </Field>
           )}
@@ -245,17 +252,19 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
           <Field>
             <FieldLabel htmlFor={field.name}>{t("Status")}</FieldLabel>
             <FieldContent>
-              <select
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors"
-                >
-                  <option value="opened">{t("Opened")}</option>
-                  <option value="closed">{t("Closed")}</option>
-                  <option value="cancelled">{t("Cancelled")}</option>
-                </select>
+              <Select
+                onValueChange={(val) => field.handleChange(val)}
+                value={field.state.value || ""}
+              >
+                <SelectTrigger id={field.name} className="w-full">
+                  <SelectValue placeholder={t("SelectStatus") || "Select status"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="opened">{t("Opened")}</SelectItem>
+                  <SelectItem value="closed">{t("Closed")}</SelectItem>
+                  <SelectItem value="cancelled">{t("Cancelled")}</SelectItem>
+                </SelectContent>
+              </Select>
             </FieldContent>
           </Field>
         )}

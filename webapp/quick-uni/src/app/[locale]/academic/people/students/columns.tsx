@@ -27,6 +27,24 @@ export const getColumns = (t: any): ColumnDef<any>[] => [
     ),
   },
   {
+    id: "class",
+    header: "Lớp hành chính",
+    cell: ({ row }) => row.original.mainClassMembers?.[0]?.mainClass?.code || "N/A",
+  },
+  {
+    id: "department",
+    header: "Khoa/Phân khoa",
+    cell: ({ row }) => row.original.mainClassMembers?.[0]?.mainClass?.major?.department?.name || "N/A",
+  },
+  {
+    id: "major",
+    header: "Chuyên ngành",
+    cell: ({ row }) => {
+      const major = row.original.mainClassMembers?.[0]?.mainClass?.major;
+      return major ? `${major.des || major.code} (${major.code})` : "N/A";
+    },
+  },
+  {
     accessorKey: "profile.gender",
     header: t("Gender") || "Gender",
     cell: ({ row }) => {

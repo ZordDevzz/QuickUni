@@ -13,7 +13,8 @@ import {
   ChevronRight,
   ChevronDown,
   X,
-  GraduationCap
+  GraduationCap,
+  FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,8 @@ const navItems: NavItem[] = [
   { key: "Schedule", href: "/academic/schedule", icon: Clock },
   { key: "Teachers", href: "/academic/people/teachers", icon: Users, category: "People" },
   { key: "Students", href: "/academic/people/students", icon: Users },
+  { key: "MainClasses", href: "/academic/classes", icon: Users },
+  { key: "Requests", href: "/academic/requests", icon: FileText, category: "Operations" },
 ];
 
 interface AcademicSidebarProps {

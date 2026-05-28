@@ -1,8 +1,9 @@
 "use server";
 
 import { db } from "../db";
-import { semester, department, major, subject, subjectPrerequisite } from "../db/schemas/academic";
+import { semester, department, major, subject, subjectPrerequisite, educationType } from "../db/schemas/academic";
 import { departmentEmployment } from "../db/schemas/system";
+import { mainClass } from "../db/schemas/course";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { eq, ne, desc, asc, isNull, sql } from "drizzle-orm";
 import {
@@ -16,6 +17,8 @@ import {
   DepartmentEmploymentInput,
   subjectSchema,
   SubjectInput,
+  mainClassSchema,
+  MainClassInput,
 } from "../lib/validators/academic";
 import { revalidatePath } from "next/cache";
 
@@ -251,4 +254,93 @@ export async function deleteSubject(id: string) {
   revalidatePath("/[locale]/academic/subjects", "page");
   revalidatePath("/academic/subjects");
   return { success: true };
+}
+
+export async function getMajors() {
+  return await db.query.major.findMany({
+    where: (m, { isNull }) => isNull(m.deletedAt),
+    orderBy: (m, { asc }) => [asc(m.code)],
+    with: {
+      department: true,
+    }
+  });
+}
+
+export async function getMainClasses() {
+  return await db.query.mainClass.findMany({
+    orderBy: (mc, { asc }) => [asc(mc.code)],
+    with: {
+      major: {
+        with: {
+          department: true,
+        }
+      }
+    }
+  });
+}
+
+export async function getEducationTypes() {
+  return await db.query.educationType.findMany({
+    orderBy: (et, { asc }) => [asc(et.name)],
+  });
+}
+
+export async function upsertMainClass(data: MainClassInput) {
+  const validated = mainClassSchema.parse(data);
+  const { id, ...values } = validated;
+
+  let result;
+  if (id) {
+    [result] = await db
+      .update(mainClass)
+      .set(values)
+      .where(eq(mainClass.id, id))
+      .returning();
+  } else {
+    [result] = await db
+      .insert(mainClass)
+      .values({
+        id: crypto.randomUUID(),
+        ...values,
+      })
+      .returning();
+  }
+
+  revalidatePath("/[locale]/academic/classes", "page");
+  revalidatePath("/[locale]/academic/classes/[id]", "page");
+  return result;
+}
+
+export async function deleteMainClass(id: string) {
+  await db.delete(mainClass).where(eq(mainClass.id, id));
+  revalidatePath("/[locale]/academic/classes", "page");
+  return { success: true };
+}
+
+export async function getMainClassDetails(id: string) {
+  return await db.query.mainClass.findFirst({
+    where: eq(mainClass.id, id),
+    with: {
+      major: {
+        with: {
+          department: true,
+        }
+      },
+      educationType: true,
+      employee: {
+        with: {
+          profile: true,
+        }
+      },
+      mainClassMembers: {
+        with: {
+          student: {
+            with: {
+              profile: true,
+            }
+          }
+        }
+      }
+    }
+  });
 }

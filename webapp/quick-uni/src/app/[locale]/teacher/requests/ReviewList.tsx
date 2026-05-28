@@ -93,24 +93,41 @@ export default function ReviewList({ requests }: { requests: unknown[] }) {
             <DialogTitle>{t("ReviewTitle")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid gap-2">
-              <div className="flex justify-between">
+            <div className="grid gap-3">
+              <div className="flex justify-between border-b pb-2">
                 <span className="text-sm font-medium text-muted-foreground">{t("Sender")}</span>
                 <span className="text-sm font-semibold">{selectedRequest?.sender?.fullname}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between border-b pb-2">
                 <span className="text-sm font-medium text-muted-foreground">{t("TypeHeader")}</span>
                 <span className="text-sm font-semibold">{selectedRequest ? t(`Type.${selectedRequest.type}`) : ""}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between border-b pb-2">
                 <span className="text-sm font-medium text-muted-foreground">{t("CreatedAt")}</span>
                 <span className="text-sm">{selectedRequest ? new Date(selectedRequest.createAt).toLocaleString() : ""}</span>
               </div>
-              <div className="mt-2">
-                <span className="text-sm font-medium text-muted-foreground">{t("Details")}</span>
-                <pre className="mt-1 text-xs bg-muted p-2 rounded max-h-[150px] overflow-auto">
-                  {JSON.stringify(selectedRequest?.data, null, 2)}
-                </pre>
+
+              {selectedRequest?.classCode && (
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-sm font-medium text-muted-foreground">Lớp học phần</span>
+                  <span className="text-sm font-semibold text-right max-w-[280px]">
+                    {selectedRequest.subjectName} ({selectedRequest.classCode})
+                  </span>
+                </div>
+              )}
+
+              {selectedRequest?.data?.date && (
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-sm font-medium text-muted-foreground">Ngày xin nghỉ</span>
+                  <span className="text-sm font-semibold">{selectedRequest.data.date}</span>
+                </div>
+              )}
+
+              <div className="space-y-1">
+                <span className="text-sm font-medium text-muted-foreground">Lý do xin vắng</span>
+                <p className="text-sm bg-muted p-2.5 rounded-md break-words whitespace-pre-wrap">
+                  {selectedRequest?.data?.reason || "N/A"}
+                </p>
               </div>
             </div>
             

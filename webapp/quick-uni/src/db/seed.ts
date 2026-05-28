@@ -61,9 +61,9 @@ const main = async () => {
     console.log("📚 Seeding academic entities...");
     const { semesterId, subjects } = await seedAcademic();
 
-    // 5. Scheduling (Commented out as requested - no scheduling data seeding)
-    // console.log("📅 Seeding scheduling...");
-    // await seedScheduling(semesterId, subjects, teachersList, rooms, studentList);
+    // 5. Scheduling (Uncommented to populate course classes, schedules, and requests in the app!)
+    console.log("📅 Seeding scheduling...");
+    await seedScheduling(semesterId, subjects, teachersList, rooms, studentList);
 
     // 6. Validation
     await validateSeed();

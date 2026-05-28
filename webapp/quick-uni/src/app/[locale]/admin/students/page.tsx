@@ -139,7 +139,7 @@ export default async function StudentsPage() {
               </div>
             </CardHeader>
             <CardContent className="pt-6">
-              <ProfileTable data={profiles} />
+              <ProfileTable data={profiles} isStudent={true} />
             </CardContent>
           </Card>
         </TabsContent>

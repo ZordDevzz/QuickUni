@@ -5,8 +5,14 @@ import { OnboardingRow } from "@/types/onboarding";
  * Generates an Excel template for admin onboarding.
  * Includes fixed profile fields and dynamic fields from the chosen schema.
  */
-export async function generateOnboardingTemplate(fields: { label: string, name: string, isRequired: boolean }[]) {
+export async function generateOnboardingTemplate(
+  fields: { label: string, name: string, isRequired: boolean }[],
+  entityType?: "student" | "employee"
+) {
   const fixedHeaders = ["Full Name", "Gender", "DOB", "National ID", "Address", "Ethnic", "Religious", "Entity Code"];
+  if (entityType === "student") {
+    fixedHeaders.push("Class Code");
+  }
   const dynamicHeaders = fields.map(f => f.label);
   const allHeaders = [...fixedHeaders, ...dynamicHeaders];
 
@@ -27,6 +33,10 @@ export async function generateOnboardingTemplate(fields: { label: string, name: 
     ["Religious", "Religious affiliation", "Text", "No"],
     ["Entity Code", "Student ID or Employee Code", "Text", "Yes"],
   ];
+
+  if (entityType === "student") {
+    instructions.push(["Class Code", "Administrative Homeroom Class", "Text (e.g., 21CNTT1, 21ATTT1)", "No"]);
+  }
 
   // Add dynamic fields to instructions
   fields.forEach(f => {

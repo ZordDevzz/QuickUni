@@ -18,9 +18,11 @@ import {
   grade,
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gradeType,
-  weeklyTemplate
+  weeklyTemplate,
+  department,
+  major
 } from "../db/schema";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, exists } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { 
   CourseClassInsertInput, 
@@ -43,14 +45,16 @@ export type ActionResponse = {
 // --- Dependencies ---
 
 export async function getCourseClassFormDependencies() {
-  const [teachers, subjects, semesters, types] = await Promise.all([
+  const [teachers, subjects, semesters, types, departments, majors] = await Promise.all([
     db.query.employee.findMany({ with: { profile: true } }),
     db.query.subject.findMany({ where: isNull(subject.deletedAt), orderBy: (s, { asc }) => [asc(s.code)] }),
     db.query.semester.findMany({ orderBy: (s, { desc }) => [desc(s.startDate)] }),
     db.query.courseClassType.findMany(),
+    db.query.department.findMany({ where: isNull(department.deletedAt), orderBy: (d, { asc }) => [asc(d.name)] }),
+    db.query.major.findMany({ where: isNull(major.deletedAt), orderBy: (m, { asc }) => [asc(m.code)] }),
   ]);
 
-  return { teachers, subjects, semesters, types };
+  return { teachers, subjects, semesters, types, departments, majors };
 }
 
 // --- Course Classes ---
@@ -104,8 +108,17 @@ export async function getClassStudents(classId: string) {
 }
 
 export async function getCourseClassesWithRelations() {
+  const currentSemester = await db.query.semester.findFirst({
+    where: eq(semester.isCurrent, true)
+  });
+
+  if (!currentSemester) return [];
+
   return await db.query.courseClass.findMany({
-    where: isNull(courseClass.deletedAt),
+    where: and(
+      isNull(courseClass.deletedAt),
+      eq(courseClass.semesterId, currentSemester.id)
+    ),
     orderBy: (cc, { asc }) => [asc(cc.code)],
     with: {
       subject: true,

@@ -6,6 +6,7 @@ import {
   LayoutDashboard, 
   BookOpen,
   Clock,
+  FileText,
   ChevronLeft,
   ChevronRight,
   X
@@ -25,6 +26,7 @@ const navItems: NavItem[] = [
   { key: "Dashboard", href: "/teacher", icon: LayoutDashboard },
   { key: "MySchedule", href: "/teacher/schedule", icon: Clock },
   { key: "MyClasses", href: "/teacher/classes", icon: BookOpen },
+  { key: "Requests", href: "/teacher/requests", icon: FileText },
 ];
 
 interface TeacherSidebarProps {

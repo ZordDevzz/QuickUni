@@ -15,6 +15,7 @@ import { createProfileFieldAction, updateProfileFieldAction } from "@/actions/pr
 import { toast } from "sonner";
 import { profileField } from "@/db/schema";
 import { z } from "zod";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type ProfileFieldType = typeof profileField.$inferSelect;
 
@@ -148,20 +149,21 @@ export function ProfileFieldForm({ initialData, onSuccess }: ProfileFieldFormPro
           {(field) => (
             <div className="space-y-2">
               <Label htmlFor={field.name}>{t("DataType")}</Label>
-              <select
-                id={field.name}
-                name={field.name}
+              <Select
+                onValueChange={(val) => field.handleChange(val)}
                 value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
-                {DATA_TYPES.map((dt) => (
-                  <option key={dt} value={dt}>
-                    {dt}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger id={field.name} className="w-full">
+                  <SelectValue placeholder={t("SelectDataType") || "Select data type"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {DATA_TYPES.map((dt) => (
+                    <SelectItem key={dt} value={dt}>
+                      {dt}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {field.state.meta.errors ? (
                 <em className="text-sm text-destructive">{field.state.meta.errors.join(", ")}</em>
               ) : null}
@@ -178,20 +180,21 @@ export function ProfileFieldForm({ initialData, onSuccess }: ProfileFieldFormPro
           {(field) => (
             <div className="space-y-2">
               <Label htmlFor={field.name}>{t("UISection")}</Label>
-              <select
-                id={field.name}
-                name={field.name}
+              <Select
+                onValueChange={(val) => field.handleChange(val)}
                 value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
-                {UI_SECTIONS.map((section) => (
-                  <option key={section} value={section}>
-                    {section}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger id={field.name} className="w-full">
+                  <SelectValue placeholder={t("SelectUISection") || "Select UI Section"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {UI_SECTIONS.map((section) => (
+                    <SelectItem key={section} value={section}>
+                      {section}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {field.state.meta.errors ? (
                 <em className="text-sm text-destructive">{field.state.meta.errors.join(", ")}</em>
               ) : null}

@@ -9,12 +9,13 @@ import { TranslationFunction } from "@/types/i18n";
 
 interface ProfileTableProps {
   data: ProfileWithAccount[];
+  isStudent?: boolean;
 }
 
-export function ProfileTable({ data }: ProfileTableProps) {
+export function ProfileTable({ data, isStudent }: ProfileTableProps) {
   const t = useTranslations("Profile");
 
-  const columns = useMemo(() => getColumns(t as unknown as TranslationFunction), [t]);
+  const columns = useMemo(() => getColumns(t as unknown as TranslationFunction, isStudent), [t, isStudent]);
 
   return <DataTable columns={columns} data={data} searchKey="fullname" />;
 }

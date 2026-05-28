@@ -11,6 +11,8 @@ import { useRouter } from "next/navigation";
 import { building, room } from "@/db/schemas/schedule";
 import { useTranslations } from "next-intl";
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 interface RoomFormProps {
   room?: typeof room.$inferSelect;
   buildings: (typeof building.$inferSelect)[];
@@ -90,20 +92,21 @@ export function RoomForm({ room: roomData, buildings, onSuccess }: RoomFormProps
           <Field>
             <FieldLabel htmlFor={field.name}>{t("Building")}</FieldLabel>
             <FieldContent>
-              <select
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(Number(e.target.value))}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30"
-                >
-                  <option value="">{t("SelectBuilding")}</option>
+              <Select
+                onValueChange={(val) => field.handleChange(Number(val))}
+                value={field.state.value ? String(field.state.value) : ""}
+              >
+                <SelectTrigger id={field.name} className="w-full">
+                  <SelectValue placeholder={t("SelectBuilding")} />
+                </SelectTrigger>
+                <SelectContent>
                   {buildings.map((b) => (
-                    <option key={b.id} value={b.id}>
+                    <SelectItem key={b.id} value={String(b.id)}>
                       {b.code} - {b.name}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
+                </SelectContent>
+              </Select>
             </FieldContent>
           </Field>
         )}

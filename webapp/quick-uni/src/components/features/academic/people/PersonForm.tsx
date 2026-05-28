@@ -14,6 +14,7 @@ import { notify } from "@/lib/custom-toast";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Checkbox } from "@/components/ui/checkbox";
+import { getDepartments, getMajors, getMainClasses } from "@/actions/academic";
 
 const fixedSchema = z.object({
   code: z.string().min(1, "Required"),
@@ -25,6 +26,9 @@ const fixedSchema = z.object({
   countryCode: z.string().optional().nullable(),
   ethnic: z.string().optional().nullable(),
   religious: z.string().optional().nullable(),
+  departmentId: z.string().optional().nullable(),
+  majorId: z.string().optional().nullable(),
+  classId: z.string().optional().nullable(),
 });
 
 interface ProfileData {
@@ -55,7 +59,13 @@ type PersonFormProps = {
 export function PersonForm({ type, schemaId, initialData, onSuccess }: PersonFormProps) {
   const t = useTranslations("Profile");
   const commonT = useTranslations("Admin");
+  const tClass = useTranslations("MainClasses");
   const [fields, setFields] = useState<SchemaField[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [majors, setMajors] = useState<any[]>([]);
+  const [mainClasses, setMainClasses] = useState<any[]>([]);
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("");
+  const [selectedMajorId, setSelectedMajorId] = useState<string>("");
   const router = useRouter();
   const isEdit = !!initialData;
 
@@ -66,6 +76,32 @@ export function PersonForm({ type, schemaId, initialData, onSuccess }: PersonFor
     }
     loadFields();
   }, [schemaId]);
+
+  useEffect(() => {
+    async function loadAcademicOptions() {
+      if (type === "student") {
+        try {
+          const [depts, majs, classes] = await Promise.all([
+            getDepartments(),
+            getMajors(),
+            getMainClasses(),
+          ]);
+          setDepartments(depts);
+          setMajors(majs);
+          setMainClasses(classes);
+
+          const studentClass = (initialData as any)?.mainClassMembers?.[0]?.mainClass;
+          if (studentClass) {
+            setSelectedDepartmentId(studentClass.major?.departmentId || "");
+            setSelectedMajorId(studentClass.majorId || "");
+          }
+        } catch (error) {
+          console.error("Failed to load academic options", error);
+        }
+      }
+    }
+    loadAcademicOptions();
+  }, [type, initialData]);
 
   const formSchema = fixedSchema.extend({
     dynamicData: z.record(z.string(), z.unknown()),
@@ -84,6 +120,9 @@ export function PersonForm({ type, schemaId, initialData, onSuccess }: PersonFor
       ethnic: initialData.profile?.ethnic || "",
       religious: initialData.profile?.religious || "",
       dynamicData: initialData.profile?.dynamicData || {},
+      departmentId: (initialData as any)?.mainClassMembers?.[0]?.mainClass?.major?.departmentId || "",
+      majorId: (initialData as any)?.mainClassMembers?.[0]?.mainClass?.majorId || "",
+      classId: (initialData as any)?.mainClassMembers?.[0]?.classId || "",
     } : {
       code: "",
       fullname: "",
@@ -95,6 +134,9 @@ export function PersonForm({ type, schemaId, initialData, onSuccess }: PersonFor
       ethnic: "",
       religious: "",
       dynamicData: {},
+      departmentId: "",
+      majorId: "",
+      classId: "",
     },
   });
 
@@ -297,6 +339,111 @@ export function PersonForm({ type, schemaId, initialData, onSuccess }: PersonFor
             />
           </div>
         </div>
+
+        {type === "student" && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold border-b pb-2">{tClass("ClassAndDeptInfo")}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="departmentId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{tClass("Department")}</FormLabel>
+                    <Select 
+                      onValueChange={(val) => {
+                        field.onChange(val);
+                        setSelectedDepartmentId(val);
+                        // Reset sub-fields
+                        form.setValue("majorId", "");
+                        form.setValue("classId", "");
+                        setSelectedMajorId("");
+                      }} 
+                      value={field.value || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={tClass("SelectDepartment")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {departments.map((d) => (
+                          <SelectItem key={d.id} value={d.id}>
+                            {d.name} ({d.code})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="majorId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{tClass("Major")}</FormLabel>
+                    <Select 
+                      onValueChange={(val) => {
+                        field.onChange(val);
+                        setSelectedMajorId(val);
+                        // Reset class
+                        form.setValue("classId", "");
+                      }} 
+                      value={field.value || ""}
+                      disabled={!selectedDepartmentId}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={selectedDepartmentId ? tClass("SelectMajor") : tClass("SelectMajorFirst")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {majors.filter(m => m.departmentId === selectedDepartmentId).map((m) => (
+                          <SelectItem key={m.id} value={m.id}>
+                            {m.des || m.code} ({m.code})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="classId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{tClass("Class")}</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      value={field.value || ""}
+                      disabled={!selectedMajorId}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={selectedMajorId ? tClass("SelectClass") : tClass("SelectClassFirst")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {mainClasses.filter(c => c.majorId === selectedMajorId).map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.code}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+        )}
 
         {Object.entries(sections).map(([sectionName, sectionFields]) => (
           <div key={sectionName} className="space-y-4">

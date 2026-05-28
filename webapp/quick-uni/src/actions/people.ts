@@ -2,6 +2,7 @@
 
 import { db } from "@/db";
 import { profile, employee, student } from "@/db/schemas/user";
+import { mainClassMember } from "@/db/schemas/course";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { eq, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
@@ -19,6 +20,7 @@ export type PersonInput = {
   ethnic?: string;
   religious?: string;
   code: string;
+  classId?: string;
 };
 
 export async function createPerson(type: 'employee' | 'student', data: PersonInput) {
@@ -48,11 +50,20 @@ export async function createPerson(type: 'employee' | 'student', data: PersonInp
         profileId: profileId,
       });
     } else {
+      const studentId = randomUUID();
       await tx.insert(student).values({
-        id: randomUUID(),
+        id: studentId,
         code: data.code,
         profileId: profileId,
       });
+
+      if (data.classId) {
+        await tx.insert(mainClassMember).values({
+          studentId,
+          classId: data.classId,
+          roleId: 3, // Default role 'Member'
+        });
+      }
     }
 
     revalidatePath(`/[locale]/academic/people/${type}s`, "page");
@@ -94,6 +105,17 @@ export async function updatePerson(type: "employee" | "student", id: string, dat
         code: data.code,
         updateAt: new Date().toISOString(),
       }).where(eq(student.id, id));
+
+      if (data.classId) {
+        await tx.delete(mainClassMember).where(eq(mainClassMember.studentId, id));
+        await tx.insert(mainClassMember).values({
+          studentId: id,
+          classId: data.classId,
+          roleId: 3, // Default 'Member'
+        });
+      } else {
+        await tx.delete(mainClassMember).where(eq(mainClassMember.studentId, id));
+      }
     }
 
     revalidatePath(`/[locale]/academic/people/${type}s`, "page");
@@ -113,6 +135,19 @@ export async function getPeople(type: "employee" | "student") {
     return await db.query.student.findMany({
       with: {
         profile: true,
+        mainClassMembers: {
+          with: {
+            mainClass: {
+              with: {
+                major: {
+                  with: {
+                    department: true,
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       orderBy: (s, { desc }) => [desc(s.createAt)],
     });
