@@ -36,6 +36,7 @@ import {
   scheduleStatus,
   scheduleType,
   systemAuditLog,
+  onboardingSession,
   chatGroupMember,
   notificationTemplate,
   profile,
@@ -516,6 +517,22 @@ export const profileSchemaRelations = relations(profileSchema, ({ many }) => ({
   profiles: many(profile),
   profileSchemaFields: many(profileSchemaField),
   profileSections: many(profileSection),
+  onboardingSessions: many(onboardingSession),
+}));
+
+export const onboardingSessionRelations = relations(onboardingSession, ({ one }) => ({
+  profileSchema: one(profileSchema, {
+    fields: [onboardingSession.schemaId],
+    references: [profileSchema.id],
+  }),
+  createByUser: one(account, {
+    fields: [onboardingSession.createBy],
+    references: [account.id],
+  }),
+  updateByUser: one(account, {
+    fields: [onboardingSession.updateBy],
+    references: [account.id],
+  }),
 }));
 
 export const profileSectionRelations = relations(profileSection, ({ one, many }) => ({

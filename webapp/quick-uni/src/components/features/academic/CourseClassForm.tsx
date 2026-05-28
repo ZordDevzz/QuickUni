@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldError, FieldContent } from "@/components/ui/field";
 import { notify } from "@/lib/custom-toast";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 interface DependencyItem {
   id: string | number;
@@ -51,6 +52,7 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
   const router = useRouter();
   const isEdit = !!courseClass;
   const { teachers, subjects, semesters, types } = dependencies;
+  const t = useTranslations("Admin");
 
   const form = useForm({
     defaultValues: {
@@ -69,7 +71,7 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
         const schema = isEdit ? courseClassUpdateSchema : courseClassInsertSchema;
         const validation = schema.safeParse(value);
         if (!validation.success) {
-           notify(validation.error.issues[0]?.message || "Validation failed", { type: "error" });
+           notify(validation.error.issues[0]?.message || t("ValidationFailed"), { type: "error" });
            return;
         }
 
@@ -82,14 +84,14 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
         }
 
         if (result.success) {
-          notify("Success", { type: "success" });
+          notify(t("Success"), { type: "success" });
           onSuccess?.();
           router.refresh();
         } else {
-          notify(result.error || "Failed", { type: "error" });
+          notify(result.error || t("Failed"), { type: "error" });
         }
       } catch (error: unknown) {
-        notify((error as Error).message || "Failed", { type: "error" });
+        notify((error as Error).message || t("Failed"), { type: "error" });
       }
     },
   });
@@ -107,7 +109,7 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
         <form.Field name="code">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Class Code</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t("ClassCode")}</FieldLabel>
               <FieldContent>
                 <Input
                   id={field.name}
@@ -124,7 +126,7 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
         <form.Field name="cap">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Capacity</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t("Capacity")}</FieldLabel>
               <FieldContent>
                 <Input
                   id={field.name}
@@ -143,7 +145,7 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
       <form.Field name="subjectId">
         {(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Subject</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t("Subject")}</FieldLabel>
             <FieldContent>
               <select
                   id={field.name}
@@ -152,7 +154,7 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
                   onChange={(e) => field.handleChange(e.target.value)}
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors"
                 >
-                  <option value="">Select Subject</option>
+                  <option value="">{t("SelectSubject")}</option>
                   {subjects.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.code} - {s.name}
@@ -167,7 +169,7 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
       <form.Field name="teacherId">
         {(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Teacher</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t("Teacher")}</FieldLabel>
             <FieldContent>
               <select
                   id={field.name}
@@ -176,7 +178,7 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
                   onChange={(e) => field.handleChange(e.target.value)}
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors"
                 >
-                  <option value="">Select Teacher</option>
+                  <option value="">{t("SelectTeacher")}</option>
                   {teachers.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.profile?.fullname || t.code} ({t.code})
@@ -192,7 +194,7 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
         <form.Field name="semesterId">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Semester</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t("Semester")}</FieldLabel>
               <FieldContent>
                 <select
                     id={field.name}
@@ -201,7 +203,7 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
                     onChange={(e) => field.handleChange(Number(e.target.value))}
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors"
                   >
-                    <option value="">Select Semester</option>
+                    <option value="">{t("SelectSemester")}</option>
                     {semesters.map((s) => (
                       <option key={s.id} value={s.id}>
                         {s.name}
@@ -216,7 +218,7 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
         <form.Field name="type">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Type</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t("Type")}</FieldLabel>
               <FieldContent>
                 <select
                     id={field.name}
@@ -225,7 +227,7 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
                     onChange={(e) => field.handleChange(Number(e.target.value))}
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors"
                   >
-                    <option value="">Select Type</option>
+                    <option value="">{t("SelectType")}</option>
                     {types.map((t) => (
                       <option key={t.id} value={t.id}>
                         {t.name || t.code}
@@ -241,7 +243,7 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
       <form.Field name="status">
         {(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Status</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t("Status")}</FieldLabel>
             <FieldContent>
               <select
                   id={field.name}
@@ -250,9 +252,9 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
                   onChange={(e) => field.handleChange(e.target.value)}
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors"
                 >
-                  <option value="opened">Opened</option>
-                  <option value="closed">Closed</option>
-                  <option value="cancelled">Cancelled</option>
+                  <option value="opened">{t("Opened")}</option>
+                  <option value="closed">{t("Closed")}</option>
+                  <option value="cancelled">{t("Cancelled")}</option>
                 </select>
             </FieldContent>
           </Field>
@@ -266,7 +268,7 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
             const selectedSemester = semesters.find(s => s.id === Number(selectedSemesterId));
             return (
               <Field>
-                <FieldLabel htmlFor={field.name}>Start Date (Optional)</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t("StartDateOptional")}</FieldLabel>
                 <FieldContent>
                   <Input
                     id={field.name}
@@ -290,7 +292,7 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
             const selectedSemester = semesters.find(s => s.id === Number(selectedSemesterId));
             return (
               <Field>
-                <FieldLabel htmlFor={field.name}>End Date (Optional)</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t("EndDateOptional")}</FieldLabel>
                 <FieldContent>
                   <Input
                     id={field.name}
@@ -312,7 +314,7 @@ export function CourseClassForm({ courseClass, dependencies, onSuccess }: Course
       <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
         {([canSubmit, isSubmitting]) => (
           <Button type="submit" className="w-full" disabled={!canSubmit || isSubmitting}>
-            {isSubmitting ? "Saving..." : "Save"}
+            {isSubmitting ? t("Saving") : t("Save")}
           </Button>
         )}
       </form.Subscribe>

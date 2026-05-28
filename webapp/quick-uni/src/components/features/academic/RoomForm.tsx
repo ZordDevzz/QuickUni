@@ -9,6 +9,7 @@ import { Field, FieldLabel, FieldContent } from "@/components/ui/field";
 import { notify } from "@/lib/custom-toast";
 import { useRouter } from "next/navigation";
 import { building, room } from "@/db/schemas/schedule";
+import { useTranslations } from "next-intl";
 
 interface RoomFormProps {
   room?: typeof room.$inferSelect;
@@ -19,6 +20,7 @@ interface RoomFormProps {
 export function RoomForm({ room: roomData, buildings, onSuccess }: RoomFormProps) {
   const router = useRouter();
   const isEdit = !!roomData;
+  const t = useTranslations("Admin");
 
   const form = useForm({
     defaultValues: {
@@ -32,7 +34,7 @@ export function RoomForm({ room: roomData, buildings, onSuccess }: RoomFormProps
         const schema = isEdit ? roomUpdateSchema : roomInsertSchema;
         const validation = schema.safeParse(value);
         if (!validation.success) {
-           notify(validation.error.issues[0]?.message || "Validation failed", { type: "error" });
+           notify(validation.error.issues[0]?.message || t("ValidationFailed"), { type: "error" });
            return;
         }
 
@@ -44,14 +46,14 @@ export function RoomForm({ room: roomData, buildings, onSuccess }: RoomFormProps
         }
 
         if (result.success) {
-          notify("Success", { type: "success" });
+          notify(t("Success"), { type: "success" });
           onSuccess?.();
           router.refresh();
         } else {
-          notify(result.error || "Failed", { type: "error" });
+          notify(result.error || t("Failed"), { type: "error" });
         }
       } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : "An unexpected error occurred";
+        const message = error instanceof Error ? error.message : t("UnexpectedError");
         notify(message, { type: "error" });
       }
     },
@@ -69,7 +71,7 @@ export function RoomForm({ room: roomData, buildings, onSuccess }: RoomFormProps
       <form.Field name="code">
         {(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Code</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t("Code")}</FieldLabel>
             <FieldContent>
               <Input
                 id={field.name}
@@ -86,7 +88,7 @@ export function RoomForm({ room: roomData, buildings, onSuccess }: RoomFormProps
       <form.Field name="buildingId">
         {(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Building</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t("Building")}</FieldLabel>
             <FieldContent>
               <select
                   id={field.name}
@@ -95,7 +97,7 @@ export function RoomForm({ room: roomData, buildings, onSuccess }: RoomFormProps
                   onChange={(e) => field.handleChange(Number(e.target.value))}
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30"
                 >
-                  <option value="">Select Building</option>
+                  <option value="">{t("SelectBuilding")}</option>
                   {buildings.map((b) => (
                     <option key={b.id} value={b.id}>
                       {b.code} - {b.name}
@@ -110,7 +112,7 @@ export function RoomForm({ room: roomData, buildings, onSuccess }: RoomFormProps
       <form.Field name="capacity">
         {(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Capacity</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t("Capacity")}</FieldLabel>
             <FieldContent>
               <Input
                 id={field.name}
@@ -128,7 +130,7 @@ export function RoomForm({ room: roomData, buildings, onSuccess }: RoomFormProps
       <form.Field name="type">
         {(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Type</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t("Type")}</FieldLabel>
             <FieldContent>
               <Input
                 id={field.name}
@@ -145,7 +147,7 @@ export function RoomForm({ room: roomData, buildings, onSuccess }: RoomFormProps
       <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
         {([canSubmit, isSubmitting]) => (
           <Button type="submit" className="w-full" disabled={!canSubmit || isSubmitting}>
-            {isSubmitting ? "Saving..." : "Save"}
+            {isSubmitting ? t("Saving") : t("Save")}
           </Button>
         )}
       </form.Subscribe>

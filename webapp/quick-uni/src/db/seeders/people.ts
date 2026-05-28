@@ -13,7 +13,13 @@ import {
 import { hash } from "bcryptjs";
 import { randomUUID } from "crypto";
 
-export const seedPeople = async (schemaId: number, roles: any, departments: any[], majors: any[]) => {
+export const seedPeople = async (
+  studentSchemaId: number,
+  employeeSchemaId: number,
+  roles: any,
+  departments: any[],
+  majors: any[]
+) => {
   console.log("👥 Seeding people (realistic Vietnamese accounts)...");
   const pwdHash = await hash("password123", 10);
 
@@ -24,6 +30,40 @@ export const seedPeople = async (schemaId: number, roles: any, departments: any[
     des: "Hệ đào tạo đại học chính quy 4 năm",
     length: 4,
   }).returning();
+
+  // 1.5. Profile and Employee for Admin Account (to make Admin a proper Person)
+  const adminId = "f90abb36-d7b2-47a3-84f4-f9c7b977a9a7";
+  const adminProfileId = randomUUID();
+  const adminEmployeeId = randomUUID();
+
+  // Insert Admin Profile
+  await db.insert(profile).values({
+    id: adminProfileId,
+    accountId: adminId,
+    schemaId: employeeSchemaId,
+    fullname: "Quản trị viên Hệ thống",
+    gender: "male",
+    dob: "1980-01-01",
+    nationalId: "001080000001",
+    dynamicData: { personal_email: "admin@gmail.com", phone: "0999999999" }
+  });
+
+  // Insert Admin Employee Record
+  await db.insert(employee).values({
+    id: adminEmployeeId,
+    profileId: adminProfileId,
+    code: "AD00001"
+  });
+
+  // Assign Admin to AAO Department (Phòng Đào tạo)
+  const aaoDept = departments.find(d => d.code === "AAO")!;
+  await db.insert(departmentEmployment).values({
+    employeeId: adminEmployeeId,
+    departmentId: aaoDept.id,
+    assignDate: "2020-09-01",
+    roleCode: "ADMINISTRATOR",
+    roleName: "Giám đốc hệ thống thông tin"
+  });
 
   // 2. Academic Office Staff
   const academicAccountId = randomUUID();
@@ -42,7 +82,7 @@ export const seedPeople = async (schemaId: number, roles: any, departments: any[
   await db.insert(profile).values({
     id: academicProfileId,
     accountId: academicAccountId,
-    schemaId,
+    schemaId: employeeSchemaId,
     fullname: "Phạm Minh Hải",
     gender: "male",
     dob: "1985-04-12",
@@ -55,14 +95,13 @@ export const seedPeople = async (schemaId: number, roles: any, departments: any[
     code: "CB00001"
   });
 
-  // Assign to AAO Department (Phòng Đào tạo)
-  const aaoDept = departments.find(d => d.code === "AAO")!;
+  // Assign to AAO Department (Phòng Đào tạo) - Academic Staff acts as Trưởng phòng Đào tạo (Department Head)
   await db.insert(departmentEmployment).values({
     employeeId: academicEmployeeId,
     departmentId: aaoDept.id,
     assignDate: "2020-09-01",
-    roleCode: "ACADEMIC_STAFF",
-    roleName: "Cán bộ quản lý đào tạo"
+    roleCode: "DEPT_HEAD",
+    roleName: "Trưởng phòng Đào tạo"
   });
 
   // 3. Teachers & Departments Mapping
@@ -100,7 +139,7 @@ export const seedPeople = async (schemaId: number, roles: any, departments: any[
     await db.insert(profile).values({
       id: profId,
       accountId: accId,
-      schemaId,
+      schemaId: employeeSchemaId,
       fullname: t.fullname,
       gender: t.gender,
       dob: t.dob,
@@ -117,12 +156,30 @@ export const seedPeople = async (schemaId: number, roles: any, departments: any[
 
     // Assign to Department
     const dept = departments.find(d => d.code === t.deptCode)!;
+    
+    // Assign Department Head roles for realistic setup
+    let roleCode = "TEACHER";
+    let roleName = "Giảng viên";
+    if (t.code === "GV00001") {
+      roleCode = "DEPT_HEAD";
+      roleName = "Trưởng khoa CNTT";
+    } else if (t.code === "GV00003") {
+      roleCode = "DEPT_HEAD";
+      roleName = "Trưởng khoa ĐTVT";
+    } else if (t.code === "GV00005") {
+      roleCode = "DEPT_HEAD";
+      roleName = "Trưởng khoa QTKD";
+    } else if (t.code === "GV00007") {
+      roleCode = "DEPT_HEAD";
+      roleName = "Trưởng khoa Ngoại ngữ";
+    }
+
     await db.insert(departmentEmployment).values({
       employeeId: empId,
       departmentId: dept.id,
       assignDate: "2021-09-01",
-      roleCode: "TEACHER",
-      roleName: "Giảng viên"
+      roleCode,
+      roleName
     });
   }
 
@@ -189,7 +246,7 @@ export const seedPeople = async (schemaId: number, roles: any, departments: any[
     await db.insert(profile).values({
       id: profId,
       accountId: accId,
-      schemaId,
+      schemaId: studentSchemaId,
       fullname: name,
       gender: i % 2 === 0 ? "male" : "female",
       dob: classIndex < 2 ? "2003-05-12" : "2004-09-18",
@@ -213,6 +270,6 @@ export const seedPeople = async (schemaId: number, roles: any, departments: any[
     });
   }
 
-  console.log(`✅ People seeded. 1 Academic Staff, ${teachersList.length} Teachers, ${studentList.length} Students across ${mainClassesList.length} Cohorts.`);
+  console.log(`✅ People seeded. Admin, 1 Academic Staff, ${teachersList.length} Teachers, ${studentList.length} Students across ${mainClassesList.length} Cohorts.`);
   return { teachersList, studentList };
 };

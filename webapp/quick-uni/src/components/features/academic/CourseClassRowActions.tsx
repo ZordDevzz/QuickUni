@@ -28,19 +28,21 @@ import {
 import { CourseClassForm, CourseClass, Dependencies } from "./CourseClassForm";
 import { deleteCourseClassAction } from "@/actions/course";
 import { notify } from "@/lib/custom-toast";
+import { useTranslations } from "next-intl";
 
 export function CourseClassRowActions({ courseClass, dependencies }: { courseClass: CourseClass, dependencies: Dependencies }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations("Admin");
 
   const handleDelete = () => {
     startTransition(async () => {
       const result = await deleteCourseClassAction(courseClass.id);
       if (result.success) {
-        notify("Deleted successfully", { type: "success" });
+        notify(t("DeletedSuccess"), { type: "success" });
       } else {
-        notify(result.error || "Delete failed", { type: "error" });
+        notify(result.error || t("DeleteFailed"), { type: "error" });
       }
       setIsDeleteOpen(false);
     });
@@ -56,10 +58,10 @@ export function CourseClassRowActions({ courseClass, dependencies }: { courseCla
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
-            <Edit className="mr-2 h-4 w-4" /> Edit
+            <Edit className="mr-2 h-4 w-4" /> {t("Edit")}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsDeleteOpen(true)} className="text-destructive">
-            <Trash2 className="mr-2 h-4 w-4" /> Delete
+            <Trash2 className="mr-2 h-4 w-4" /> {t("Delete")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -67,7 +69,7 @@ export function CourseClassRowActions({ courseClass, dependencies }: { courseCla
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Edit Course Class</DialogTitle>
+            <DialogTitle>{t("EditCourseClass")}</DialogTitle>
           </DialogHeader>
           <CourseClassForm courseClass={courseClass} dependencies={dependencies} onSuccess={() => setIsEditOpen(false)} />
         </DialogContent>
@@ -76,13 +78,13 @@ export function CourseClassRowActions({ courseClass, dependencies }: { courseCla
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>This action cannot be undone. It will softly delete the class.</AlertDialogDescription>
+            <AlertDialogTitle>{t("ConfirmDelete")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("DeleteSoftWarning")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} disabled={isPending} className="bg-destructive hover:bg-destructive/90">
-              Delete
+              {t("Delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

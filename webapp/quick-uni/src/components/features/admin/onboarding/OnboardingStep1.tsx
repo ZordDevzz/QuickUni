@@ -18,6 +18,8 @@ import { createOnboardingSession } from "@/actions/onboarding";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
+import { useEffect } from "react";
+
 interface OnboardingStep1Props {
   schemas: unknown[];
   onNext: (sessionId: string) => void;
@@ -34,6 +36,20 @@ export function OnboardingStep1({ schemas, onNext, initialData }: OnboardingStep
   const [isSaving, setIsSaving] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [sessionId, setSessionId] = useState<string | null>((initialData as any)?.id || null);
+
+  useEffect(() => {
+    if (initialData) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setName((initialData as any).name || "");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setEntityType((initialData as any).entityType || "student");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setSchemaId((initialData as any).schemaId?.toString() || "");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setSessionId((initialData as any).id || null);
+    }
+  }, [initialData]);
+
   const t = useTranslations("Onboarding");
   const handleSaveAndDownload = async () => {
     if (!name || !schemaId) {

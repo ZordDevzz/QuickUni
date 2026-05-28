@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldContent } from "@/components/ui/field";
 import { notify } from "@/lib/custom-toast";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 interface Building {
   id: number;
@@ -24,6 +25,7 @@ interface BuildingFormProps {
 export function BuildingForm({ building, onSuccess }: BuildingFormProps) {
   const router = useRouter();
   const isEdit = !!building;
+  const t = useTranslations("Admin");
 
   const form = useForm({
     defaultValues: {
@@ -36,7 +38,7 @@ export function BuildingForm({ building, onSuccess }: BuildingFormProps) {
         const schema = isEdit ? buildingUpdateSchema : buildingInsertSchema;
         const validation = schema.safeParse(value);
         if (!validation.success) {
-           notify(validation.error.issues[0]?.message || "Validation failed", { type: "error" });
+           notify(validation.error.issues[0]?.message || t("ValidationFailed"), { type: "error" });
            return;
         }
 
@@ -48,14 +50,14 @@ export function BuildingForm({ building, onSuccess }: BuildingFormProps) {
         }
 
         if (result.success) {
-          notify("Success", { type: "success" });
+          notify(t("Success"), { type: "success" });
           onSuccess?.();
           router.refresh();
         } else {
-          notify(result.error || "Failed", { type: "error" });
+          notify(result.error || t("Failed"), { type: "error" });
         }
       } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : "An unexpected error occurred";
+        const message = error instanceof Error ? error.message : t("UnexpectedError");
         notify(message, { type: "error" });
       }
     },
@@ -73,7 +75,7 @@ export function BuildingForm({ building, onSuccess }: BuildingFormProps) {
       <form.Field name="code">
         {(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Code</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t("Code")}</FieldLabel>
             <FieldContent>
               <Input
                 id={field.name}
@@ -90,7 +92,7 @@ export function BuildingForm({ building, onSuccess }: BuildingFormProps) {
       <form.Field name="name">
         {(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t("Name")}</FieldLabel>
             <FieldContent>
               <Input
                 id={field.name}
@@ -107,7 +109,7 @@ export function BuildingForm({ building, onSuccess }: BuildingFormProps) {
       <form.Field name="des">
         {(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Description</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t("Description")}</FieldLabel>
             <FieldContent>
               <Input
                 id={field.name}
@@ -124,7 +126,7 @@ export function BuildingForm({ building, onSuccess }: BuildingFormProps) {
       <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
         {([canSubmit, isSubmitting]) => (
           <Button type="submit" className="w-full" disabled={!canSubmit || isSubmitting}>
-            {isSubmitting ? "Saving..." : "Save"}
+            {isSubmitting ? t("Saving") : t("Save")}
           </Button>
         )}
       </form.Subscribe>

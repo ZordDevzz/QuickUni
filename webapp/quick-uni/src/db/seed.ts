@@ -47,7 +47,7 @@ const main = async () => {
   try {
     // 1. Roles & System Setup
     console.log("⚙️  Seeding system...");
-    const { schemaId, roles } = await seedSystem();
+    const { studentSchemaId, employeeSchemaId, roles } = await seedSystem();
 
     // 2. Org Entities
     console.log("🏢 Seeding organization...");
@@ -55,15 +55,15 @@ const main = async () => {
 
     // 3. People (Users)
     console.log("👥 Seeding people...");
-    const { teachersList, studentList } = await seedPeople(schemaId, roles, departments, majors);
+    const { teachersList, studentList } = await seedPeople(studentSchemaId, employeeSchemaId, roles, departments, majors);
 
     // 4. Academic Data
     console.log("📚 Seeding academic entities...");
     const { semesterId, subjects } = await seedAcademic();
 
-    // 5. Scheduling
-    console.log("📅 Seeding scheduling...");
-    await seedScheduling(semesterId, subjects, teachersList, rooms, studentList);
+    // 5. Scheduling (Commented out as requested - no scheduling data seeding)
+    // console.log("📅 Seeding scheduling...");
+    // await seedScheduling(semesterId, subjects, teachersList, rooms, studentList);
 
     // 6. Validation
     await validateSeed();

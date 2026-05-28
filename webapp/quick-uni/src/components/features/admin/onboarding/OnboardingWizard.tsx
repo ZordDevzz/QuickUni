@@ -23,6 +23,7 @@ interface OnboardingWizardProps {
 export function OnboardingWizard({ schemas, initialSessionId }: OnboardingWizardProps) {
   const [step, setStep] = useState(1);
   const [sessionId, setSessionId] = useState<string | null>(initialSessionId || null);
+  const [sessionData, setSessionData] = useState<unknown | null>(null);
   const t = useTranslations("Onboarding");
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export function OnboardingWizard({ schemas, initialSessionId }: OnboardingWizard
       const resume = async () => {
         const res = await getSessionAction(initialSessionId);
         if (res.success && res.data) {
+          setSessionData(res.data);
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const status = (res.data as any).status;
           if (status === "draft") setStep(1);
@@ -78,6 +80,7 @@ export function OnboardingWizard({ schemas, initialSessionId }: OnboardingWizard
         {step === 1 && (
           <OnboardingStep1 
             schemas={schemas} 
+            initialData={sessionData}
             onNext={(id) => {
               setSessionId(id);
               setStep(2);

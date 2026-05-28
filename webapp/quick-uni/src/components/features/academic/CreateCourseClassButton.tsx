@@ -11,20 +11,22 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { CourseClassForm, Dependencies } from "./CourseClassForm";
+import { useTranslations } from "next-intl";
 
 export function CreateCourseClassButton({ dependencies }: { dependencies: Dependencies }) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations("Admin");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="gap-2">
-          <Plus className="h-4 w-4" /> Add Class
+          <Plus className="h-4 w-4" /> {t("AddClass")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Add Course Class</DialogTitle>
+          <DialogTitle>{t("AddCourseClass")}</DialogTitle>
         </DialogHeader>
         <CourseClassForm dependencies={dependencies} onSuccess={() => setOpen(false)} />
       </DialogContent>

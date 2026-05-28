@@ -28,6 +28,7 @@ import {
 import { BuildingForm } from "./BuildingForm";
 import { deleteBuildingAction } from "@/actions/facility";
 import { notify } from "@/lib/custom-toast";
+import { useTranslations } from "next-intl";
 
 interface Building {
   id: number;
@@ -40,14 +41,15 @@ export function BuildingRowActions({ building }: { building: Building }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations("Admin");
 
   const handleDelete = () => {
     startTransition(async () => {
       const result = await deleteBuildingAction(building.id);
       if (result.success) {
-        notify("Deleted successfully", { type: "success" });
+        notify(t("DeletedSuccess"), { type: "success" });
       } else {
-        notify(result.error || "Delete failed", { type: "error" });
+        notify(result.error || t("DeleteFailed"), { type: "error" });
       }
       setIsDeleteOpen(false);
     });
@@ -63,10 +65,10 @@ export function BuildingRowActions({ building }: { building: Building }) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
-            <Edit className="mr-2 h-4 w-4" /> Edit
+            <Edit className="mr-2 h-4 w-4" /> {t("Edit")}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsDeleteOpen(true)} className="text-destructive">
-            <Trash2 className="mr-2 h-4 w-4" /> Delete
+            <Trash2 className="mr-2 h-4 w-4" /> {t("Delete")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -74,7 +76,7 @@ export function BuildingRowActions({ building }: { building: Building }) {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Building</DialogTitle>
+            <DialogTitle>{t("EditBuilding")}</DialogTitle>
           </DialogHeader>
           <BuildingForm building={building} onSuccess={() => setIsEditOpen(false)} />
         </DialogContent>
@@ -83,13 +85,13 @@ export function BuildingRowActions({ building }: { building: Building }) {
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+            <AlertDialogTitle>{t("ConfirmDelete")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("DeleteWarning")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} disabled={isPending} className="bg-destructive hover:bg-destructive/90">
-              Delete
+              {t("Delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

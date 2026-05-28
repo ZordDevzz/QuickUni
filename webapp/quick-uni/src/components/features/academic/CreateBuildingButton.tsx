@@ -11,20 +11,22 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { BuildingForm } from "./BuildingForm";
+import { useTranslations } from "next-intl";
 
 export function CreateBuildingButton() {
   const [open, setOpen] = useState(false);
+  const t = useTranslations("Admin");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="gap-2">
-          <Plus className="h-4 w-4" /> Add Building
+          <Plus className="h-4 w-4" /> {t("AddBuilding")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Building</DialogTitle>
+          <DialogTitle>{t("AddBuilding")}</DialogTitle>
         </DialogHeader>
         <BuildingForm onSuccess={() => setOpen(false)} />
       </DialogContent>

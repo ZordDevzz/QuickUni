@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { ProfileWithAccount, Profile } from "@/types/profile";
 import { useTranslations } from "next-intl";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ProfileFormProps {
   profile?: ProfileWithAccount | Profile; // Optional for creation
@@ -95,20 +96,21 @@ export function ProfileForm({ profile, onSuccess, schemas = [] }: ProfileFormPro
             <Field>
               <FieldLabel htmlFor={field.name}>{t("ProfileSchema")}</FieldLabel>
               <FieldContent>
-                <select
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(Number(e.target.value))}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30"
+                <Select
+                  onValueChange={(val) => field.handleChange(Number(val))}
+                  value={field.state.value ? String(field.state.value) : ""}
                 >
-                  <option value="">{t("SelectSchema")}</option>
-                  {schemas.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.schemaCode}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id={field.name} className="w-full">
+                    <SelectValue placeholder={t("SelectSchema")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {schemas.map((s) => (
+                      <SelectItem key={s.id} value={String(s.id)}>
+                        {s.schemaCode}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
               </FieldContent>
             </Field>
@@ -147,17 +149,19 @@ export function ProfileForm({ profile, onSuccess, schemas = [] }: ProfileFormPro
             <Field>
               <FieldLabel htmlFor={field.name}>{t("Gender")}</FieldLabel>
               <FieldContent>
-                <select
-                  id={field.name}
-                  name={field.name}
+                <Select
+                  onValueChange={(val) => field.handleChange(val as "male" | "female" | "others")}
                   value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value as "male" | "female" | "others")}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30"
                 >
-                  <option value="male">{t("Male")}</option>
-                  <option value="female">{t("Female")}</option>
-                  <option value="others">{t("Others")}</option>
-                </select>
+                  <SelectTrigger id={field.name} className="w-full">
+                    <SelectValue placeholder={t("SelectGender") || "Select gender"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">{t("Male")}</SelectItem>
+                    <SelectItem value="female">{t("Female")}</SelectItem>
+                    <SelectItem value="others">{t("Others")}</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
               </FieldContent>
             </Field>

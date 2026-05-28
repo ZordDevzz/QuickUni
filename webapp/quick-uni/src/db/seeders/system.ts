@@ -27,8 +27,8 @@ export const seedSystem = async () => {
   ];
   await db.insert(systemRole).values(roles).onConflictDoNothing();
 
-  // 2. Admin Account
-  const adminId = randomUUID();
+  // 2. Admin Account (Static UUID to preserve developer login sessions across database reseeding)
+  const adminId = "f90abb36-d7b2-47a3-84f4-f9c7b977a9a7";
   const [adminAccount] = await db.insert(account).values({
     id: adminId,
     username: "admin",
@@ -46,7 +46,14 @@ export const seedSystem = async () => {
   const [schema] = await db.insert(profileSchema).values({
     schemaCode: "STD_V1",
     effectiveDate: new Date().toISOString().split('T')[0],
-    des: "Standard University Profile V1",
+    des: "Standard Student Profile V1",
+    createAt: new Date().toISOString(),
+  }).returning();
+
+  const [empSchema] = await db.insert(profileSchema).values({
+    schemaCode: "EMP_V1",
+    effectiveDate: new Date().toISOString().split('T')[0],
+    des: "Standard Employee Profile V1",
     createAt: new Date().toISOString(),
   }).returning();
 
@@ -58,14 +65,22 @@ export const seedSystem = async () => {
   const insertedFields = await db.insert(profileField).values(fields).returning();
 
   // 5. Link Fields to Schema
-  await db.insert(profileSchemaField).values(
-    insertedFields.map((f, i) => ({
+  const schemaFieldsToInsert: any[] = [];
+  insertedFields.forEach((f, i) => {
+    schemaFieldsToInsert.push({
       fieldId: f.id,
       schemaId: schema.id,
-      order: i,
+      order: i * 2,
       isRequired: true,
-    }))
-  );
+    });
+    schemaFieldsToInsert.push({
+      fieldId: f.id,
+      schemaId: empSchema.id,
+      order: i * 2 + 1,
+      isRequired: true,
+    });
+  });
+  await db.insert(profileSchemaField).values(schemaFieldsToInsert);
 
   // 6. Enroll Statuses
   const enrollStatuses = [
@@ -112,5 +127,9 @@ export const seedSystem = async () => {
   await db.insert(scheduleStatus).values(scheduleStatuses).onConflictDoNothing();
 
   console.log("✅ System data seeded.");
-  return { schemaId: schema.id, roles: { admin: 1, teacher: 2, student: 3, academic_office: 4 } };
+  return { 
+    studentSchemaId: schema.id, 
+    employeeSchemaId: empSchema.id, 
+    roles: { admin: 1, teacher: 2, student: 3, academic_office: 4 } 
+  };
 };

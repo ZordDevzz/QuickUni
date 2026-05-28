@@ -1,8 +1,8 @@
 === I18N SCANNER REPORT ===
-Date: 2026-05-26T15:05:17.490Z
+Date: 2026-05-28T08:58:14.434Z
 
 --- HARDCODED TEXT ---
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/shared/AcademicSidebar.tsx:95 - "QuickUni"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/shared/AcademicSidebar.tsx:97 - "QuickUni"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/shared/AdminHeader.tsx:50 - "Toggle Menu"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/shared/AdminSidebar.tsx:110 - "QuickUni"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/shared/AdminSkeleton.tsx:9 - "Coming Soon"
@@ -15,36 +15,6 @@ Date: 2026-05-26T15:05:17.490Z
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/ui/dialog.tsx:76 - "Close"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/ui/dialog.tsx:114 - "Close"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/tests/integration/academic/MasterList.test.tsx:6 - "Test"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:71 - "Chào mừng quay trở lại, Cán bộ Đào tạo!"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:74 - "Chào mừng bạn đến với Cổng Chỉ huy Đào tạo và Học vụ. Hãy bắt đầu quản lý thời khóa biểu, sắp lịch học tự động, quản lý lớp học và phê duyệt yêu cầu của sinh viên."
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:85 - "Học kỳ hiện tại"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:94 - "Học kỳ đang hoạt động"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:102 - "Sinh viên chính quy"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:109 - "Sinh viên đã nhập học"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:117 - "Cán bộ giảng viên"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:124 - "Giảng viên và cán bộ khoa"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:132 - "Yêu cầu chờ duyệt"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:139 - "Yêu cầu đang chờ xem xét"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:148 - "Phân hệ Nghiệp vụ"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:158 - "Sắp lịch tự động"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:161 - "Xếp thời khóa biểu tự động, quản lý blacklist/ngày nghỉ và giải quyết xung đột lịch học."
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:175 - "Hồ sơ Sinh viên"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:178 - "Quản lý danh sách sinh viên chính quy, thông tin liên lạc, chuyên ngành và tình trạng học tập."
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:192 - "Hồ sơ Giảng viên"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:195 - "Xem thông tin liên hệ của giảng viên, khoa trực thuộc và phân công giảng dạy."
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:209 - "Duyệt đơn & Yêu cầu"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:212 - "Phê duyệt đơn xin vắng học của sinh viên hoặc xin đổi ca giảng dạy của giảng viên."
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:226 - "Khoa & Phòng ban"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:229 - "Quản lý cơ cấu các khoa đào tạo, phân bổ nhân viên và sơ đồ phòng ban nghiệp vụ."
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:243 - "Quản lý Phòng học"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:246 - "Xem thông tin danh sách các phòng học, số chỗ ngồi tối đa và trang thiết bị hỗ trợ xếp lịch."
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:257 - "Yêu cầu mới nhất"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:260 - "Xem tất cả ("
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:268 - "Đơn chờ xem xét"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:285 - "Loại:"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:290 - "Xét duyệt"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:299 - "Không có yêu cầu nào chờ duyệt"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/page.tsx:300 - "Tất cả hồ sơ và học vụ đều đã sạch sẽ!"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/account/page.tsx:19 - "Profile not found. Please contact support."
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/account/page.tsx:32 - "Account Settings"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/account/PreferencesTab.tsx:44 - "Light"
@@ -53,69 +23,24 @@ Date: 2026-05-26T15:05:17.490Z
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/account/PreferencesTab.tsx:58 - "English"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/account/PreferencesTab.tsx:59 - "Tiếng Việt"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/page.tsx:39 - "Overview"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/BuildingForm.tsx:76 - "Code"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/BuildingForm.tsx:93 - "Name"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/BuildingForm.tsx:110 - "Description"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/BuildingRowActions.tsx:66 - "Edit"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/BuildingRowActions.tsx:69 - "Delete"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/BuildingRowActions.tsx:77 - "Edit Building"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/BuildingRowActions.tsx:86 - "Are you sure?"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/BuildingRowActions.tsx:87 - "This action cannot be undone."
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/BuildingRowActions.tsx:90 - "Cancel"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/BuildingRowActions.tsx:92 - "Delete"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassForm.tsx:104 - "Class Code"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassForm.tsx:121 - "Capacity"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassForm.tsx:140 - "Subject"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassForm.tsx:149 - "Select Subject"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassForm.tsx:164 - "Teacher"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassForm.tsx:173 - "Select Teacher"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassForm.tsx:189 - "Semester"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassForm.tsx:198 - "Select Semester"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassForm.tsx:213 - "Type"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassForm.tsx:222 - "Select Type"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassForm.tsx:238 - "Status"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassForm.tsx:247 - "Opened"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassForm.tsx:248 - "Closed"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassForm.tsx:249 - "Cancelled"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassRowActions.tsx:59 - "Edit"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassRowActions.tsx:62 - "Delete"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassRowActions.tsx:70 - "Edit Course Class"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassRowActions.tsx:79 - "Are you sure?"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassRowActions.tsx:80 - "This action cannot be undone. It will softly delete the class."
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassRowActions.tsx:83 - "Cancel"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CourseClassRowActions.tsx:85 - "Delete"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CreateBuildingButton.tsx:22 - "Add Building"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CreateBuildingButton.tsx:27 - "Add Building"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CreateCourseClassButton.tsx:22 - "Add Class"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CreateCourseClassButton.tsx:27 - "Add Course Class"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CreateRoomButton.tsx:23 - "Add Room"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/CreateRoomButton.tsx:28 - "Add Room"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/HolidayDialog.tsx:153 - "(Semester specific)"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileFieldForm.tsx:107 - Prop 'placeholder': "e.g. graduation_year"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileFieldForm.tsx:131 - Prop 'placeholder': "e.g. Graduation Year"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:133 - Prop 'placeholder': "John Doe"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:205 - Prop 'placeholder': "123456789"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:227 - Prop 'placeholder': "US"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:251 - Prop 'placeholder': "123 Main St, City, Country"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:274 - Prop 'placeholder': "e.g. Caucasian"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:296 - Prop 'placeholder': "e.g. None"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:135 - Prop 'placeholder': "John Doe"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:209 - Prop 'placeholder': "123456789"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:231 - Prop 'placeholder': "US"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:255 - Prop 'placeholder': "123 Main St, City, Country"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:278 - Prop 'placeholder': "e.g. Caucasian"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:300 - Prop 'placeholder': "e.g. None"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileRowActions.tsx:66 - "Open menu"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileSchemaRowActions.tsx:62 - "Open menu"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/RoomForm.tsx:72 - "Code"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/RoomForm.tsx:89 - "Building"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/RoomForm.tsx:98 - "Select Building"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/RoomForm.tsx:113 - "Capacity"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/RoomForm.tsx:131 - "Type"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/RoomRowActions.tsx:66 - "Edit"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/RoomRowActions.tsx:69 - "Delete"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/RoomRowActions.tsx:77 - "Edit Room"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/RoomRowActions.tsx:86 - "Are you sure?"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/RoomRowActions.tsx:87 - "This action cannot be undone."
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/RoomRowActions.tsx:90 - "Cancel"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/RoomRowActions.tsx:92 - "Delete"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ScheduleManager.tsx:263 - "Thiết lập & Xếp lịch tự động"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ScheduleSlotDialog.tsx:185 - "Loại lịch học"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ScheduleSlotDialog.tsx:209 - "Hiển thị trên lịch:"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ScheduleManager.tsx:263 - "Quản lý lịch giảng dạy của giảng viên, phòng học và lớp học phần."
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ScheduleManager.tsx:279 - "Bản mẫu tuần"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ScheduleManager.tsx:290 - "Lịch thực tế"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ScheduleManager.tsx:376 - "Thiết lập & Xếp lịch tự động"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ScheduleSlotDialog.tsx:212 - "📅 Ngày học thực tế:"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ScheduleSlotDialog.tsx:233 - "Loại lịch học"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ScheduleSlotDialog.tsx:257 - "Hiển thị trên lịch:"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/SchedulingWizardWorkspace.tsx:315 - "Trình thiết lập Xếp lịch Tối ưu"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/SchedulingWizardWorkspace.tsx:317 - "Bản nâng cấp"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/SchedulingWizardWorkspace.tsx:320 - "Workspace điều phối ràng buộc và tự động phân lịch biểu cho Học kỳ hiện tại."
@@ -196,8 +121,10 @@ Date: 2026-05-26T15:05:17.490Z
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/SchemaFieldManager.tsx:102 - "Required"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/SchemaFieldManager.tsx:124 - "Loading..."
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/SchemaFieldManager.tsx:126 - "No more fields available"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/TimeGrid.tsx:160 - Prop 'title': "Lịch dạy bù"
-[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/TimeGrid.tsx:164 - "Bù"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/TimeGrid.tsx:195 - Prop 'title': "Lịch dạy bù"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/TimeGrid.tsx:199 - "Bù"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/TimeGrid.tsx:236 - "Hiệu lực:"
+[HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/TimeGrid.tsx:236 - "đến"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountForm.tsx:110 - Prop 'placeholder': "johndoe"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountForm.tsx:135 - Prop 'placeholder': "john@example.com"
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountForm.tsx:159 - Prop 'placeholder': "+1234567890"
@@ -286,177 +213,4 @@ Date: 2026-05-26T15:05:17.490Z
 [HARDCODE] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/system/settings/page.tsx:4 - Prop 'title': "System Settings"
 
 --- MISSING KEYS ---
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/student/page.tsx:19 - Key "Dashboard" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/student/page.tsx:24 - Key "TodaySchedule" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/student/page.tsx:28 - Key "YouHaveClasses" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/student/page.tsx:30 - Key "NoClassesToday" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/student/page.tsx:38 - Key "WeeklyOverview" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/page.tsx:20 - Key "Dashboard" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/page.tsx:25 - Key "TodaySchedule" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/page.tsx:29 - Key "YouHaveClasses" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/page.tsx:31 - Key "NoClassesToday" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/page.tsx:39 - Key "WeeklyOverview" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:96 - Key "Toast.ProfileSchema" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:105 - Key "Toast.SelectSchema" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:125 - Key "Toast.FullName" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:148 - Key "Toast.Gender" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:157 - Key "Toast.Male" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:158 - Key "Toast.Female" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:159 - Key "Toast.Others" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:173 - Key "Toast.DateOfBirth" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:197 - Key "Toast.NationalID" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:219 - Key "Toast.CountryCode" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:243 - Key "Toast.Address" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:266 - Key "Toast.Ethnic" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:288 - Key "Toast.Religious" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:310 - Key "Toast.Saving" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:310 - Key "Toast.UpdateButton" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileForm.tsx:310 - Key "Toast.CreateButton" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileRowActions.tsx:74 - Key "Account.EditProfile" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileRowActions.tsx:82 - Key "Account.IssueAccount" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileRowActions.tsx:88 - Key "Account.LinkToStudent" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileRowActions.tsx:92 - Key "Account.LinkToEmployee" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/ProfileSchemaRowActions.tsx:68 - Key "Profile.Edit" is missing in: en.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountForm.tsx:102 - Key "Toast.Username" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountForm.tsx:126 - Key "Toast.Email" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountForm.tsx:151 - Key "Toast.Phone" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountForm.tsx:171 - Key "Toast.Type" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountForm.tsx:199 - Key "Toast.Status" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountForm.tsx:226 - Key "Toast.LinkToProfile" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountForm.tsx:235 - Key "Toast.SelectProfile" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountForm.tsx:272 - Key "Toast.PasswordOptional" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountForm.tsx:272 - Key "Toast.Password" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountForm.tsx:295 - Key "Toast.Saving" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountForm.tsx:295 - Key "Toast.UpdateButton" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountForm.tsx:295 - Key "Toast.CreateButton" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountRowActions.tsx:159 - Key "Toast.Cancel" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountRowActions.tsx:162 - Key "Toast.Saving" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountRowActions.tsx:177 - Key "Toast.EditTitle" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountRowActions.tsx:191 - Key "Toast.DeleteTitle" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountRowActions.tsx:195 - Key "Toast.DeleteDescription" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountRowActions.tsx:200 - Key "Toast.Cancel" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountRowActions.tsx:203 - Key "Toast.Deleting" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/auth/AccountRowActions.tsx:203 - Key "Toast.DeleteButton" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/(auth)/login/page.tsx:87 - Key "Toast.Login" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/(auth)/login/page.tsx:89 - Key "Toast.LoginDescription" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/(auth)/login/page.tsx:100 - Key "Toast.Username" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/(auth)/login/page.tsx:109 - Key "Toast.UsernamePlaceholder" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/(auth)/login/page.tsx:132 - Key "Toast.Password" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/(auth)/login/page.tsx:139 - Key "Toast.ForgotPassword" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/(auth)/login/page.tsx:150 - Key "Toast.PasswordPlaceholder" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/(auth)/login/page.tsx:166 - Key "Toast.LoggingIn" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/(auth)/login/page.tsx:166 - Key "Toast.Login" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/(auth)/login/page.tsx:173 - Key "Toast.Copyright" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/requests/AdminRequestList.tsx:45 - Key "Workflow.Type" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/requests/AdminRequestList.tsx:50 - Key "Workflow.Status" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/requests/AdminRequestList.tsx:100 - Key "Workflow.Type" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/accounts/columns.tsx:21 - Key "Username" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/accounts/columns.tsx:29 - Key "Email" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/accounts/columns.tsx:34 - Key "Type" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/accounts/columns.tsx:47 - Key "Status" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/accounts/columns.tsx:63 - Key "CreatedAt" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/accounts/columns.tsx:68 - Key "Actions" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/onboarding/page.tsx:7 - Key "DashboardTitle" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/personnel/page.tsx:41 - Key "PersonnelMgmt" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/personnel/page.tsx:60 - Key "TotalPersonnel" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/personnel/page.tsx:75 - Key "LinkedAccounts" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/personnel/page.tsx:90 - Key "UnlinkedProfiles" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/personnel/page.tsx:121 - Key "PersonnelProfiles" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/personnel/page.tsx:124 - Key "PersonnelAccounts" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/personnel/page.tsx:134 - Key "PersonnelProfiles" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/personnel/page.tsx:153 - Key "PersonnelAccounts" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/columns.tsx:20 - Key "FullName" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/columns.tsx:29 - Key "Gender" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/columns.tsx:33 - Key "Male" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/columns.tsx:34 - Key "Female" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/columns.tsx:35 - Key "Others" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/columns.tsx:42 - Key "DateOfBirth" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/columns.tsx:47 - Key "Contact" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/columns.tsx:68 - Key "NationalID" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/columns.tsx:72 - Key "Actions" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/students/page.tsx:41 - Key "StudentMgmt" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/students/page.tsx:60 - Key "TotalStudents" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/students/page.tsx:75 - Key "LinkedAccounts" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/students/page.tsx:90 - Key "UnlinkedProfiles" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/students/page.tsx:121 - Key "StudentProfiles" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/students/page.tsx:124 - Key "StudentAccounts" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/students/page.tsx:134 - Key "StudentProfiles" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/students/page.tsx:153 - Key "StudentAccounts" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/student/classes/page.tsx:24 - Key "Title" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/student/classes/page.tsx:26 - Key "NoActiveSemester" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/student/requests/page.tsx:22 - Key "Title" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/student/requests/page.tsx:23 - Key "Description" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/student/requests/RequestWizard.tsx:213 - Key "Student.Requests.Wizard.Next" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/student/requests/RequestWizard.tsx:218 - Key "Student.Requests.Wizard.Previous" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/student/schedule/page.tsx:31 - Key "Title" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/student/schedule/page.tsx:33 - Key "Description" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/classes/teacher-class-columns.tsx:26 - Key "Teacher.ClassCode" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/classes/teacher-class-columns.tsx:38 - Key "Teacher.Subject" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/classes/teacher-class-columns.tsx:48 - Key "Teacher.Capacity" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/classes/teacher-class-columns.tsx:63 - Key "Teacher.Status" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/classes/TeacherClassClient.tsx:19 - Key "Teacher.ClassesTitle" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/classes/TeacherClassClient.tsx:21 - Key "Teacher.ClassesDescription" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/requests/ReviewList.tsx:45 - Key "Workflow.Type" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/requests/ReviewList.tsx:50 - Key "Workflow.Status" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/requests/ReviewList.tsx:102 - Key "Workflow.Type" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/schedule/page.tsx:31 - Key "Title" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/schedule/page.tsx:33 - Key "Description" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/people/PersonForm.tsx:164 - Key "Admin.Identity" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/people/PersonForm.tsx:184 - Key "Admin.FullName" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/people/PersonForm.tsx:197 - Key "Admin.Gender" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/people/PersonForm.tsx:201 - Key "Admin.SelectGender" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/people/PersonForm.tsx:205 - Key "Admin.Male" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/people/PersonForm.tsx:206 - Key "Admin.Female" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/people/PersonForm.tsx:207 - Key "Admin.Others" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/people/PersonForm.tsx:219 - Key "Admin.DateOfBirth" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/people/PersonForm.tsx:232 - Key "Admin.NationalID" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/people/PersonForm.tsx:244 - Key "Admin.Contact" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/people/PersonForm.tsx:251 - Key "Admin.Address" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/people/PersonForm.tsx:264 - Key "Admin.CountryCode" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/people/PersonForm.tsx:277 - Key "Admin.Ethnic" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/academic/people/PersonForm.tsx:290 - Key "Admin.Religious" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/admin/onboarding/OnboardingDashboard.tsx:60 - Key "Onboarding.DeleteSuccess" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/admin/onboarding/OnboardingDashboard.tsx:72 - Key "Onboarding.StatusReady" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/admin/onboarding/OnboardingDashboard.tsx:113 - Key "Onboarding.NoSessionsFound" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/components/features/admin/onboarding/OnboardingStep3.tsx:154 - Key "Onboarding.ReadyToProcess" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/people/students/columns.tsx:15 - Key "FullName" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/people/students/columns.tsx:24 - Key "Code" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/people/students/columns.tsx:31 - Key "Gender" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/people/students/columns.tsx:39 - Key "DateOfBirth" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/people/students/columns.tsx:44 - Key "NationalID" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/people/students/student-client.tsx:41 - Key "Admin.AddProfile" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/people/students/student-row-actions.tsx:37 - Key "Profile.Edit" is missing in: en.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/people/teachers/columns.tsx:15 - Key "FullName" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/people/teachers/columns.tsx:24 - Key "Code" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/people/teachers/columns.tsx:31 - Key "Gender" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/people/teachers/columns.tsx:39 - Key "DateOfBirth" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/people/teachers/columns.tsx:44 - Key "NationalID" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/people/teachers/teacher-client.tsx:41 - Key "Admin.AddProfile" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/academic/people/teachers/teacher-row-actions.tsx:37 - Key "Profile.Edit" is missing in: en.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/fields/page.tsx:16 - Key "ProfileField" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/fields/page.tsx:22 - Key "SystemFields" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/schemas/columns.tsx:14 - Key "SchemaCode" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/schemas/columns.tsx:18 - Key "EffectiveDate" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/schemas/columns.tsx:23 - Key "ExpiredDate" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/schemas/columns.tsx:28 - Key "CreatedAt" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/schemas/columns.tsx:33 - Key "Actions" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/schemas/page.tsx:16 - Key "ProfileSchema" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/profiles/schemas/page.tsx:22 - Key "SystemSchemas" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/system/roles/RoleClient.tsx:83 - Key "Admin.RoleID" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/system/roles/RoleClient.tsx:94 - Key "Admin.IsDefault" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/system/roles/RoleClient.tsx:111 - Key "Admin.UpdateAuthorities" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/system/roles/RoleClient.tsx:218 - Key "Admin.UpdateAuthoritiesSuccess" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/system/roles/RoleClient.tsx:240 - Key "Admin.Roles" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/system/roles/RoleClient.tsx:242 - Key "Admin.AddRole" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/system/roles/RoleClient.tsx:257 - Key "Admin.EditRole" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/system/roles/RoleClient.tsx:257 - Key "Admin.AddRole" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/system/roles/RoleClient.tsx:262 - Key "Admin.RoleID" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/system/roles/RoleClient.tsx:285 - Key "Admin.IsDefault" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/system/roles/RoleClient.tsx:299 - Key "Admin.UpdateAuthorities" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/system/roles/RoleClient.tsx:300 - Key "Admin.Authorities" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/system/roles/RoleClient.tsx:337 - Key "Admin.DeleteTitle" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/admin/system/roles/RoleClient.tsx:339 - Key "Admin.DeleteDescription" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/classes/[id]/roster-columns.tsx:21 - Key "MSSV" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/classes/[id]/roster-columns.tsx:25 - Key "FullName" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/classes/[id]/roster-columns.tsx:29 - Key "Gender" is missing in: en.json, vi.json
-[MISSING] D:/source/QuickUni/webapp/quick-uni/src/app/[locale]/teacher/classes/[id]/roster-columns.tsx:38 - Key "EnrollmentDate" is missing in: en.json, vi.json
+None found.

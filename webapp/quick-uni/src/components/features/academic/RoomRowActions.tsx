@@ -29,6 +29,7 @@ import { RoomForm } from "./RoomForm";
 import { deleteRoomAction } from "@/actions/facility";
 import { notify } from "@/lib/custom-toast";
 import { room as roomSchema, building as buildingSchema } from "@/db/schemas/schedule";
+import { useTranslations } from "next-intl";
 
 export function RoomRowActions({
   room,
@@ -40,14 +41,15 @@ export function RoomRowActions({
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations("Admin");
 
   const handleDelete = () => {
     startTransition(async () => {
       const result = await deleteRoomAction(room.id);
       if (result.success) {
-        notify("Deleted successfully", { type: "success" });
+        notify(t("DeletedSuccess"), { type: "success" });
       } else {
-        notify(result.error || "Delete failed", { type: "error" });
+        notify(result.error || t("DeleteFailed"), { type: "error" });
       }
       setIsDeleteOpen(false);
     });
@@ -63,10 +65,10 @@ export function RoomRowActions({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
-            <Edit className="mr-2 h-4 w-4" /> Edit
+            <Edit className="mr-2 h-4 w-4" /> {t("Edit")}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsDeleteOpen(true)} className="text-destructive">
-            <Trash2 className="mr-2 h-4 w-4" /> Delete
+            <Trash2 className="mr-2 h-4 w-4" /> {t("Delete")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -74,7 +76,7 @@ export function RoomRowActions({
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Room</DialogTitle>
+            <DialogTitle>{t("EditRoom")}</DialogTitle>
           </DialogHeader>
           <RoomForm room={room} buildings={buildings} onSuccess={() => setIsEditOpen(false)} />
         </DialogContent>
@@ -83,13 +85,13 @@ export function RoomRowActions({
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+            <AlertDialogTitle>{t("ConfirmDelete")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("DeleteWarning")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} disabled={isPending} className="bg-destructive hover:bg-destructive/90">
-              Delete
+              {t("Delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

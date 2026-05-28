@@ -65,29 +65,35 @@ project.getSourceFiles().forEach(sourceFile => {
   });
 
   // Detect Missing Keys
-  // Find useTranslations hook to get namespace
-  const callExpressions = sourceFile.getDescendantsOfKind(SyntaxKind.CallExpression);
+  // Map translation function variable names to their namespaces
+  const tNamespaceMap = new Map<string, string>(); // variableName -> namespace
   
-  let currentNamespace = "";
-  
-  callExpressions.forEach(callExpr => {
-    const exprText = callExpr.getExpression().getText();
-    if (exprText === "useTranslations") {
-      const args = callExpr.getArguments();
+  // Find all variable declarations calling useTranslations
+  sourceFile.getDescendantsOfKind(SyntaxKind.VariableDeclaration).forEach(varDecl => {
+    const initializer = varDecl.getInitializerIfKind(SyntaxKind.CallExpression);
+    if (initializer && initializer.getExpression().getText() === "useTranslations") {
+      const args = initializer.getArguments();
+      const varName = varDecl.getName();
       if (args.length > 0 && args[0].getKind() === SyntaxKind.StringLiteral) {
-        currentNamespace = args[0].getText().replace(/["']/g, "");
+        const namespace = args[0].getText().replace(/["']/g, "");
+        tNamespaceMap.set(varName, namespace);
+      } else {
+        // If useTranslations() is called without arguments, namespace is empty/global
+        tNamespaceMap.set(varName, "");
       }
     }
   });
 
-  // Find t("key") calls
+  // Find t("key") or translationFn("key") calls
+  const callExpressions = sourceFile.getDescendantsOfKind(SyntaxKind.CallExpression);
   callExpressions.forEach(callExpr => {
     const exprText = callExpr.getExpression().getText();
-    if (exprText === "t") {
+    if (tNamespaceMap.has(exprText)) {
+      const namespace = tNamespaceMap.get(exprText)!;
       const args = callExpr.getArguments();
       if (args.length > 0 && args[0].getKind() === SyntaxKind.StringLiteral) {
         const key = args[0].getText().replace(/["']/g, "");
-        const fullKey = currentNamespace ? `${currentNamespace}.${key}` : key;
+        const fullKey = namespace ? `${namespace}.${key}` : key;
         
         // Check against i18n data
         const missingIn: string[] = [];

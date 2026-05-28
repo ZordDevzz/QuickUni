@@ -42,12 +42,12 @@ export default function ReviewList({ requests }: { requests: unknown[] }) {
     },
     {
       accessorKey: "type",
-      header: t("Type"),
+      header: t("TypeHeader"),
       cell: ({ row }) => t(`Type.${row.getValue("type")}`)
     },
     {
       accessorKey: "status",
-      header: t("Status"),
+      header: t("StatusHeader"),
       cell: ({ row }) => {
         const status = row.getValue("status") as string;
         const variants: Record<string, "default" | "secondary" | "destructive" | "outline" | "success"> = {
@@ -99,7 +99,7 @@ export default function ReviewList({ requests }: { requests: unknown[] }) {
                 <span className="text-sm font-semibold">{selectedRequest?.sender?.fullname}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm font-medium text-muted-foreground">{t("Type")}</span>
+                <span className="text-sm font-medium text-muted-foreground">{t("TypeHeader")}</span>
                 <span className="text-sm font-semibold">{selectedRequest ? t(`Type.${selectedRequest.type}`) : ""}</span>
               </div>
               <div className="flex justify-between">
