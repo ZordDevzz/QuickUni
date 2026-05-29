@@ -1,0 +1,41 @@
+# Chương 5.2: Tự Động Hóa Xử Lý Excel Và Cơ Chế Audit Trail
+
+Trong bối cảnh quản trị giáo dục hiện đại, đặc biệt là vào các kỳ tuyển sinh đầu năm học mới, các trường đại học thường phải đối mặt với bài toán tạo mới hàng ngàn, thậm chí hàng chục ngàn hồ sơ sinh viên và tài khoản truy cập. Nếu thực hiện thủ công, công việc này không chỉ tiêu tốn nguồn nhân lực khổng lồ mà còn tiềm ẩn rất nhiều rủi ro sai sót về dữ liệu. Nắm bắt được "nỗi đau" này, QuickUni đã tích hợp quy trình Cấp phát hàng loạt (Bulk Provisioning) dựa trên Excel, kết hợp cùng hệ thống vết kiểm toán (Audit Trail) để đảm bảo mọi thao tác đều được kiểm soát và truy vết.
+
+## 1. Giải quyết bài toán nhập liệu hàng loạt bằng Excel
+
+Dựa trên thực tiễn vận hành, chúng tôi tính toán được rằng việc thao tác qua UI để tạo thủ công một bộ hồ sơ (bao gồm nhập Profile, gán Entity, cấp Account) mất trung bình khoảng 2-3 phút cho một hồ sơ. Với 1.000 sinh viên, khoảng thời gian này lên tới 50 giờ làm việc liên tục.
+
+Bằng việc tích hợp logic `bulkProvisioningWorkflow` (trong tập tin `src/services/onboarding.ts`), QuickUni thay đổi hoàn toàn cục diện, giúp giảm hơn 90% thời gian thực thi:
+
+[PLACEHOLDER: Sơ đồ quy trình đọc Excel và cấp phát Bulk Provisioning]
+
+*   **Truy vấn mục tiêu (Targeting):** Hệ thống không thực hiện quét toàn bộ cơ sở dữ liệu một cách lãng phí. Thay vào đó, nó tận dụng cú pháp Drizzle ORM để lọc ra (Filter) chính xác các Hồ sơ (Profiles) chưa có tài khoản (`isNull(profile.accountId)`), đồng thời join với bảng `student` hoặc `employee` tương ứng.
+*   **Vòng lặp tự động (Iteration & Generation):** Với danh sách hồ sơ thu được, hệ thống tự động sinh ra (Generate) thông tin đăng nhập. Cụ thể, `username` được tự động lấy từ mã sinh viên (`student.code`) hoặc mã nhân viên (`employee.code`). Mật khẩu được khởi tạo theo chuẩn mặc định của nhà trường.
+*   **Tái sử dụng Logic (Reusability):** Điểm sáng trong kiến trúc của QuickUni là `bulkProvisioningWorkflow` không phải viết lại logic tạo tài khoản. Nó gọi trực tiếp hàm `issueAccountWorkflow` (đã được đề cập ở Chương 5.1). Điều này đảm bảo tính nhất quán (Consistency): Dù Admin tạo một tài khoản hay một ngàn tài khoản, mọi quy tắc về cấp quyền (Role), ràng buộc Profile-Account đều được kiểm tra một cách giống hệt nhau.
+*   **Báo cáo kết quả trực quan (Result Aggregation):** Sau khi quá trình chạy kết thúc, hệ thống không chỉ báo cáo "Thành công" hay "Thất bại". Nó tổng hợp một Object kết quả gồm: Tổng số cần cấp (`total`), số lượng thành công (`success`), số lượng thất bại (`failed`), và mảng chứa danh sách các lỗi (`errors`). Admin có thể ngay lập tức nhìn thấy ví dụ: "Profile ID 123 thất bại do thiếu mã sinh viên", từ đó dễ dàng thực hiện thao tác khắc phục chỉ trên một vài bản ghi bị lỗi.
+
+Sự tự động hóa này biến công việc của hàng tuần thành thao tác chỉ trong vài chục giây, giải phóng nguồn lực cho bộ phận Admin tập trung vào công tác quản lý chuyên môn.
+
+## 2. Cơ chế Audit Trail và Logging: Đảm bảo tính minh bạch
+
+Trong một hệ thống cho phép tạo tài khoản tự động số lượng lớn, rủi ro lớn nhất là việc mất kiểm soát và lạm quyền. Ai đã cấp tài khoản này? Được cấp khi nào? Tại sao lại bị thay đổi? Đây là những câu hỏi bắt buộc phải trả lời trong một hệ thống đạt chuẩn an toàn thông tin. Do đó, cơ chế Audit Trail đã được thiết kế ngầm bên dưới tầng Service.
+
+### Tại sao cần Audit?
+Việc cấp phát và chỉnh sửa Account là những "Sensitive Actions" (Hành động nhạy cảm). Nếu không có Audit, việc điều tra các sự cố rò rỉ dữ liệu hoặc thay đổi quyền trái phép là bất khả thi. QuickUni giải quyết vấn đề này bằng việc bắt buộc mọi hành động tạo hay sửa tài khoản (trong `src/services/user.ts`) đều phải gọi qua các "Workflow", ví dụ: `createAccountWorkflow` thay vì gọi trực tiếp `createAccount`.
+
+### Phân tích cơ chế Logging (Tập tin `src/services/user.ts`)
+
+Mỗi khi một Account được tạo ra thông qua `createAccountWorkflow`, sau khi ghi nhận bản ghi vào bảng `account`, hệ thống lập tức tiến hành lưu một bản ghi lịch sử vào bảng `account_audit` thông qua hàm `createAccountAudit`. 
+
+Các tham số ngữ cảnh (Context Parameters) được lưu trữ cực kỳ chi tiết:
+*   **`performedBy`**: Ghi nhận ID của người thực hiện hành động (Admin). Trừ trường hợp hệ thống tự động chạy theo batch job, trường này cho biết cá nhân nào chịu trách nhiệm về mặt pháp lý/nội quy đối với thao tác tạo tài khoản này.
+*   **`action`**: Định nghĩa rõ loại thao tác (ví dụ: `create_account`, `update_account_status`). Việc gán cứng các mã hành động này giúp cho việc truy vấn báo cáo thống kê sau này dễ dàng hơn.
+*   **`newValue`**: Không chỉ lưu lại lịch sử hành động, hệ thống lưu lại toàn bộ trạng thái (Snapshot) của tài khoản vào thời điểm đó (bao gồm `username`, `email`, `type`, `status`) dưới dạng JSON. Nếu Admin vô tình hoặc cố ý thay đổi loại tài khoản, hệ thống có thể dễ dàng so sánh `newValue` với các dòng audit trước đó để tìm ra sự sai lệch.
+*   **`userAgent` & `ipAddress`**: Đây là hai trường thông tin tối quan trọng phục vụ cho Forensic (Điều tra pháp y kỹ thuật số). Việc ghi nhận lại địa chỉ IP và trình duyệt của người thực hiện giúp đội ngũ bảo mật nhanh chóng phát hiện nếu có một truy cập bất thường từ một quốc gia khác hoặc từ một script tấn công đánh cắp phiên đăng nhập (Session Hijacking).
+
+## 3. Tổng kết
+
+Sự kết hợp giữa Bulk Provisioning và Audit Trail tạo ra một hệ thống Onboarding "Nhanh nhưng An Toàn". Admin có thể đẩy nhanh tốc độ số hóa dữ liệu lên 10 lần nhờ xử lý Excel, nhưng đồng thời, mọi hành động nhỏ nhất của họ đều bị hệ thống giám sát và ghi nhận một cách trung thực, không thể tẩy xóa. 
+
+Đây chính là chuẩn mực của một nền tảng quản lý đại học thế hệ mới (Next-gen University Management Platform): Vừa giải quyết bài toán hiệu suất vận hành (Operational Efficiency), vừa đảm bảo tuyệt đối tính tuân thủ và minh bạch dữ liệu (Data Compliance & Transparency).

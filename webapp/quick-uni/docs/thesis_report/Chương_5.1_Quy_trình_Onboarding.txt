@@ -1,0 +1,44 @@
+# Chương 5.1: Phân Tích Quy Trình Onboarding (Onboarding Workflow)
+
+Trong hệ sinh thái của QuickUni, Onboarding không chỉ đơn thuần là việc tạo một tài khoản để đăng nhập, mà là một quy trình quản trị dữ liệu vòng đời con người (Human Lifecycle Data Management). Quy trình này được thiết kế để đảm bảo sự chặt chẽ về dữ liệu, tính minh bạch và đặc biệt là tối ưu hóa trải nghiệm của Quản trị viên (Admin). Thay vì phải thao tác thủ công qua nhiều màn hình khác nhau để tạo thông tin cá nhân, phân quyền và cấp tài khoản, QuickUni gom nhóm tất cả thành một Workflow 3 bước duy nhất. Các logic nghiệp vụ cốt lõi này được triển khai trong tập tin `src/services/onboarding.ts`.
+
+Quy trình 3 bước này bao gồm: (1) Lập hồ sơ - Khởi tạo dữ liệu cơ bản theo Dynamic Profile; (2) Liên kết thực thể - Định danh vai trò học thuật hoặc nghề nghiệp trong hệ thống; và (3) Cấp phát tài khoản - Xác thực và phân quyền truy cập.
+
+[PLACEHOLDER: Sơ đồ luồng dữ liệu 3 bước Onboarding Workflow]
+
+## 1. Bước 1: Lập hồ sơ (Profile Creation)
+
+Bước đầu tiên của quá trình Onboarding là thiết lập một `Profile` (Hồ sơ người dùng). Điều làm nên sự khác biệt của QuickUni là tính năng Dynamic Profile (Hồ sơ động). Trong hàm `createProfileWorkflow`, dữ liệu truyền vào không bị giới hạn trong một cấu trúc bảng cứng nhắc, mà được xác thực dựa trên một `Schema` cấu hình sẵn trong cơ sở dữ liệu.
+
+Quá trình này diễn ra như sau:
+*   **Xác thực Schema (Schema Validation):** Hệ thống sẽ kiểm tra `schemaId` được cung cấp xem có tồn tại và hợp lệ trong bảng `profile_schema` hay không. Đây là cơ sở để hệ thống hiểu được hồ sơ này thuộc nhóm đối tượng nào (ví dụ: Sinh viên đại trà, Giảng viên thỉnh giảng, Nhân viên khối văn phòng).
+*   **Xác thực dữ liệu động (Dynamic Data Validation):** Toàn bộ thông tin cá nhân thực tế (như số CMND/CCCD, ngày cấp, nơi cấp, thông tin liên hệ khẩn cấp) được truyền dưới dạng JSON `dynamicData`. Hệ thống sẽ tự động đối chiếu từng trường dữ liệu với `profile_schema_field`. Nếu một trường được đánh dấu `isRequired` nhưng bị thiếu, hoặc kiểu dữ liệu (`datatype`) không khớp, một Exception sẽ được ném ra ngay lập tức, ngăn chặn việc tạo ra các hồ sơ rác hoặc thiếu dữ liệu.
+*   **Khởi tạo Hồ sơ:** Khi dữ liệu đã hợp lệ, hệ thống tạo bản ghi vào bảng `profile` và tạo ID duy nhất. Đáng chú ý, tại bước này, trường `accountId` được gán cố định là `null`. Việc này đảm bảo sự phân tách trách nhiệm (Separation of Concerns) – một hồ sơ có thể tồn tại độc lập mà chưa cần cấp quyền truy cập hệ thống.
+
+## 2. Bước 2: Liên kết thực thể (Entity Linkage)
+
+Sau khi Hồ sơ (Profile) được hình thành, hệ thống cần biết người này đóng vai trò thực thể nào trong mô hình vận hành của trường đại học. Hàm `linkProfileToEntity` chịu trách nhiệm gán Hồ sơ này với một thực thể `Student` (Sinh viên) hoặc `Employee` (Nhân sự/Giảng viên).
+
+*   **Tính toàn vẹn dữ liệu:** Hệ thống kiểm tra xem `profileId` có tồn tại hay không. Đồng thời, đối với Sinh viên, một hồ sơ chỉ được phép liên kết với một Sinh viên duy nhất, tránh tình trạng một cá nhân vô tình sở hữu nhiều mã số sinh viên song song gây sai lệch số liệu học vụ.
+*   **Phân luồng thực thể:**
+    *   **Sinh viên:** Hệ thống khởi tạo bản ghi `student` với mã sinh viên (`code`). Nếu có `classId` đi kèm, hệ thống tự động gọi hàm gán sinh viên này vào lớp sinh hoạt (`mainClassMember`) với vai trò mặc định (Role ID 3 - Member). Điều này giúp quá trình nhập học (Enrollment) diễn ra hoàn toàn tự động ngay sau khi có hồ sơ.
+    *   **Nhân sự:** Hệ thống khởi tạo bản ghi `employee`. Dù kiến trúc cho phép một Profile có thể vừa là Sinh viên vừa là Nhân viên (ví dụ: Trợ giảng), bản thân mỗi thực thể sẽ giữ một mã số (`code`) độc lập.
+
+## 3. Bước 3: Cấp tài khoản (Account Provisioning)
+
+Bước cuối cùng của Onboarding là cấp phát danh tính kỹ thuật số (Digital Identity) để người dùng có thể đăng nhập vào ứng dụng. QuickUni hỗ trợ 2 chiến lược cấp phát: Cấp phát đơn lẻ (Strategy A - `issueAccountWorkflow`) và Cấp phát hàng loạt (Strategy B - Bulk Provisioning, sẽ phân tích sâu ở phần sau).
+
+Đối với cấp phát đơn lẻ:
+*   **Kiểm tra tính ràng buộc:** Đối với tài khoản người dùng bình thường (không phải tài khoản `dev`), hệ thống bắt buộc phải có một `profileId` hợp lệ. Nếu hồ sơ đó đã được gắn `accountId` trước đó, quá trình sẽ bị từ chối để chống cấp trùng tài khoản.
+*   **Tạo Account:** Hệ thống gọi hàm `createAccountWorkflow` từ `user.ts` để tạo bản ghi đăng nhập.
+*   **Cập nhật liên kết (Linkage):** ID của Account mới được tạo sẽ được ghi ngược lại vào trường `accountId` của bảng `profile`. Mối liên kết 1-1 giữa Account và Profile chính thức được thiết lập.
+*   **Tự động phân quyền (Authorization):** Dựa vào tham số `systemRoleId` được truyền từ workflow trước đó (ví dụ: cấp quyền 'Student' hoặc 'Staff'), hệ thống tự động ghi dữ liệu vào bảng `user_system_role`. Người dùng ngay lập tức có quyền truy cập vào các menu tương ứng mà Admin không cần thao tác thêm.
+
+## 4. Giá trị mang lại cho Quản trị viên (Admin)
+
+Góc nhìn của Admin khi sử dụng quy trình Onboarding 3 bước này là một sự thay đổi mang tính cách mạng so với các phần mềm truyền thống:
+1.  **Chống phân mảnh dữ liệu:** Admin không còn tình trạng "tạo tài khoản ở module này, nhưng quên tạo hồ sơ ở module kia". Mọi thứ được gói gọn trong một Transaction nghiệp vụ.
+2.  **Giảm thao tác thủ công:** Việc tự động gán sinh viên vào lớp học và tự động gán quyền hệ thống (Role) dựa trên loại thực thể giúp Admin tiết kiệm hàng tá click chuột cho mỗi user.
+3.  **Bảo vệ dữ liệu chặt chẽ:** Quy trình Validate ngay từ tầng Service bằng code TypeScript giúp Admin không thể nhập sai, nhập thiếu dữ liệu bắt buộc. Điều này chuyển gánh nặng kiểm tra dữ liệu từ con người sang máy móc.
+
+Tóm lại, Workflow Onboarding của QuickUni là một thiết kế kiến trúc theo hướng Domain-Driven Design (DDD), nơi các quy tắc nghiệp vụ của nhà trường được phản ánh trực tiếp vào code, giúp giảm thiểu sai sót do con người và tăng tối đa năng suất làm việc của bộ phận Đào tạo và Nhân sự.
