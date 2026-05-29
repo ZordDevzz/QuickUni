@@ -1,0 +1,47 @@
+CHƯƠNG 3: NỀN TẢNG CÔNG NGHỆ VÀ QUẢN TRỊ DỮ LIỆU TỪ GÓC NHÌN KHÁCH HÀNG
+
+3.3. An toàn và Bảo mật Dữ liệu: Nền tảng của Sự Tin cậy và Minh bạch
+
+Trong môi trường giáo dục đại học, dữ liệu không chỉ là thông tin đơn thuần mà còn liên quan mật thiết đến quyền riêng tư của cá nhân (thông tin định danh, điểm số, học phí) và tính minh bạch của tổ chức (bảng điểm, văn bằng, lịch học). Bất kỳ sự cố rò rỉ, thay đổi trái phép hay mất mát dữ liệu nào đều có thể gây ra những hậu quả nghiêm trọng về mặt pháp lý và uy tín. Vì vậy, "An toàn" và "Bảo mật" được xác định là nguyên tắc thiết kế tối thượng của nền tảng QuickUni. Hệ thống được bảo vệ nhiều lớp, từ xác thực người dùng, kiểm soát quyền truy cập cho đến lưu vết minh bạch mọi hành động.
+
+3.3.1. Xác thực An toàn với NextAuth.js
+
+Bức tường phòng thủ đầu tiên của QuickUni là hệ thống xác thực (Authentication). Chúng tôi tích hợp NextAuth.js - một giải pháp bảo mật toàn diện được thiết kế riêng cho hệ sinh thái Next.js.
+- Quản lý Phiên (Session Management) hiện đại: NextAuth.js cung cấp cơ chế quản lý phiên đăng nhập cực kỳ an toàn thông qua JSON Web Tokens (JWT) kết hợp với mã hóa cấp độ cao (JWE). Thay vì lưu trữ thông tin nhạy cảm trên máy chủ hoặc trực tiếp trên trình duyệt dễ bị đánh cắp, thông tin phiên được mã hóa an toàn và gửi kèm qua HTTP-only Cookies. 
+- Ngăn chặn Tấn công Mạng: Kiến trúc của hệ thống vô hiệu hóa hoàn toàn các nguy cơ tấn công phổ biến như Cross-Site Scripting (XSS) bằng cách không cho phép JavaScript phía client truy cập vào cookie bảo mật. Đồng thời, cơ chế Cross-Site Request Forgery (CSRF) protection được tự động kích hoạt cho mọi yêu cầu gửi đến máy chủ, đảm bảo không có kẻ xấu nào có thể giả mạo lệnh của người dùng hợp lệ.
+
+[PLACEHOLDER: Sơ đồ Luồng Xác thực Người dùng qua NextAuth.js]
+
+3.3.2. Kiểm soát Quyền Truy cập Dựa trên Vai trò (RBAC)
+
+Xác định người dùng là ai (Authentication) mới chỉ là bước đầu; xác định họ được phép làm gì (Authorization) mới là cốt lõi của bảo mật dữ liệu nội bộ. QuickUni triển khai một mô hình Kiểm soát Truy cập Dựa trên Vai trò (Role-Based Access Control - RBAC) linh hoạt nhưng vô cùng nghiêm ngặt.
+
+- Phân cấp Quyền hạn Tinh gọn: Trong QuickUni, mỗi người dùng không được cấp quyền trực tiếp. Thay vào đó, hệ thống định nghĩa các "Vai trò" (Roles) như Quản trị viên Hệ thống, Giáo vụ Khoa, Giảng viên, Sinh viên. Mỗi vai trò được gắn chặt với các quyền hạn cụ thể (Permissions) đối với các mô-đun dữ liệu (ví dụ: Quyền xem điểm, Quyền sửa điểm, Quyền khóa bảng điểm). Một người dùng có thể được gắn một hoặc nhiều Vai trò tùy thuộc vào chức vụ thực tế của họ trong trường.
+- Bảo vệ Kép (Double Security Layer): Sự an toàn không chỉ nằm ở việc ẩn đi các nút bấm trên Giao diện (UI) mà người dùng không có quyền. Quan trọng hơn, mọi yêu cầu thay đổi dữ liệu (Server Actions / APIs) gửi về máy chủ đều phải trải qua một lớp kiểm tra quyền (Authorization Check) độc lập. Dù kẻ xấu có sử dụng các công cụ kỹ thuật để cố tình gửi lệnh can thiệp (bypass UI), máy chủ QuickUni vẫn sẽ từ chối và chặn đứng hành động đó nếu tài khoản không mang Vai trò hợp lệ.
+- Linh hoạt cho Khách hàng: Mô hình RBAC cho phép các trường đại học tự do định nghĩa các Vai trò mới theo cơ cấu tổ chức đặc thù của họ mà không cần đội ngũ kỹ thuật can thiệp, mang lại sự tùy biến tối đa trong khuôn khổ an toàn.
+
+[PLACEHOLDER: Mô hình Hoạt động của Hệ thống RBAC trong QuickUni]
+
+3.3.3. Lưu Vết Dữ Liệu (Audit Trail) - Cam kết về Tính Minh Bạch
+
+Trong quản lý đào tạo, khi một con điểm bị thay đổi từ 4 (Rớt) lên 5 (Đậu), hay một sinh viên đột nhiên được đưa vào danh sách thi dù chưa đủ điều kiện, nhà quản lý cần phải biết chính xác: Ai đã làm việc đó? Làm vào lúc nào? Và tại sao?
+
+Để giải quyết triệt để vấn đề này, QuickUni thiết kế cơ chế Audit Trail (Lưu vết Dữ liệu) hoạt động hoàn toàn tự động và ẩn danh ở tầng cơ sở dữ liệu. Tâm điểm của cơ chế này là bảng `account_audit` (hoặc các cơ chế ghi nhận log lịch sử tương tự).
+- Ghi nhận Hành động Toàn diện: Bất kỳ một sự kiện quan trọng nào xảy ra trong hệ thống - từ việc tạo mới tài khoản, cấp quyền, đổi mật khẩu, cho đến thay đổi trạng thái của hồ sơ sinh viên hay sửa chữa điểm số - đều được hệ thống tự động ghi lại một cách lặng lẽ. Bản ghi audit sẽ lưu giữ các thông tin cốt lõi: 
+  - `actor_id`: Mã định danh của người thực hiện hành động.
+  - `action`: Loại hành động (CREATE, UPDATE, DELETE).
+  - `target_entity`: Đối tượng bị tác động (Ví dụ: ID của sinh viên bị đổi điểm).
+  - `old_value` và `new_value`: Trạng thái dữ liệu trước và sau khi thay đổi (thường được lưu dưới định dạng JSON để tiết kiệm không gian và dễ đối chiếu).
+  - `timestamp`: Thời gian chính xác đến từng mili-giây.
+  - `ip_address` và `user_agent`: Thông tin về thiết bị và vị trí mạng của người thực hiện.
+- Tính Bất biến (Immutability): Các bản ghi trong hệ thống Audit Trail được thiết kế theo nguyên tắc chỉ ghi (append-only). Ngay cả một Quản trị viên cấp cao cũng không có quyền sửa chữa hay xóa bỏ các lịch sử này. Nó giống như một "hộp đen" của máy bay, bảo vệ sự thật khách quan tuyệt đối.
+
+[PLACEHOLDER: Sơ đồ Cơ chế Ghi Log (Audit Trail Architecture)]
+
+3.3.4. Quản trị Luồng Công việc (Workflow Logging)
+
+Bên cạnh việc theo dõi dữ liệu thô, QuickUni còn cung cấp tính năng Workflow Logging để quản lý các quy trình nghiệp vụ phức tạp. Ví dụ, trong quá trình lập Thời khóa biểu (Scheduling) hoặc Nhập học (Onboarding), một tác vụ sẽ phải đi qua nhiều bước (nháp, chờ duyệt, đã duyệt, xuất bản). Mỗi lần chuyển đổi trạng thái, hệ thống không chỉ thay đổi dữ liệu mà còn ghi nhận lại người đã "ký duyệt" điện tử cho bước đó. Điều này giúp các nhà quản lý dễ dàng rà soát lại quy trình, phát hiện điểm nghẽn và quy trách nhiệm rõ ràng trong chuỗi cung ứng dịch vụ giáo dục.
+
+3.3.5. Sự Yên tâm tuyệt đối cho Khách hàng
+
+Sự kết hợp giữa NextAuth bảo vệ cửa ngõ, RBAC kiểm soát nội bộ và Audit Trail giám sát hành vi tạo thành một "Kiềng ba chân" vững chắc về bảo mật. Đối với Ban Giám hiệu các trường đại học, đây không chỉ là tính năng kỹ thuật mà là một lời cam kết về pháp lý. Khi triển khai QuickUni, họ có trong tay một hệ thống minh bạch tuyệt đối, khả năng truy vết trách nhiệm 100%, sẵn sàng đáp ứng mọi tiêu chuẩn khắt khe nhất của các đợt thanh tra, kiểm định chất lượng giáo dục trong nước và quốc tế. Hệ thống không chỉ quản lý dữ liệu, mà còn bảo vệ danh dự và uy tín của nhà trường.
