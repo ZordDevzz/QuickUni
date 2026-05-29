@@ -12,11 +12,13 @@ import { revalidatePath } from 'next/cache';
 vi.mock('@/db', () => ({
   db: {
     query: {
-      employee: { findMany: vi.fn() },
+      employee: { findMany: vi.fn().mockResolvedValue([]) },
       subject: { findMany: vi.fn() },
       semester: { findMany: vi.fn() },
       courseClassType: { findMany: vi.fn() },
       courseClass: { findMany: vi.fn() },
+      department: { findMany: vi.fn() },
+      major: { findMany: vi.fn() },
     },
     insert: vi.fn(() => ({
       values: vi.fn().mockResolvedValue({}),
@@ -44,6 +46,8 @@ describe('course actions', () => {
     expect(db.query.subject.findMany).toHaveBeenCalled();
     expect(db.query.semester.findMany).toHaveBeenCalled();
     expect(db.query.courseClassType.findMany).toHaveBeenCalled();
+    expect(db.query.department.findMany).toHaveBeenCalled();
+    expect(db.query.major.findMany).toHaveBeenCalled();
   });
 
   it('getCourseClassesWithRelations should fetch course classes with relations', async () => {

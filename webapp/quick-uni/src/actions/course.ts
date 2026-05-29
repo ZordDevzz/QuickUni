@@ -45,14 +45,36 @@ export type ActionResponse = {
 // --- Dependencies ---
 
 export async function getCourseClassFormDependencies() {
-  const [teachers, subjects, semesters, types, departments, majors] = await Promise.all([
-    db.query.employee.findMany({ with: { profile: true } }),
+  const [rawTeachers, subjects, semesters, types, departments, majors] = await Promise.all([
+    db.query.employee.findMany({
+      with: {
+        profile: {
+          with: {
+            account: {
+              with: {
+                userSystemRoles: true,
+              },
+            },
+          },
+        },
+      },
+    }),
     db.query.subject.findMany({ where: isNull(subject.deletedAt), orderBy: (s, { asc }) => [asc(s.code)] }),
     db.query.semester.findMany({ orderBy: (s, { desc }) => [desc(s.startDate)] }),
     db.query.courseClassType.findMany(),
     db.query.department.findMany({ where: isNull(department.deletedAt), orderBy: (d, { asc }) => [asc(d.name)] }),
     db.query.major.findMany({ where: isNull(major.deletedAt), orderBy: (m, { asc }) => [asc(m.code)] }),
   ]);
+
+  // Filter out system administrators (1) and academic office staff (4)
+  const teachers = rawTeachers.filter((emp) => {
+    const roles = emp.profile?.account?.userSystemRoles || [];
+    const hasAdminOrAcademicOffice = roles.some((r) => {
+      const roleId = Number(r.systemRole);
+      return roleId === 1 || roleId === 4;
+    });
+    return !hasAdminOrAcademicOffice;
+  });
 
   return { teachers, subjects, semesters, types, departments, majors };
 }
@@ -108,17 +130,8 @@ export async function getClassStudents(classId: string) {
 }
 
 export async function getCourseClassesWithRelations() {
-  const currentSemester = await db.query.semester.findFirst({
-    where: eq(semester.isCurrent, true)
-  });
-
-  if (!currentSemester) return [];
-
   return await db.query.courseClass.findMany({
-    where: and(
-      isNull(courseClass.deletedAt),
-      eq(courseClass.semesterId, currentSemester.id)
-    ),
+    where: isNull(courseClass.deletedAt),
     orderBy: (cc, { asc }) => [asc(cc.code)],
     with: {
       subject: true,

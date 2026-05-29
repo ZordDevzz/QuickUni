@@ -114,8 +114,9 @@ export function StructureWorkspace({ initialSchemas, allFields }: StructureWorks
         const sectionData = selectedItem.data as ProfileSection;
         const section = sections.find(s => s.id === sectionData.id);
         if (section) {
-// eslint-disable-next-line react-hooks/set-state-in-effect
-          setSelectedItem({ type: "section", data: section });
+          if (selectedItem.data !== section) {
+            setSelectedItem({ type: "section", data: section });
+          }
         } else {
           setSelectedItem(null);
         }
@@ -124,7 +125,9 @@ export function StructureWorkspace({ initialSchemas, allFields }: StructureWorks
         const section = sections.find(s => s.id === fieldData.sectionId);
         const field = section?.profileSchemaFields.find(f => f.fieldId === fieldData.fieldId);
         if (field) {
-          setSelectedItem({ type: "field", data: field });
+          if (selectedItem.data !== field) {
+            setSelectedItem({ type: "field", data: field });
+          }
         } else {
           setSelectedItem(null);
         }

@@ -4,7 +4,7 @@ import { weeklyTemplate, availability, holidayBlacklist, scheduleType } from "..
 import { courseClass, enrollment } from "../db/schemas/course";
 import { profile, employee, student } from "../db/schemas/user";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { eq, and, ne, asc, exists } from "drizzle-orm";
+import { eq, and, ne, asc, exists, or, between, isNull } from "drizzle-orm";
 import { createMask, hasCollision } from "../lib/scheduling/bitmask";
 import { weeklyTemplateValidator, holidayValidator } from "../lib/validators/scheduling";
 
@@ -59,10 +59,28 @@ export async function getSemesters() {
 
 export async function getTeachers() {
   try {
-    return await db.query.employee.findMany({
+    const rawTeachers = await db.query.employee.findMany({
       with: { 
-        profile: true 
+        profile: {
+          with: {
+            account: {
+              with: {
+                userSystemRoles: true
+              }
+            }
+          }
+        } 
       }
+    });
+
+    // Filter out system administrators (1) and academic office staff (4)
+    return rawTeachers.filter((emp) => {
+      const roles = emp.profile?.account?.userSystemRoles || [];
+      const hasAdminOrAcademicOffice = roles.some((r) => {
+        const roleId = Number(r.systemRole);
+        return roleId === 1 || roleId === 4;
+      });
+      return !hasAdminOrAcademicOffice;
     });
   } catch (error) {
     console.error("Error in getTeachers:", error);
@@ -141,28 +159,35 @@ export async function toggleAvailabilityAction(params: {
   entityId: string,
   entityType: 'teacher' | 'room' | 'subject' | 'class' | 'global',
   dayOfWeek: number,
-  slotMask: number
+  slotMask: number,
+  schDate?: string | null
 }) {
   try {
     const existing = await db.query.availability.findFirst({
-      where: (a, { and, eq }) => and(
+      where: (a, { and, eq, isNull }) => and(
         eq(a.entityId, params.entityId),
         eq(a.entityType, params.entityType),
-        eq(a.dayOfWeek, params.dayOfWeek)
+        eq(a.dayOfWeek, params.dayOfWeek),
+        params.schDate ? eq(a.schDate, params.schDate) : isNull(a.schDate)
       )
     });
 
     if (existing) {
       const newMask = existing.occupiedMask ^ params.slotMask;
-      await db.update(availability)
-        .set({ occupiedMask: newMask })
-        .where(eq(availability.id, existing.id));
+      if (newMask === 0) {
+        await db.delete(availability).where(eq(availability.id, existing.id));
+      } else {
+        await db.update(availability)
+          .set({ occupiedMask: newMask })
+          .where(eq(availability.id, existing.id));
+      }
     } else {
       await db.insert(availability).values({
         entityId: params.entityId,
         entityType: params.entityType,
         dayOfWeek: params.dayOfWeek,
-        occupiedMask: params.slotMask
+        occupiedMask: params.slotMask,
+        schDate: params.schDate || null
       });
     }
     return { success: true };
@@ -277,10 +302,31 @@ export async function validateWeeklyTemplateEdit(params: {
   return { valid: true };
 }
 
-export async function getAvailability(entityId: string, type: 'teacher' | 'room' | 'subject' | 'class' | 'global') {
+export async function getAvailability(
+  entityId: string, 
+  type: 'teacher' | 'room' | 'subject' | 'class' | 'global',
+  startDateStr?: string | null,
+  endDateStr?: string | null
+) {
   try {
+    const conditions = [
+      eq(availability.entityId, entityId),
+      eq(availability.entityType, type)
+    ];
+
+    if (startDateStr && endDateStr) {
+      conditions.push(
+        or(
+          isNull(availability.schDate),
+          between(availability.schDate, startDateStr, endDateStr)
+        ) as any
+      );
+    } else {
+      conditions.push(isNull(availability.schDate) as any);
+    }
+
     return await db.query.availability.findMany({
-      where: (a, { and, eq }) => and(eq(a.entityId, entityId), eq(a.entityType, type))
+      where: and(...conditions)
     });
   } catch (error) {
     console.error("Error in getAvailability:", error);

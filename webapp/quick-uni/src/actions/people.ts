@@ -75,10 +75,36 @@ export async function updatePerson(type: "employee" | "student", id: string, dat
   return await db.transaction(async (tx) => {
     // 1. Get current entity to find profileId
     const entity = type === "employee" 
-      ? await tx.query.employee.findFirst({ where: eq(employee.id, id) })
+      ? await tx.query.employee.findFirst({
+          where: eq(employee.id, id),
+          with: {
+            profile: {
+              with: {
+                account: {
+                  with: {
+                    userSystemRoles: true,
+                  },
+                },
+              },
+            },
+          },
+        })
       : await tx.query.student.findFirst({ where: eq(student.id, id) });
     
     if (!entity || !entity.profileId) return { success: false, error: "Not found" };
+
+    // Prevent modifying system administrator or academic office staff
+    if (type === "employee") {
+      const empEntity = entity as any;
+      const roles = empEntity.profile?.account?.userSystemRoles || [];
+      const isSensitive = roles.some((r: any) => {
+        const roleId = Number(r.systemRole);
+        return roleId === 1 || roleId === 4;
+      });
+      if (isSensitive) {
+        return { success: false, error: "Cannot modify system administrator or academic office staff" };
+      }
+    }
 
     // 2. Update Profile
     await tx.update(profile).set({
@@ -125,11 +151,29 @@ export async function updatePerson(type: "employee" | "student", id: string, dat
 
 export async function getPeople(type: "employee" | "student") {
   if (type === "employee") {
-    return await db.query.employee.findMany({
+    const employees = await db.query.employee.findMany({
       with: {
-        profile: true,
+        profile: {
+          with: {
+            account: {
+              with: {
+                userSystemRoles: true,
+              },
+            },
+          },
+        },
       },
       orderBy: (e, { desc }) => [desc(e.createAt)],
+    });
+
+    // Filter out system administrators (1) and academic office staff (4)
+    return employees.filter((emp) => {
+      const roles = emp.profile?.account?.userSystemRoles || [];
+      const hasAdminOrAcademicOffice = roles.some((r) => {
+        const roleId = Number(r.systemRole);
+        return roleId === 1 || roleId === 4;
+      });
+      return !hasAdminOrAcademicOffice;
     });
   } else {
     return await db.query.student.findMany({

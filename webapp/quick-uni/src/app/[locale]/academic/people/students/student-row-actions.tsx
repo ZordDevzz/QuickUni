@@ -40,7 +40,7 @@ export function StudentRowActions({ student }: { student: any }) {
       </DropdownMenu>
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{profileT("EditProfile") || "Edit Student"}</DialogTitle>
           </DialogHeader>

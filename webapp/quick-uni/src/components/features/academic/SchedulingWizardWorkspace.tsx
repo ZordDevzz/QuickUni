@@ -201,12 +201,24 @@ export function SchedulingWizardWorkspace() {
     }
   };
 
-  const handleUpdateClassSettings = async (classId: string, minPeriods: number, allowEvening: boolean, allowWeekend?: boolean) => {
+  const handleUpdateClassSettings = async (
+    classId: string,
+    minPeriods: number,
+    allowEvening: boolean,
+    allowWeekend?: boolean,
+    preferredStartPeriod?: number | null
+  ) => {
     setClassSavingId(classId);
     try {
-      const res = await updateCourseClassSetupAction(classId, minPeriods, allowEvening, allowWeekend);
+      const res = await updateCourseClassSetupAction(classId, minPeriods, allowEvening, allowWeekend, preferredStartPeriod);
       if (res.success) {
-        setClasses(prev => prev.map(c => c.id === classId ? { ...c, minSessionPeriods: minPeriods, allowEvening, allowWeekend: allowWeekend ?? false } : c));
+        setClasses(prev => prev.map(c => c.id === classId ? {
+          ...c,
+          minSessionPeriods: minPeriods,
+          allowEvening,
+          allowWeekend: allowWeekend ?? false,
+          preferredStartPeriod: preferredStartPeriod ?? null
+        } : c));
         toast.success(t("SuccessSaveClass") || "Class settings saved", { duration: 1000 });
       } else {
         toast.error(res.error || t("ErrorSaveClass") || "Failed to save class");
@@ -720,15 +732,16 @@ export function SchedulingWizardWorkspace() {
 
               {/* Data Table */}
               <div className="border border-border/40 rounded-xl overflow-hidden shadow-xs bg-background">
-                <table className="w-full text-xs text-left">
+                 <table className="w-full text-xs text-left">
                   <thead className="bg-muted/50 border-b border-border/30">
                     <tr>
-                      <th className="p-4 font-bold text-muted-foreground w-36">{t("ClassCodeCol")}</th>
+                      <th className="p-4 font-bold text-muted-foreground w-32">{t("ClassCodeCol")}</th>
                       <th className="p-4 font-bold text-muted-foreground">{t("SubjectCol")}</th>
                       <th className="p-4 font-bold text-muted-foreground">{t("TeacherCol")}</th>
-                      <th className="p-4 font-bold text-muted-foreground w-48">{t("MinPeriodsCol")}</th>
-                      <th className="p-4 font-bold text-muted-foreground text-right w-56">{t("AllowEveningCol")}</th>
-                      <th className="p-4 font-bold text-muted-foreground text-right w-56">{t("AllowWeekendCol")}</th>
+                      <th className="p-4 font-bold text-muted-foreground w-40">{t("MinPeriodsCol")}</th>
+                      <th className="p-4 font-bold text-muted-foreground w-44">{t("PreferredStartPeriodCol")}</th>
+                      <th className="p-4 font-bold text-muted-foreground text-right w-44">{t("AllowEveningCol")}</th>
+                      <th className="p-4 font-bold text-muted-foreground text-right w-44">{t("AllowWeekendCol")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/20">
@@ -744,7 +757,7 @@ export function SchedulingWizardWorkspace() {
                               <select
                                 disabled={isSaving}
                                 value={c.minSessionPeriods}
-                                onChange={e => handleUpdateClassSettings(c.id, parseInt(e.target.value), c.allowEvening, c.allowWeekend)}
+                                onChange={e => handleUpdateClassSettings(c.id, parseInt(e.target.value), c.allowEvening, c.allowWeekend, c.preferredStartPeriod)}
                                 className="h-8 w-24 rounded-lg border border-border/40 text-xs px-2 focus:ring-1 focus:ring-emerald-500 outline-none bg-background cursor-pointer"
                               >
                                 <option value={1}>{t("Period1")}</option>
@@ -752,6 +765,27 @@ export function SchedulingWizardWorkspace() {
                                 <option value={3}>{t("Period3")}</option>
                                 <option value={4}>{t("Period4")}</option>
                                 <option value={5}>{t("Period5")}</option>
+                              </select>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              <select
+                                disabled={isSaving}
+                                value={c.preferredStartPeriod ?? ""}
+                                onChange={e => handleUpdateClassSettings(
+                                  c.id,
+                                  c.minSessionPeriods,
+                                  c.allowEvening,
+                                  c.allowWeekend,
+                                  e.target.value === "" ? null : parseInt(e.target.value)
+                                )}
+                                className="h-8 w-36 rounded-lg border border-border/40 text-xs px-2 focus:ring-1 focus:ring-emerald-500 outline-none bg-background cursor-pointer"
+                              >
+                                <option value="">{t("NoPreferenceDefault")}</option>
+                                {Array.from({ length: 10 }, (_, i) => i + 1).map(p => (
+                                  <option key={p} value={p}>{t("PeriodSlot", { period: p })}</option>
+                                ))}
                               </select>
                               {isSaving && <Loader2 className="h-4 w-4 animate-spin text-emerald-500" />}
                             </div>
@@ -769,7 +803,7 @@ export function SchedulingWizardWorkspace() {
                               <Switch
                                 disabled={isSaving}
                                 checked={c.allowEvening}
-                                onCheckedChange={(checked) => handleUpdateClassSettings(c.id, c.minSessionPeriods, checked, c.allowWeekend)}
+                                onCheckedChange={(checked) => handleUpdateClassSettings(c.id, c.minSessionPeriods, checked, c.allowWeekend, c.preferredStartPeriod)}
                               />
                             </div>
                           </td>
@@ -786,7 +820,7 @@ export function SchedulingWizardWorkspace() {
                               <Switch
                                 disabled={isSaving}
                                 checked={c.allowWeekend}
-                                onCheckedChange={(checked) => handleUpdateClassSettings(c.id, c.minSessionPeriods, c.allowEvening, checked)}
+                                onCheckedChange={(checked) => handleUpdateClassSettings(c.id, c.minSessionPeriods, c.allowEvening, checked, c.preferredStartPeriod)}
                               />
                             </div>
                           </td>
@@ -795,7 +829,7 @@ export function SchedulingWizardWorkspace() {
                     })}
                     {filteredClasses.length === 0 && (
                       <tr>
-                        <td colSpan={6} className="p-12 text-center text-muted-foreground font-semibold bg-muted/5">
+                        <td colSpan={7} className="p-12 text-center text-muted-foreground font-semibold bg-muted/5">
                           {t("NoClassesFound")}
                         </td>
                       </tr>

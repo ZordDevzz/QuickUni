@@ -153,9 +153,9 @@ export function TimeGrid({
               const duration = end - start + 1;
  
               const subjectId = assignment.courseClass?.subject?.id;
-              const bgColor = subjectId ? stringToHslColor(subjectId, 70, 90) : "hsl(var(--muted))";
-              const borderColor = subjectId ? stringToHslColor(subjectId, 70, 60) : "hsl(var(--primary))";
-              const textColor = subjectId ? stringToHslColor(subjectId, 80, 20) : "hsl(var(--primary))";
+              const bgColor = subjectId ? stringToHslColor(subjectId, 65, 92) : "hsl(var(--muted))";
+              const borderColor = subjectId ? stringToHslColor(subjectId, 65, 75) : "hsl(var(--primary))";
+              const textColor = subjectId ? stringToHslColor(subjectId, 85, 15) : "hsl(var(--primary))";
 
               // Calculate width and left offset for side-by-side rendering
               const key = `${dayIndex}-${start}`;
@@ -165,7 +165,7 @@ export function TimeGrid({
 
               const widthPercent = 12.5 / groupCount;
               const leftPercent = (dayIndex + 1) * 12.5 + groupIndex * widthPercent;
- 
+  
               return (
                 <div
                   key={assignment.id}
@@ -182,7 +182,7 @@ export function TimeGrid({
                   }}
                 >
                   <div 
-                    className="h-full w-full rounded-md border-2 p-2 overflow-hidden shadow-sm transition-all cursor-pointer group hover:brightness-95"
+                    className="h-full w-full rounded-md border p-2 overflow-hidden shadow-xs transition-all cursor-pointer group hover:brightness-95 hover:shadow-sm"
                     style={{
                       backgroundColor: bgColor,
                       borderColor: borderColor,
@@ -194,34 +194,34 @@ export function TimeGrid({
                       <div className="absolute top-1 right-1">
                         <span
                           title={tSM("MakeupClass")}
-                          className="inline-flex items-center gap-0.5 text-[8px] font-bold uppercase px-1 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/20"
+                          className="inline-flex items-center gap-0.5 text-[8px] font-bold uppercase px-1 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-500/20"
                         >
                           <RefreshCw className="h-2 w-2" />
                           {tSM("Makeup")}
                         </span>
                       </div>
                     )}
-                    <div className="text-[10px] font-bold truncate uppercase pr-6" style={{ color: borderColor }}>
+                    <div className="text-[10px] font-extrabold truncate uppercase pr-6 tracking-wide opacity-90">
                         {assignment.courseClass?.code}
                     </div>
-                    <div className="text-[9px] font-medium leading-tight line-clamp-2 mt-1">
+                    <div className="text-[9.5px] font-bold leading-snug line-clamp-2 mt-0.5 opacity-95">
                         {assignment.courseClass?.subject?.name}
                     </div>
                     
                     {/* Active Period / Week range display */}
                     {assignment.courseClass?.startDate && (
-                      <div className="text-[8px] font-semibold mt-1 opacity-70 truncate" style={{ color: borderColor }}>
+                      <div className="text-[8px] font-bold mt-1 opacity-75 truncate">
                         📅 {assignment.courseClass.startDate.substring(5)} → {assignment.courseClass.endDate?.substring(5)}
                       </div>
                     )}
 
                     {type !== 'rooms' && (
-                      <div className="text-[9px] mt-0.5 truncate opacity-80">
+                      <div className="text-[9px] mt-0.5 truncate font-semibold opacity-85">
                         📍 {assignment.room?.code}
                       </div>
                     )}
                     {type !== 'teachers' && (
-                      <div className="text-[9px] mt-0.5 truncate opacity-80">
+                      <div className="text-[9px] mt-0.5 truncate font-semibold opacity-85">
                         👤 {assignment.courseClass?.employee?.profile?.fullname}
                       </div>
                     )}

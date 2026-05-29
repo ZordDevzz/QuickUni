@@ -11,6 +11,7 @@ export interface ClassRequest {
   preferredConsecutiveDays?: number;
   startDate?: string;
   endDate?: string;
+  preferredStartPeriod?: number | null;
 }
 
 export interface RoomRequest {
@@ -165,6 +166,31 @@ export function solveWeekly(request: ScheduleRequest): Assignment[] | null {
           const isEvening = start >= 11 && end <= 15;
           return isMorning || isAfternoon || isEvening;
         });
+
+        // Sort possible starts by preferred start period score
+        possibleStarts.sort((startA, startB) => {
+          const targetStart = currentClass.preferredStartPeriod;
+          
+          function getPriority(start: number) {
+            const end = start + periods - 1;
+            const isMorning = start >= 1 && end <= 5;
+            const isAfternoon = start >= 6 && end <= 10;
+            
+            // 1. Manually configured priority
+            if (targetStart !== undefined && targetStart !== null && targetStart > 0) {
+              if (start === targetStart) return 100;
+            } else {
+              // 2. Default priorities: period 2 for morning, period 6 for afternoon
+              if (isMorning && start === 2) return 90;
+              if (isAfternoon && start === 6) return 85;
+            }
+            
+            // 3. Baseline priority
+            return 10 - start;
+          }
+          
+          return getPriority(startB) - getPriority(startA); // Descending
+        });
         
         for (const start of possibleStarts) {
           const mask = createMask(start, start + periods - 1);
@@ -175,8 +201,26 @@ export function solveWeekly(request: ScheduleRequest): Assignment[] | null {
             startDate: classStart,
             endDate: classEnd
           };
+          
+          // Enforce room session-level blocking (lock entire morning / afternoon / evening)
+          const end = start + periods - 1;
+          let roomBlockedMask = mask;
+          if (start >= 1 && end <= 5) {
+            roomBlockedMask = createMask(1, 5); // Block morning
+          } else if (start >= 6 && end <= 10) {
+            roomBlockedMask = createMask(6, 10); // Block afternoon
+          } else if (start >= 11 && end <= 15) {
+            roomBlockedMask = createMask(11, 15); // Block evening
+          }
+
+          const roomSlotItem = {
+            mask: roomBlockedMask,
+            startDate: classStart,
+            endDate: classEnd
+          };
+
           teacherAssignments.get(teacherId)![day].push(slotItem);
-          roomAssignments.get(roomId)![day].push(slotItem);
+          roomAssignments.get(roomId)![day].push(roomSlotItem);
           
           assignments.push({
             courseClassId: currentClass.id,

@@ -29,10 +29,10 @@ import {
 import { autoGenerateWeeklyAction } from "@/actions/schedule-generate";
 import { publishTemplateToSchedule } from "@/actions/schedule-publish";
 import { getSemesters, toggleAvailabilityAction, getWeeklyTemplateByEntity, getAvailability } from "@/actions/scheduling-data";
-import { getActualScheduleByEntity } from "@/actions/actual-schedule";
+import { getActualScheduleByEntity, upsertActualScheduleAction, relocateClassAutomaticallyAction, approveRelocationAction } from "@/actions/actual-schedule";
 import { parseISO, format, addDays, startOfWeek } from "date-fns";
 import { toast } from "sonner";
-import { Loader2, Play, Send, Calendar, ChevronDown, Lock, Unlock } from "lucide-react";
+import { Loader2, Play, Send, Calendar, ChevronDown, Lock, Unlock, AlertTriangle, CheckCircle } from "lucide-react";
 import { useSemester } from "@/components/providers/semester-provider";
 import { createMask } from "@/lib/scheduling/bitmask";
 
@@ -71,6 +71,11 @@ export function ScheduleManager() {
   const [semesters, setSemesters] = useState<any[]>([]);
   const [isPending, startTransition] = useTransition();
   const [isEditAvailabilityMode, setIsEditAvailabilityMode] = useState(false);
+  const [conflictClass, setConflictClass] = useState<any>(null);
+  const [autoRelocating, setAutoRelocating] = useState(false);
+  const [relocationSuggestion, setRelocationSuggestion] = useState<any>(null);
+  const [showConflictDialog, setShowConflictDialog] = useState(false);
+  const [pendingBlockParams, setPendingBlockParams] = useState<any>(null);
 
   const [assignments, setAssignments] = useState<any[]>([]);
   const [availability, setAvailability] = useState<number[]>(new Array(7).fill(0));
@@ -129,7 +134,7 @@ export function ScheduleManager() {
           
           const availMasks = new Array(7).fill(0);
           availData.forEach(a => {
-            availMasks[a.dayOfWeek] = a.occupiedMask;
+            availMasks[a.dayOfWeek] |= a.occupiedMask;
           });
           setAvailability(availMasks);
         } else {
@@ -142,14 +147,14 @@ export function ScheduleManager() {
           }
           const [actuals, availData] = await Promise.all([
             getActualScheduleByEntity(selectedId, mappedType as any, currentWeek.start, currentWeek.end),
-            getAvailability(selectedId, mappedType as any)
+            getAvailability(selectedId, mappedType as any, currentWeek.start, currentWeek.end)
           ]);
           
           setAssignments(actuals || []);
           
           const availMasks = new Array(7).fill(0);
           availData.forEach(a => {
-            availMasks[a.dayOfWeek] = a.occupiedMask;
+            availMasks[a.dayOfWeek] |= a.occupiedMask;
           });
           setAvailability(availMasks);
         }
@@ -196,11 +201,39 @@ export function ScheduleManager() {
     const slotMask = createMask(period, period);
     const mappedType = activeTab === "rooms" ? "room" : activeTab === "teachers" ? "teacher" : "class";
     
+    let targetSchDate: string | null = null;
+    if (viewMode === "actual" && weeks[selectedWeekIndex]) {
+      targetSchDate = format(addDays(parseISO(weeks[selectedWeekIndex].start), dayIndex), "yyyy-MM-dd");
+    }
+
+    const isCurrentlyBlocked = (availability[dbDayOfWeek] & slotMask) !== 0;
+    if (viewMode === "actual" && !isCurrentlyBlocked && targetSchDate) {
+      const conflict = assignments.find(a => 
+        a.schDate === targetSchDate && 
+        period >= a.startPeriod && 
+        period <= a.endPeriod
+      );
+      if (conflict) {
+        setConflictClass(conflict);
+        setPendingBlockParams({
+          entityId: selectedId,
+          entityType: mappedType as any,
+          dayOfWeek: dbDayOfWeek,
+          slotMask,
+          schDate: targetSchDate
+        });
+        setRelocationSuggestion(null);
+        setShowConflictDialog(true);
+        return;
+      }
+    }
+
     const result = await toggleAvailabilityAction({
       entityId: selectedId,
       entityType: mappedType as any,
       dayOfWeek: dbDayOfWeek,
-      slotMask
+      slotMask,
+      schDate: targetSchDate
     });
     
     if (result.success) {
@@ -241,6 +274,73 @@ export function ScheduleManager() {
         toast.error(result.error || "Failed to generate schedule");
       }
     });
+  };
+
+  const handleConfirmManualRelocation = async () => {
+    if (!pendingBlockParams) return;
+    const result = await toggleAvailabilityAction(pendingBlockParams);
+    if (result.success) {
+      toast.success("Đã chặn lịch bận thành công. Vui lòng di dời lịch học thủ công.");
+      setRefreshKey(prev => prev + 1);
+    } else {
+      toast.error(result.error || "Không thể chặn lịch bận");
+    }
+    setShowConflictDialog(false);
+    setConflictClass(null);
+    setPendingBlockParams(null);
+  };
+
+  const [isPendingAuto, startTransitionAuto] = useTransition();
+  const handleRequestAutoRelocation = async () => {
+    if (!conflictClass) return;
+    setAutoRelocating(true);
+    setRelocationSuggestion(null);
+    try {
+      const result = await relocateClassAutomaticallyAction({
+        scheduleId: parseInt(conflictClass.id),
+        schDate: conflictClass.schDate
+      });
+      if (result.success && result.suggestion) {
+        setRelocationSuggestion(result.suggestion);
+      } else {
+        toast.error(result.error || "Không tìm thấy phương án di dời tự động.");
+      }
+    } catch (e) {
+      toast.error("Lỗi trong quá trình tìm vị trí thay thế tự động.");
+    } finally {
+      setAutoRelocating(false);
+    }
+  };
+
+  const handleApproveAutoRelocation = async () => {
+    if (!relocationSuggestion || !pendingBlockParams) return;
+    
+    const relocResult = await approveRelocationAction({
+      scheduleId: relocationSuggestion.scheduleId,
+      roomId: relocationSuggestion.roomId,
+      schDate: relocationSuggestion.schDate,
+      startPeriod: relocationSuggestion.startPeriod,
+      endPeriod: relocationSuggestion.endPeriod
+    });
+    
+    if (!relocResult.success) {
+      toast.error(relocResult.error || "Không thể di dời lớp học.");
+      return;
+    }
+    
+    const blockResult = await toggleAvailabilityAction(pendingBlockParams);
+    
+    if (blockResult.success) {
+      toast.success("Đã di dời lớp học và chặn lịch bận thành công.");
+      setRefreshKey(prev => prev + 1);
+    } else {
+      toast.error(blockResult.error || "Di dời thành công nhưng không thể chặn lịch bận.");
+    }
+    
+    setShowConflictDialog(false);
+    setConflictClass(null);
+    setPendingBlockParams(null);
+    setRelocationSuggestion(null);
   };
 
   const handlePublish = () => {
@@ -323,7 +423,6 @@ export function ScheduleManager() {
             size="sm"
             onClick={() => setIsEditAvailabilityMode(!isEditAvailabilityMode)}
             className="gap-2"
-            disabled={viewMode === "actual"} // Availability blocking only in template/setup
           >
             {isEditAvailabilityMode ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
             <span className="hidden sm:inline-block">
@@ -451,6 +550,114 @@ export function ScheduleManager() {
         onSuccess={handleSuccess}
         viewMode={viewMode}
       />
+
+      <AlertDialog open={showConflictDialog} onOpenChange={setShowConflictDialog}>
+        <AlertDialogContent className="max-w-md border border-white/20 bg-background/85 backdrop-blur-xl shadow-2xl rounded-2xl p-6">
+          <AlertDialogHeader className="space-y-3">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/10 text-amber-500 animate-pulse">
+              <AlertTriangle className="h-6 w-6" />
+            </div>
+            <AlertDialogTitle className="text-center text-xl font-bold tracking-tight text-foreground">
+              Phát hiện xung đột lịch học
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-sm text-muted-foreground">
+              Slot bạn đang chọn chặn bận đã có lớp học được xếp lịch. Vui lòng chọn phương án giải quyết xung đột dưới đây:
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          {conflictClass && (
+            <div className="my-4 rounded-xl border border-border bg-card/50 p-4 space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="font-semibold text-muted-foreground">Lớp học phần:</span>
+                <span className="font-bold text-foreground">{conflictClass.courseClass?.code || conflictClass.courseClassId}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-muted-foreground">Môn học:</span>
+                <span className="font-medium text-foreground text-right max-w-[200px] truncate">
+                  {conflictClass.courseClass?.subject?.name || "Không rõ"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-muted-foreground">Phòng hiện tại:</span>
+                <span className="font-semibold text-amber-600 dark:text-amber-400">{conflictClass.room?.code || "Chưa xếp"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-muted-foreground">Thời gian:</span>
+                <span className="font-semibold text-foreground">
+                  Tiết {conflictClass.startPeriod} - {conflictClass.endPeriod} ({conflictClass.schDate})
+                </span>
+              </div>
+            </div>
+          )}
+
+          {relocationSuggestion ? (
+            <div className="my-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="flex items-center gap-2 text-emerald-500 font-semibold text-sm">
+                <CheckCircle className="h-4 w-4" />
+                <span>Đã tìm thấy vị trí thay thế khả dụng!</span>
+              </div>
+              <div className="text-xs space-y-1.5 text-muted-foreground">
+                <div className="flex justify-between">
+                  <span>Phòng học mới:</span>
+                  <span className="font-bold text-foreground">{relocationSuggestion.roomCode}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Thời gian đề xuất:</span>
+                  <span className="font-bold text-foreground">
+                    Tiết {relocationSuggestion.startPeriod} - {relocationSuggestion.endPeriod} ({relocationSuggestion.schDate})
+                  </span>
+                </div>
+              </div>
+              <Button
+                onClick={handleApproveAutoRelocation}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg py-2 flex items-center justify-center gap-2 text-sm font-semibold transition-all shadow-md shadow-emerald-600/25"
+              >
+                <CheckCircle className="h-4 w-4" />
+                Phê duyệt di dời tự động
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2 my-4">
+              <Button
+                onClick={handleRequestAutoRelocation}
+                disabled={autoRelocating}
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg py-2 flex items-center justify-center gap-2 text-sm font-semibold transition-all shadow-lg"
+              >
+                {autoRelocating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Đang tìm vị trí thay thế...
+                  </>
+                ) : (
+                  "Tự động tìm vị trí thay thế"
+                )}
+              </Button>
+            </div>
+          )}
+
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowConflictDialog(false);
+                setConflictClass(null);
+                setPendingBlockParams(null);
+                setRelocationSuggestion(null);
+              }}
+              className="w-full sm:w-auto"
+            >
+              Hủy
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmManualRelocation}
+              className="w-full sm:w-auto bg-amber-600 hover:bg-amber-700"
+            >
+              Chặn & Di dời thủ công
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

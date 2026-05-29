@@ -21,7 +21,7 @@ describe("excel service", () => {
     const data = XLSX.utils.sheet_to_json(templateSheet, { header: 1 }) as string[][];
     const headers = data[0];
 
-    const expectedFixedHeaders = ["Full Name", "Gender", "DOB", "National ID", "Address", "Ethnic", "Religious", "Entity Code"];
+    const expectedFixedHeaders = ["Họ và tên", "Giới tính", "Ngày sinh", "Số CCCD/Hộ chiếu", "Địa chỉ", "Dân tộc", "Tôn giáo", "Mã định danh"];
     const expectedDynamicHeaders = ["Phone Number", "Major"];
     const expectedAllHeaders = [...expectedFixedHeaders, ...expectedDynamicHeaders];
 
@@ -35,7 +35,7 @@ describe("excel service", () => {
     ];
 
     // Create a mock excel buffer with valid and invalid data
-    const headers = ["Full Name", "Gender", "DOB", "National ID", "Address", "Ethnic", "Religious", "Entity Code", "Phone Number", "Major"];
+    const headers = ["Họ và tên", "Giới tính", "Ngày sinh", "Số CCCD/Hộ chiếu", "Địa chỉ", "Dân tộc", "Tôn giáo", "Mã định danh", "Phone Number", "Major"];
     const validRow = ["John Doe", "male", "2000-01-01", "123456789", "123 Street", "Kinh", "None", "STU001", "0987654321", "CS"];
     const invalidRow = ["Jane Doe", "female", "2001-01-01", undefined, "456 Ave", "Kinh", "None", "STU002", undefined, "IT"]; // Missing National ID and Phone Number
 
@@ -51,11 +51,11 @@ describe("excel service", () => {
     // Valid row
     expect(result[0].isValid).toBe(true);
     expect(result[0].errors).toHaveLength(0);
-    expect(result[0].data["Full Name"]).toBe("John Doe");
+    expect(result[0].data["Họ và tên"]).toBe("John Doe");
 
     // Invalid row
     expect(result[1].isValid).toBe(false);
-    expect(result[1].errors).toContain("Missing required field: National ID");
-    expect(result[1].errors).toContain("Missing required field: Phone Number");
+    expect(result[1].errors).toContain("Thiếu trường thông tin bắt buộc: Số CCCD/Hộ chiếu");
+    expect(result[1].errors).toContain("Thiếu trường thông tin bắt buộc: Phone Number");
   });
 });

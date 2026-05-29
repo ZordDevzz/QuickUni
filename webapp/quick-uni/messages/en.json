@@ -759,7 +759,12 @@
     "Type": "Type: {type}",
     "Review": "Review",
     "NoPendingRequests": "No requests awaiting review",
-    "CleanDashboard": "All student and academic records are perfectly clean!"
+    "CleanDashboard": "All student and academic records are perfectly clean!",
+    "RequestTypes": {
+      "student_absence": "Student Absence",
+      "class_cancellation": "Class Cancellation",
+      "teacher_schedule_change": "Schedule Change"
+    }
   },
   "Common": {
     "ToggleMenu": "Toggle Menu",
@@ -869,8 +874,11 @@
     "SubjectCol": "Subject",
     "TeacherCol": "Instructor",
     "MinPeriodsCol": "Min periods / session",
+    "PreferredStartPeriodCol": "Preferred Start Period",
     "AllowEveningCol": "Allow evening sessions?",
     "AllowWeekendCol": "Allow weekend sessions?",
+    "NoPreferenceDefault": "No preference (2 / 6)",
+    "PeriodSlot": "Period {period}",
     "Period1": "1 period",
     "Period2": "2 periods",
     "Period3": "3 periods",

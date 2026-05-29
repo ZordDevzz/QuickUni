@@ -48,6 +48,7 @@ export const courseClass = courseSchema.table(
     minSessionPeriods: smallint("min_session_periods").default(4).notNull(),
     allowEvening: boolean("allow_evening").default(false).notNull(),
     allowWeekend: boolean("allow_weekend").default(false).notNull(),
+    preferredStartPeriod: smallint("preferred_start_period"),
     startDate: date("start_date"),
     endDate: date("end_date"),
     createAt: timestamp("create_at", {

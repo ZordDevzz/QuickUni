@@ -9,7 +9,7 @@ vi.mock('@/db', () => ({
         findMany: vi.fn(),
       },
       employee: {
-        findMany: vi.fn(),
+        findMany: vi.fn().mockResolvedValue([]),
       },
       courseClass: {
         findMany: vi.fn(),

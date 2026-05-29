@@ -6,23 +6,23 @@ export const seedAcademic = async () => {
   console.log("📚 Seeding academic data (realistic semesters, subjects, grade types)...");
   
   // 1. Semesters
-  const [currentSemester] = await db.insert(semester).values({
+  await db.insert(semester).values({
     name: "Học kỳ 1 năm học 2025-2026",
     code: "2025.1",
     academicYear: 2025,
     startDate: "2025-08-15",
     endDate: "2026-01-15",
-    isCurrent: true,
-  }).returning();
+    isCurrent: false,
+  }).onConflictDoNothing();
 
-  await db.insert(semester).values({
+  const [currentSemester] = await db.insert(semester).values({
     name: "Học kỳ 2 năm học 2025-2026",
     code: "2025.2",
     academicYear: 2025,
     startDate: "2026-02-15",
-    endDate: "2026-07-15",
-    isCurrent: false,
-  }).onConflictDoNothing();
+    endDate: "2026-08-31",
+    isCurrent: true,
+  }).returning();
 
   // 2. Realistic Subjects
   const subjectsData = [

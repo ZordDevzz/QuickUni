@@ -170,30 +170,42 @@ export async function executeOnboardingSession(sessionId: string): Promise<Actio
       try {
         const rowData = row.data;
         
-        // Handle Gender enum mapping
+        // Handle Gender enum mapping supporting both VN and EN
         let genderValue: "male" | "female" | "others" = "others";
-        const rawGender = rowData["Gender"]?.toString().toLowerCase();
-        if (rawGender === "male") genderValue = "male";
-        else if (rawGender === "female") genderValue = "female";
+        const rawGender = (rowData["Giới tính"] || rowData["Gender"])?.toString().toLowerCase();
+        if (rawGender === "male" || rawGender === "nam") genderValue = "male";
+        else if (rawGender === "female" || rawGender === "nữ") genderValue = "female";
 
         // Handle DOB format
-        let dobValue = rowData["DOB"];
+        let dobValue = rowData["Ngày sinh"] || rowData["DOB"];
         if (dobValue instanceof Date) {
           dobValue = dobValue.toISOString().split('T')[0];
         } else if (typeof dobValue === "string") {
-          dobValue = new Date(dobValue).toISOString().split('T')[0];
+          const cleanDob = dobValue.trim();
+          // Match DD-MM-YYYY or DD/MM/YYYY (allowing 1 or 2 digit day/month, and 4 digit year)
+          const dmyMatch = cleanDob.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+          if (dmyMatch) {
+            const [_, d, m, y] = dmyMatch;
+            dobValue = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+          } else {
+            try {
+              dobValue = new Date(cleanDob).toISOString().split('T')[0];
+            } catch (err) {
+              throw new Error(`Định dạng ngày sinh không hợp lệ: "${cleanDob}". Vui lòng dùng DD-MM-YYYY hoặc YYYY-MM-DD.`);
+            }
+          }
         }
 
         // 1. Create Profile
         const profile = await createProfileWorkflow({
           id: randomUUID(),
-          fullname: rowData["Full Name"] as string,
+          fullname: (rowData["Họ và tên"] || rowData["Full Name"]) as string,
           gender: genderValue,
           dob: dobValue as string,
-          nationalId: rowData["National ID"]?.toString() || "",
-          address: rowData["Address"] as string,
-          ethnic: rowData["Ethnic"] as string,
-          religious: rowData["Religious"] as string,
+          nationalId: (rowData["Số CCCD/Hộ chiếu"] || rowData["National ID"])?.toString() || "",
+          address: (rowData["Địa chỉ"] || rowData["Address"]) as string,
+          ethnic: (rowData["Dân tộc"] || rowData["Ethnic"]) as string,
+          religious: (rowData["Tôn giáo"] || rowData["Religious"]) as string,
           schemaId: session.schemaId,
           dynamicData: rowData,
           sessionId: session.id,
@@ -201,8 +213,9 @@ export async function executeOnboardingSession(sessionId: string): Promise<Actio
 
         // 2. Link Profile to Entity
         let classId = null;
-        if (session.entityType === "student" && rowData["Class Code"]) {
-          const cCode = rowData["Class Code"].toString().trim();
+        const rawClassCode = rowData["Mã lớp hành chính"] || rowData["Class Code"];
+        if (session.entityType === "student" && rawClassCode) {
+          const cCode = rawClassCode.toString().trim();
           const foundClass = await db.query.mainClass.findFirst({
             where: eq(mainClass.code, cCode),
           });
@@ -213,14 +226,16 @@ export async function executeOnboardingSession(sessionId: string): Promise<Actio
           }
         }
 
+        const rawEntityCode = rowData["Mã định danh"] || rowData["Entity Code"];
         await linkProfileToEntity(profile.id, session.entityType as "student" | "employee", {
-          code: rowData["Entity Code"]?.toString() || "",
+          code: rawEntityCode?.toString() || "",
           classId,
         });
 
         // 3. Issue Account
-        const username = rowData["Entity Code"]?.toString() || "";
-        const password = rowData["National ID"]?.toString() || rowData["Entity Code"]?.toString() || "";
+        const username = rawEntityCode?.toString() || "";
+        const rawNationalId = rowData["Số CCCD/Hộ chiếu"] || rowData["National ID"];
+        const password = rawNationalId?.toString() || rawEntityCode?.toString() || "";
         await issueAccountWorkflow(
           {
             username,

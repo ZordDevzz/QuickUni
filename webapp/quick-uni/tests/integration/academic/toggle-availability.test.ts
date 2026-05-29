@@ -40,10 +40,10 @@ describe('toggleAvailabilityAction', () => {
       slotMask: 0b1,
     };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db.query.availability.findFirst as any).mockResolvedValue(null);
     const mockInsertValues = vi.fn().mockResolvedValue({ success: true });
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db.insert as any).mockReturnValue({ values: mockInsertValues });
 
     const result = await toggleAvailabilityAction(params);
@@ -55,6 +55,7 @@ describe('toggleAvailabilityAction', () => {
       entityType: params.entityType,
       dayOfWeek: params.dayOfWeek,
       occupiedMask: params.slotMask,
+      schDate: null,
     });
     expect(result.success).toBe(true);
   });
@@ -72,12 +73,12 @@ describe('toggleAvailabilityAction', () => {
       occupiedMask: 0b11,
     };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db.query.availability.findFirst as any).mockResolvedValue(existingAvailability);
     
     const mockWhere = vi.fn().mockResolvedValue({ success: true });
     const mockSet = vi.fn(() => ({ where: mockWhere }));
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db.update as any).mockReturnValue({ set: mockSet });
 
     const result = await toggleAvailabilityAction(params);

@@ -176,6 +176,7 @@ export const availability = scheduleSchema.table(
     entityType: availabilityEntityType("entity_type").notNull(),
     dayOfWeek: smallint("day_of_week").notNull(), // 0-6
     occupiedMask: integer("occupied_mask").default(0).notNull(),
+    schDate: date("sch_date"),
   },
   (table) => [index("availability_entity_idx").on(table.entityId, table.entityType)],
 );

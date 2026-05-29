@@ -83,7 +83,9 @@ export const seedScheduling = async (
       type: c.type,
       cap: isLab ? 30 : 40,
       status: "opened",
-      currentSlot: 0 // Will update after enrollment
+      currentSlot: 0, // Will update after enrollment
+      startDate: "2026-02-15",
+      endDate: "2026-08-31"
     });
 
     createdClasses.push({
@@ -130,93 +132,5 @@ export const seedScheduling = async (
     await db.update(courseClass).set({ currentSlot: count }).where(eq(courseClass.id, cc.id));
   }
 
-  // 4. Seed Requests (student leave, teacher rescheduling, student withdraw)
-  console.log("📬 Seeding requests for testing...");
-  
-  const cnttClass = createdClasses.find(cc => cc.code === "IT301-L01")!;
-  const csdlClass = createdClasses.find(cc => cc.code === "IT302-L01")!;
-
-  const teacher1 = teachers[0]; // Nguyễn Văn An (FITI teacher)
-  const teacher2 = teachers[1]; // Trần Thị Bình (FITI teacher)
-  const teacher1AccountId = getAccountIdByProfileId(teacher1.profileId);
-  const teacher2AccountId = getAccountIdByProfileId(teacher2.profileId);
-
-  // Request 1: Pending Student Absence Request
-  const student1 = students[0];
-  const stud1AccountId = getAccountIdByProfileId(student1.profileId);
-  if (stud1AccountId && teacher1AccountId) {
-    await db.insert(request).values({
-      id: randomUUID(),
-      senderId: stud1AccountId,
-      type: "student_absence",
-      status: "pending",
-      targetId: teacher1AccountId, // Leave requests target the class teacher
-      data: {
-        classId: cnttClass.id,
-        reason: "Em bị sốt xuất huyết cấp tính phải điều trị tại bệnh viện, xin phép nghỉ học buổi thứ hai.",
-        date: "2025-08-18",
-        periods: "1-3"
-      }
-    });
-  }
-
-  // Request 2: Approved Student Absence Request
-  const student2 = students[1];
-  const stud2AccountId = getAccountIdByProfileId(student2.profileId);
-  if (stud2AccountId && teacher2AccountId) {
-    await db.insert(request).values({
-      id: randomUUID(),
-      senderId: stud2AccountId,
-      type: "student_absence",
-      status: "approved",
-      targetId: teacher2AccountId, // Leave requests target the class teacher
-      data: {
-        classId: csdlClass.id,
-        reason: "Em xin phép vắng mặt để đại diện trường tham gia vòng chung kết cuộc thi lập trình Olympic Tin học.",
-        date: "2025-08-19",
-        periods: "1-3"
-      },
-      comment: "Đã phê duyệt. Sinh viên chú ý ôn bài đầy đủ.",
-      processedAt: new Date().toISOString(),
-      processedBy: teacher2AccountId
-    });
-  }
-
-  // Request 3: Pending Teacher Rescheduling Request (targets null -> academic office PĐT)
-  if (teacher1AccountId) {
-    await db.insert(request).values({
-      id: randomUUID(),
-      senderId: teacher1AccountId,
-      type: "teacher_schedule_change",
-      status: "pending",
-      targetId: null, // General requests target academic office (null)
-      data: {
-        classId: cnttClass.id,
-        reason: "Giảng viên bận tham gia hội thảo khoa học cấp Quốc gia tổ chức tại Đà Nẵng.",
-        newDate: "2025-08-29",
-        newStartPeriod: "7",
-        newEndPeriod: "9",
-        newRoomId: rooms[0].id.toString() // proposed room
-      }
-    });
-  }
-
-  // Request 4: Pending Student Withdraw Class Request (targets null -> academic office PĐT)
-  const student3 = students[2];
-  const stud3AccountId = getAccountIdByProfileId(student3.profileId);
-  if (stud3AccountId) {
-    await db.insert(request).values({
-      id: randomUUID(),
-      senderId: stud3AccountId,
-      type: "class_cancellation",
-      status: "pending",
-      targetId: null, // targets PĐT
-      data: {
-        classId: csdlClass.id,
-        reason: "Em muốn xin hủy học phần này vì có lịch cá nhân bị trùng khớp không thể tham gia lớp."
-      }
-    });
-  }
-
-  console.log("✅ Enrollments and requests seeded.");
+  console.log("✅ Enrollments seeded.");
 };

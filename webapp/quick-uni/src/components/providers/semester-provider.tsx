@@ -19,14 +19,16 @@ export function SemesterProvider({
   const [selectedSemesterId, setSelectedSemesterIdState] = useState<number | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Initialize from localStorage or default
+  // Initialize from defaultSemesterId to ensure active semester is selected on login/load
   useEffect(() => {
-    const savedId = localStorage.getItem("selectedSemesterId");
-    if (savedId) {
-// eslint-disable-next-line react-hooks/set-state-in-effect
-      setSelectedSemesterIdState(parseInt(savedId));
-    } else if (defaultSemesterId) {
+    if (defaultSemesterId) {
       setSelectedSemesterIdState(defaultSemesterId);
+      localStorage.setItem("selectedSemesterId", defaultSemesterId.toString());
+    } else {
+      const savedId = localStorage.getItem("selectedSemesterId");
+      if (savedId) {
+        setSelectedSemesterIdState(parseInt(savedId));
+      }
     }
     setIsInitialized(true);
   }, [defaultSemesterId]);

@@ -7,8 +7,10 @@ import { Dependencies } from "@/components/features/academic/CourseClassForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { School, GraduationCap, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSemester } from "@/components/providers/semester-provider";
 
 export function CourseClassTable({ data, dependencies }: { data: any[], dependencies: Dependencies }) {
+  const { selectedSemesterId } = useSemester();
   const columns = useMemo(() => getColumns(dependencies), [dependencies]);
 
   const [selectedDeptId, setSelectedDeptId] = useState<string>("ALL");
@@ -63,6 +65,9 @@ export function CourseClassTable({ data, dependencies }: { data: any[], dependen
   // Filter classes dynamically
   const filteredClasses = useMemo(() => {
     return data.filter(c => {
+      // Filter by semester
+      if (selectedSemesterId && c.semesterId !== selectedSemesterId) return false;
+
       const subjectCode = c.subject?.code || "";
       const meta = getSubjectMetadata(subjectCode);
 
@@ -78,7 +83,7 @@ export function CourseClassTable({ data, dependencies }: { data: any[], dependen
 
       return true;
     });
-  }, [data, selectedDeptId, selectedMajorId, selectedDept, selectedMajor]);
+  }, [data, selectedSemesterId, selectedDeptId, selectedMajorId, selectedDept, selectedMajor]);
 
   const handleResetFilters = () => {
     setSelectedDeptId("ALL");

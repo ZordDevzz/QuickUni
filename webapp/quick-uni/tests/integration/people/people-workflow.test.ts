@@ -61,7 +61,7 @@ describe('People Workflow Integration', () => {
     await getPeople('student');
     expect(db.query.student.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        with: { profile: true },
+        with: expect.objectContaining({ profile: true }),
       })
     );
   });

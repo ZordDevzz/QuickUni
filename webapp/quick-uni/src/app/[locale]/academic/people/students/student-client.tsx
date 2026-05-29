@@ -36,7 +36,7 @@ export function StudentClient({ data, defaultSchemaId }: { data: unknown[]; defa
               <Plus className="mr-2 h-4 w-4" /> {commonT("Add") || "Add Student"}
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t("AddProfile") || "Add New Student"}</DialogTitle>
             </DialogHeader>

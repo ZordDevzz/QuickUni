@@ -343,12 +343,12 @@ export function PersonForm({ type, schemaId, initialData, onSuccess }: PersonFor
         {type === "student" && (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold border-b pb-2">{tClass("ClassAndDeptInfo")}</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}
                 name="departmentId"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>{tClass("Department")}</FormLabel>
                     <Select 
                       onValueChange={(val) => {
@@ -362,7 +362,7 @@ export function PersonForm({ type, schemaId, initialData, onSuccess }: PersonFor
                       value={field.value || ""}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder={tClass("SelectDepartment")} />
                         </SelectTrigger>
                       </FormControl>
@@ -383,7 +383,7 @@ export function PersonForm({ type, schemaId, initialData, onSuccess }: PersonFor
                 control={form.control}
                 name="majorId"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>{tClass("Major")}</FormLabel>
                     <Select 
                       onValueChange={(val) => {
@@ -396,7 +396,7 @@ export function PersonForm({ type, schemaId, initialData, onSuccess }: PersonFor
                       disabled={!selectedDepartmentId}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder={selectedDepartmentId ? tClass("SelectMajor") : tClass("SelectMajorFirst")} />
                         </SelectTrigger>
                       </FormControl>
@@ -417,7 +417,7 @@ export function PersonForm({ type, schemaId, initialData, onSuccess }: PersonFor
                 control={form.control}
                 name="classId"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>{tClass("Class")}</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
@@ -425,7 +425,7 @@ export function PersonForm({ type, schemaId, initialData, onSuccess }: PersonFor
                       disabled={!selectedMajorId}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder={selectedMajorId ? tClass("SelectClass") : tClass("SelectClassFirst")} />
                         </SelectTrigger>
                       </FormControl>

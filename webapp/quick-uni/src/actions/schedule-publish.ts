@@ -86,6 +86,7 @@ export async function publishTemplateToSchedule(semesterId: number) {
             endPeriod: t.endPeriod,
             mPerPeriod: 45,
             statusId: 1, // Bình thường
+            conductorId: t.courseClass?.teacherId,
           });
         }
       }

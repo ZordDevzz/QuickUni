@@ -1,11 +1,14 @@
 "use server";
 
 import { db } from "@/db";
-import { schedule, weeklyTemplate } from "@/db/schemas/schedule";
+import { schedule, weeklyTemplate, room, availability } from "@/db/schemas/schedule";
 import { courseClass } from "@/db/schemas/course";
-import { and, eq, between, isNull } from "drizzle-orm";
+import { subject } from "@/db/schemas/academic";
+import { and, eq, ne, between, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { validateManualEdit } from "@/services/schedule-validation";
+import { createMask } from "@/lib/scheduling/bitmask";
+import { findEmptySlots } from "@/lib/scheduling/slot-finder";
 
 export async function getActualScheduleByEntity(
   entityId: string,
@@ -155,3 +158,169 @@ export async function deleteActualScheduleAction(id: string) {
     return { success: false, error: "Failed to delete actual schedule session" };
   }
 }
+
+export async function relocateClassAutomaticallyAction(params: {
+  scheduleId: number; // The ID of the conflicting schedule entry
+  schDate: string;   // YYYY-MM-DD
+}) {
+  try {
+    // 1. Fetch conflicting schedule entry
+    const entry = await db.query.schedule.findFirst({
+      where: eq(schedule.id, params.scheduleId),
+      with: {
+        courseClass: true
+      }
+    });
+
+    if (!entry) {
+      return { success: false, error: "Lịch học xung đột không tồn tại." };
+    }
+
+    const duration = (entry.endPeriod ?? entry.period) - entry.period + 1;
+    const teacherId = entry.conductorId;
+    if (!teacherId) {
+      return { success: false, error: "Không tìm thấy giảng viên cho lớp học này." };
+    }
+
+    // 2. Fetch all rooms
+    const allRooms = await db.query.room.findMany({
+      where: eq(room.isAvailable, true),
+      with: { building: true }
+    });
+
+    // 3. Fetch all active schedules on this specific date (excluding the current one)
+    const daySchedules = await db.query.schedule.findMany({
+      where: and(
+        eq(schedule.schDate, params.schDate),
+        isNull(schedule.deletedAt),
+        ne(schedule.id, params.scheduleId)
+      )
+    });
+
+    // 4. Fetch availability (busy blocks) for the teacher on this day of the week
+    const dateObj = new Date(params.schDate);
+    const teacherAvail = await db.query.availability.findMany({
+      where: and(
+        eq(availability.entityId, teacherId),
+        eq(availability.entityType, "teacher")
+      )
+    });
+
+    // Compute teacher's busy mask on this day
+    let teacherBusyMask = 0;
+    teacherAvail.forEach(a => {
+      const dbDayOfWeek = dateObj.getDay(); // 0 (Sun) - 6 (Sat)
+      if (a.dayOfWeek === dbDayOfWeek || a.schDate === params.schDate) {
+        teacherBusyMask |= a.occupiedMask;
+      }
+    });
+
+    // Add occupied periods from other schedules of the teacher on this date
+    daySchedules
+      .filter(s => s.conductorId === teacherId)
+      .forEach(s => {
+        const start = s.period;
+        const end = s.endPeriod ?? s.period;
+        teacherBusyMask |= createMask(start, end);
+      });
+
+    // 5. Search for a valid slot: prioritize morning (1-5), then afternoon (6-10)
+    const candidateStarts = findEmptySlots(teacherBusyMask, duration);
+
+    for (const start of candidateStarts) {
+      const end = start + duration - 1;
+      if (end > 10) continue;
+
+      const blockMask = createMask(start, end);
+
+      // Now find a room that is free during this block
+      for (const r of allRooms) {
+        let roomBusyMask = 0;
+
+        // Add occupied periods from other schedules in this room on this date
+        daySchedules
+          .filter(s => s.roomId === r.id)
+          .forEach(s => {
+            const sStart = s.period;
+            const sEnd = s.endPeriod ?? s.period;
+            roomBusyMask |= createMask(sStart, sEnd);
+          });
+
+        // Add availability blocks of the room on this date
+        const roomAvail = await db.query.availability.findMany({
+          where: and(
+            eq(availability.entityId, r.id.toString()),
+            eq(availability.entityType, "room")
+          )
+        });
+        roomAvail.forEach(a => {
+          const dbDayOfWeek = dateObj.getDay();
+          if (a.dayOfWeek === dbDayOfWeek || a.schDate === params.schDate) {
+            roomBusyMask |= a.occupiedMask;
+          }
+        });
+
+        if ((roomBusyMask & blockMask) === 0) {
+          // Success! Found a free room and free slot
+          let subjName = "";
+          if (entry.courseClass?.subjectId) {
+            const foundSubj = await db.query.subject.findFirst({ where: eq(subject.id, entry.courseClass.subjectId) });
+            if (foundSubj) subjName = foundSubj.name || "";
+          }
+          return {
+            success: true,
+            suggestion: {
+              scheduleId: params.scheduleId,
+              classCode: entry.courseClass?.code,
+              subjectName: subjName,
+              roomId: r.id,
+              roomCode: r.code,
+              schDate: params.schDate,
+              startPeriod: start,
+              endPeriod: end
+            }
+          };
+        }
+      }
+    }
+
+    return { success: false, error: "Không tìm thấy phương án thay thế khả dụng nào khác trong ngày này." };
+  } catch (error) {
+    console.error("Error in relocateClassAutomaticallyAction:", error);
+    return { success: false, error: "Lỗi trong quá trình tìm vị trí thay thế tự động." };
+  }
+}
+
+export async function approveRelocationAction(params: {
+  scheduleId: number;
+  roomId: number;
+  schDate: string;
+  startPeriod: number;
+  endPeriod: number;
+}) {
+  try {
+    const entry = await db.query.schedule.findFirst({
+      where: eq(schedule.id, params.scheduleId)
+    });
+    if (!entry) {
+      return { success: false, error: "Lịch học không tồn tại." };
+    }
+
+    await db.update(schedule)
+      .set({
+        roomId: params.roomId,
+        schDate: params.schDate,
+        period: params.startPeriod,
+        endPeriod: params.endPeriod,
+        updateAt: new Date().toISOString()
+      })
+      .where(eq(schedule.id, params.scheduleId));
+
+    revalidatePath("/admin/schedule");
+    return { success: true };
+  } catch (error) {
+    console.error("Error in approveRelocationAction:", error);
+    return { success: false, error: "Không thể di dời lịch học." };
+  }
+}
+

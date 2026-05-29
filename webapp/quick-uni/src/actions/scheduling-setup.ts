@@ -37,10 +37,27 @@ export async function updateRoomAvailabilityAction(id: number, isAvailable: bool
 
 export async function getTeachersSetup() {
   try {
-    const teachers = await db.query.employee.findMany({
+    const rawTeachers = await db.query.employee.findMany({
       with: {
-        profile: true
+        profile: {
+          with: {
+            account: {
+              with: {
+                userSystemRoles: true
+              }
+            }
+          }
+        }
       }
+    });
+
+    const teachers = rawTeachers.filter((emp) => {
+      const roles = emp.profile?.account?.userSystemRoles || [];
+      const hasAdminOrAcademicOffice = roles.some((r) => {
+        const roleId = Number(r.systemRole);
+        return roleId === 1 || roleId === 4;
+      });
+      return !hasAdminOrAcademicOffice;
     });
 
     const teacherAvailabilities = await db.query.availability.findMany({
@@ -134,14 +151,16 @@ export async function updateCourseClassSetupAction(
   id: string,
   minSessionPeriods: number,
   allowEvening: boolean,
-  allowWeekend?: boolean
+  allowWeekend?: boolean,
+  preferredStartPeriod?: number | null
 ) {
   try {
     await db.update(courseClass)
       .set({ 
         minSessionPeriods, 
         allowEvening, 
-        allowWeekend: allowWeekend ?? false 
+        allowWeekend: allowWeekend ?? false,
+        preferredStartPeriod: preferredStartPeriod ?? null
       })
       .where(eq(courseClass.id, id));
     revalidatePath("/admin/schedule");

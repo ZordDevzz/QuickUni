@@ -9,9 +9,9 @@ export async function generateOnboardingTemplate(
   fields: { label: string, name: string, isRequired: boolean }[],
   entityType?: "student" | "employee"
 ) {
-  const fixedHeaders = ["Full Name", "Gender", "DOB", "National ID", "Address", "Ethnic", "Religious", "Entity Code"];
+  const fixedHeaders = ["Họ và tên", "Giới tính", "Ngày sinh", "Số CCCD/Hộ chiếu", "Địa chỉ", "Dân tộc", "Tôn giáo", "Mã định danh"];
   if (entityType === "student") {
-    fixedHeaders.push("Class Code");
+    fixedHeaders.push("Mã lớp hành chính");
   }
   const dynamicHeaders = fields.map(f => f.label);
   const allHeaders = [...fixedHeaders, ...dynamicHeaders];
@@ -23,24 +23,24 @@ export async function generateOnboardingTemplate(
 
   // 2. Create Instructions Sheet
   const instructions = [
-    ["Column", "Description", "Format / Options", "Required"],
-    ["Full Name", "User's full name", "Text", "Yes"],
-    ["Gender", "User's gender", "male / female / other", "Yes"],
-    ["DOB", "Date of Birth", "YYYY-MM-DD (e.g., 2000-01-01)", "Yes"],
-    ["National ID", "ID number or Passport", "Numeric string", "Yes"],
-    ["Address", "Current living address", "Text", "No"],
-    ["Ethnic", "Ethnic group", "Text", "No"],
-    ["Religious", "Religious affiliation", "Text", "No"],
-    ["Entity Code", "Student ID or Employee Code", "Text", "Yes"],
+    ["Cột", "Mô tả", "Định dạng / Lựa chọn", "Bắt buộc"],
+    ["Họ và tên", "Họ và tên đầy đủ của người dùng", "Văn bản", "Có"],
+    ["Giới tính", "Giới tính của người dùng", "nam / nữ / khác (hoặc male / female / other)", "Có"],
+    ["Ngày sinh", "Ngày sinh", "DD-MM-YYYY hoặc YYYY-MM-DD (Ví dụ: 01-01-2000)", "Có"],
+    ["Số CCCD/Hộ chiếu", "Số căn cước công dân hoặc hộ chiếu", "Chuỗi số", "Có"],
+    ["Địa chỉ", "Địa chỉ hiện tại", "Văn bản", "Không"],
+    ["Dân tộc", "Dân tộc", "Văn bản", "Không"],
+    ["Tôn giáo", "Tôn giáo", "Văn bản", "Không"],
+    ["Mã định danh", "Mã sinh viên hoặc mã nhân viên", "Văn bản", "Có"],
   ];
 
   if (entityType === "student") {
-    instructions.push(["Class Code", "Administrative Homeroom Class", "Text (e.g., 21CNTT1, 21ATTT1)", "No"]);
+    instructions.push(["Mã lớp hành chính", "Lớp sinh hoạt hành chính của sinh viên", "Văn bản (Ví dụ: 21CNTT1, 21ATTT1)", "Không"]);
   }
 
   // Add dynamic fields to instructions
   fields.forEach(f => {
-    instructions.push([f.label, "Custom profile field", "Text", f.isRequired ? "Yes" : "No"]);
+    instructions.push([f.label, "Trường thông tin tùy chỉnh", "Văn bản", f.isRequired ? "Có" : "Không"]);
   });
 
   const instrSheet = XLSX.utils.aoa_to_sheet(instructions);
@@ -52,10 +52,10 @@ export async function generateOnboardingTemplate(
   
   // Also set widths for Instructions sheet
   instrSheet["!cols"] = [
-    { wch: 20 }, // Column
-    { wch: 30 }, // Description
-    { wch: 30 }, // Format
-    { wch: 10 }  // Required
+    { wch: 25 }, // Column
+    { wch: 35 }, // Description
+    { wch: 35 }, // Format
+    { wch: 12 }  // Required
   ];
 
   // 4. Write to Buffer
@@ -74,15 +74,19 @@ export async function parseAndValidateOnboardingExcel(buffer: Buffer, fields: { 
   return rawData.map((row) => {
     const errors: string[] = [];
     
-    // Fixed validations
-    if (!row["Full Name"]) errors.push("Missing required field: Full Name");
-    if (!row["National ID"]) errors.push("Missing required field: National ID");
-    if (!row["Entity Code"]) errors.push("Missing required field: Entity Code");
+    // Fixed validations supporting both VN and EN headers
+    const hasFullName = row["Họ và tên"] || row["Full Name"];
+    const hasNationalId = row["Số CCCD/Hộ chiếu"] || row["National ID"];
+    const hasEntityCode = row["Mã định danh"] || row["Entity Code"];
+
+    if (!hasFullName) errors.push("Thiếu trường thông tin bắt buộc: Họ và tên");
+    if (!hasNationalId) errors.push("Thiếu trường thông tin bắt buộc: Số CCCD/Hộ chiếu");
+    if (!hasEntityCode) errors.push("Thiếu trường thông tin bắt buộc: Mã định danh");
     
     // Dynamic validations
     fields.forEach(f => {
       if (f.isRequired && !row[f.label]) {
-        errors.push(`Missing required field: ${f.label}`);
+        errors.push(`Thiếu trường thông tin bắt buộc: ${f.label}`);
       }
     });
 
@@ -98,18 +102,24 @@ export async function parseAndValidateOnboardingExcel(buffer: Buffer, fields: { 
  * Generates an Excel report of the onboarding execution.
  */
 export async function generateOnboardingReport(results: OnboardingRow[]) {
-  const data = results.map(r => ({
-    "Full Name": r.data["Full Name"],
-    "Entity Code": r.data["Entity Code"],
-    "Status": r.processed ? "SUCCESS" : "FAILED",
-    "Error Message": r.error || "",
-    "Username": r.data["Entity Code"],
-    "Password": r.data["National ID"] || r.data["Entity Code"],
-  }));
+  const data = results.map(r => {
+    const fullName = r.data["Họ và tên"] || r.data["Full Name"];
+    const entityCode = r.data["Mã định danh"] || r.data["Entity Code"];
+    const nationalId = r.data["Số CCCD/Hộ chiếu"] || r.data["National ID"];
+
+    return {
+      "Họ và tên": fullName,
+      "Mã định danh": entityCode,
+      "Trạng thái": r.processed ? "THÀNH CÔNG" : "THẤT BẠI",
+      "Chi tiết lỗi": r.error || "",
+      "Tài khoản truy cập": entityCode,
+      "Mật khẩu mặc định": nationalId || entityCode,
+    };
+  });
 
   const worksheet = XLSX.utils.json_to_sheet(data);
   const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Results");
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Kết quả Onboarding");
 
   const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
   return buffer as Buffer;
