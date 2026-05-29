@@ -1,0 +1,41 @@
+4.3. TÍNH LINH HOẠT TRONG HIỆU CHỈNH: MANUAL OVERRIDE VÀ CƠ CHẾ BẢO VỆ
+
+Một hệ thống lập lịch dù thông minh đến đâu cũng không thể thay thế hoàn toàn vai trò điều phối của con người. Trong thực tế vận hành đại học, luôn có những tình huống phát sinh ngoài dự kiến: một phòng học đột ngột cần sửa chữa, một giảng viên có việc riêng khẩn cấp, hoặc đơn giản là yêu cầu đặc biệt từ Ban Giám hiệu. QuickUni giải quyết bài toán này thông qua cơ chế "Linh hoạt trong kỷ luật" – cho phép hiệu chỉnh thủ công nhưng vẫn đảm bảo tính toàn vẹn của dữ liệu lịch trình.
+
+4.3.1. Cơ chế Manual Override (Ghi đè thủ công)
+Hệ thống cung cấp giao diện kéo-thả trực quan cho phép Admin di chuyển các lớp học đã được xếp lịch. Tuy nhiên, đằng sau thao tác kéo-thả đơn giản đó là một quy trình kiểm soát chặt chẽ:
+- Kiểm tra xung đột tức thời (Real-time Validation): Khi người dùng bắt đầu kéo một lớp học, hệ thống sẽ sử dụng Bitmask để tính toán và làm nổi bật các vùng trống khả thi (Green Zones) và các vùng xung đột (Red Zones).
+- Khóa lịch trình (Pinning): Các lớp học được di chuyển thủ công có thể được "ghim" (pinned). Khi chạy lại thuật toán lập lịch tự động cho các lớp còn lại, công cụ Solver sẽ coi các lớp đã ghim này là các "ràng buộc cứng" (Hard constraints) và không bao giờ tự ý thay đổi chúng.
+
+4.3.2. Tính năng Re-schedule (Lập lịch lại cục bộ)
+Thay vì phải xóa toàn bộ và làm lại từ đầu khi có thay đổi, QuickUni cho phép lập lịch lại có chọn lọc. Người quản lý có thể chọn một nhóm lớp học (ví dụ: tất cả các lớp của khoa CNTT) và yêu cầu hệ thống tìm vị trí mới cho chúng mà không ảnh hưởng đến lịch của các khoa khác. 
+Điều này đạt được bằng cách:
+1. Giữ nguyên trạng thái Bitmask của các lớp không được chọn.
+2. Giải phóng các bit tương ứng với các lớp cần lập lịch lại.
+3. Chạy thuật toán Backtracking trên không gian trống vừa tạo ra.
+
+4.3.3. Quản lý Blacklist (Danh sách bận) – Ràng buộc cá nhân hóa
+Mỗi giảng viên trong QuickUni có một "Lịch bận cá nhân" (Blacklist). Đây là những khoảng thời gian mà họ không thể giảng dạy do đi công tác, làm nghiên cứu hoặc việc gia đình.
+- Cấu trúc dữ liệu: Blacklist cũng được lưu trữ dưới dạng Bitmask 15-bit cho mỗi ngày trong tuần.
+- Tích hợp Solver: Khi bắt đầu quá trình lập lịch, mặt nạ bận của giảng viên sẽ được khởi tạo bằng chính Blacklist này. Điều này đảm bảo thuật toán AI sẽ "né" các tiết bận của giảng viên ngay từ bước đầu tiên, loại bỏ hoàn toàn việc phải điều chỉnh sau khi xếp.
+
+4.3.4. Quản lý Holidays (Ngày nghỉ lễ) – Ràng buộc hệ thống
+Tương tự như Blacklist của giảng viên, hệ thống có một mặt nạ bận toàn cục (Global Availability Mask) dành cho các ngày nghỉ lễ, ngày lễ hội hoặc các sự kiện toàn trường.
+- Khi một ngày được đánh dấu là Holiday, Bitmask của toàn bộ các phòng học và giảng viên trong ngày đó sẽ được thiết lập là 0x7FFF (tất cả các tiết đều bận).
+- Solver sẽ tự động bỏ qua ngày này và tìm kiếm các phương án ở những tuần kế tiếp, đảm bảo chương trình học không bị gián đoạn và sinh viên không bị xếp lịch vào những ngày nghỉ.
+
+4.3.5. Quy trình phê duyệt thay đổi (Change Approval Workflow)
+Mọi thay đổi thủ công hoặc lập lịch lại đều được lưu dưới dạng "Dự thảo" (Draft). 
+- Hệ thống so sánh sự khác biệt (Diff) giữa lịch cũ và lịch mới.
+- Admin có thể xem trước các xung đột mới phát sinh (nếu có) trước khi quyết định "Xuất bản" (Publish) lịch trình chính thức.
+- Khi xuất bản, hệ thống sẽ tự động gửi thông báo (Notification) qua Email hoặc ứng dụng di động cho các giảng viên và sinh viên bị ảnh hưởng bởi sự thay đổi.
+
+4.3.6. Ý nghĩa của tính linh hoạt đối với khách hàng
+Tính năng hiệu chỉnh linh hoạt giúp QuickUni trở thành một công cụ hỗ trợ đắc lực thay vì một rào cản công nghệ:
+1. Thích ứng nhanh: Xử lý các thay đổi đột xuất chỉ trong vài phút thay vì hàng giờ đồng hồ kiểm tra chéo.
+2. Tôn trọng người dùng: Cho phép giảng viên chủ động đăng ký lịch bận, tạo môi trường làm việc nhân văn và chuyên nghiệp.
+3. Bảo mật và An toàn: Mọi thao tác ghi đè đều được ghi lại (Audit Log), giúp truy vết nguyên nhân của các thay đổi lịch trình.
+
+[Placeholder: Diagram 4.3 - Sơ đồ quy trình phối hợp giữa AI Solver và Manual Override]
+
+Kết luận: Bằng cách kết hợp giữa sức mạnh tính toán của thuật toán AI và khả năng ra quyết định linh hoạt của con người, QuickUni tạo ra một quy trình quản lý lịch trình hoàn hảo: vừa đảm bảo tối ưu hóa tài nguyên, vừa sẵn sàng ứng phó với mọi biến động thực tế của môi trường giáo dục.

@@ -1,0 +1,70 @@
+4.2. TRÍ TUỆ NHÂN TẠO TRONG LẬP LỊCH: THUẬT TOÁN BACKTRACKING VÀ HEURISTICS TỐI ƯU
+
+Xếp thời khóa biểu đại học là một bài toán thuộc lớp NP-Hard (Nondeterministic Polynomial-time hard) trong khoa học máy tính. Với hàng trăm lớp học, hàng chục phòng học và hàng trăm giảng viên, số lượng tổ hợp khả thi là cực kỳ lớn (lên tới hàng tỷ tỷ trường hợp). Để giải quyết bài toán này một cách thông minh, QuickUni sử dụng thuật toán Backtracking (Quay lui) kết hợp với các kỹ thuật Heuristic (Kinh nghiệm) để tìm ra lời giải tối ưu trong thời gian thực.
+
+4.2.1. Bản chất của thuật toán Backtracking trong QuickUni
+Thuật toán Backtracking vận hành dựa trên chiến lược "Thử và Sai" có hệ thống. Hệ thống sẽ xây dựng lời giải từng bước một:
+1. Chọn một lớp học chưa được xếp lịch.
+2. Tìm kiếm một vị trí trống (Ngày, Phòng, Tiết) phù hợp với tất cả các ràng buộc.
+3. Nếu tìm thấy, tạm thời gán lớp đó vào vị trí đó và tiến hành xếp lớp tiếp theo.
+4. Nếu ở một bước nào đó không thể xếp được lớp tiếp theo (do bị xung đột với các lớp đã xếp trước), hệ thống sẽ "quay lui" (backtrack) lại bước trước, hủy bỏ gán lịch cũ và thử một phương án khác.
+
+Quá trình này tiếp tục cho đến khi tất cả các lớp được xếp lịch thành công hoặc tất cả các khả năng đã được duyệt qua.
+
+4.2.2. Chiến lược Pruning (Cắt tỉa nhánh) để tối ưu hiệu năng
+Nếu duyệt qua toàn bộ không gian trạng thái, thuật toán sẽ cực kỳ chậm. QuickUni sử dụng kỹ thuật Pruning dựa trên Bitmask (đã trình bày ở chương 4.1) để loại bỏ sớm các nhánh không khả thi:
+- Ngay khi kiểm tra một tổ hợp (Phòng, Giảng viên, Ngày), hệ thống thực hiện phép toán `Combined_Mask = Teacher_Mask | Room_Mask | Global_Mask`.
+- Nếu `Combined_Mask` không còn đủ khoảng trống liên tục cho độ dài của lớp học, nhánh đó bị cắt bỏ ngay lập tức mà không cần tính toán sâu hơn.
+
+4.2.3. Các Heuristics (Kinh nghiệm tối ưu) cốt lõi
+Để thuật toán hội tụ nhanh hơn và cho ra kết quả "đẹp" về mặt nghiệp vụ, QuickUni triển khai 4 bộ Heuristics quan trọng:
+
+a) Heuristic về thứ tự lớp học (Most Constrained First):
+Hệ thống không xếp lịch theo thứ tự ngẫu nhiên. Các lớp học có thời lượng dài (ví dụ: lớp 5 tiết) sẽ khó xếp hơn các lớp ngắn (2-3 tiết). Do đó, QuickUni ưu tiên xếp các "khối đá lớn" trước, sau đó mới lấp đầy các "khoảng trống nhỏ" bằng cát và sỏi.
+Mã nguồn triển khai:
+```typescript
+const sortedClasses = [...request.classes].sort((a, b) => b.periods - a.periods);
+```
+
+b) Heuristic về thứ tự ngày trong tuần (Day Priority):
+Người dùng (sinh viên và giảng viên) thường thích học vào các ngày giữa tuần hơn là cuối tuần. Hệ thống chấm điểm ưu tiên theo thứ tự: Thứ 2 -> Thứ 6, sau đó mới đến Thứ 7 và Chủ nhật (nếu được phép).
+Trọng số điểm (Score):
+- Thứ 2 - Thứ 6: 10 điểm.
+- Thứ 7, Chủ nhật: 0 điểm.
+Điều này đảm bảo thời khóa biểu tập trung vào các ngày làm việc chính thức, tối ưu hóa chi phí vận hành tòa nhà.
+
+c) Heuristic về sự tập trung của giảng viên (Teacher Continuity):
+Giảng viên thường mong muốn lịch dạy được tập trung vào các ngày gần nhau để giảm công sức đi lại. QuickUni tính toán `preferredConsecutiveDays`:
+- Nếu một giảng viên đã có lịch dạy vào Thứ 3, hệ thống sẽ ưu tiên xếp lớp tiếp theo của họ vào Thứ 2 hoặc Thứ 4.
+- Điểm thưởng sẽ được cộng thêm nếu ngày đang xét nằm cạnh ngày đã có lịch.
+
+d) Heuristic về vị trí tiết học (Slot Scoring):
+Trong một ca (Sáng/Chiều), không phải tiết nào cũng có giá trị như nhau. Tiết 2 (bắt đầu khoảng 7h30-8h) thường là tiết lý tưởng nhất cho buổi sáng, và Tiết 6 cho buổi chiều.
+Hệ thống sử dụng hàm chấm điểm ưu tiên:
+- Tiết khớp với `preferredStartPeriod` của giảng viên: +100 điểm.
+- Tiết 2 (Sáng) hoặc Tiết 6 (Chiều): +90/85 điểm.
+- Các tiết còn lại: Điểm giảm dần theo thời gian bắt đầu.
+
+4.2.4. Cơ chế chặn ca (Session-level Blocking)
+Một điểm đặc biệt trong logic của QuickUni là cơ chế bảo vệ phòng học theo ca. Để tránh tình trạng một phòng bị xé lẻ (ví dụ: lớp học 3 tiết xếp vào giữa ca sáng khiến 2 tiết đầu và cuối không thể xếp thêm lớp nào khác), hệ thống có tùy chọn:
+- Khi một lớp được xếp vào một phần của ca Sáng (Tiết 1-5), toàn bộ ca đó của phòng sẽ được đánh dấu là bận trong bộ nhớ tạm của thuật toán.
+- Điều này buộc các lớp học khác phải tìm phòng trống hoàn toàn, giúp tối ưu hóa công suất phòng học theo đơn vị Ca thay vì đơn vị Tiết.
+
+4.2.5. Xử lý ràng buộc mềm và ràng buộc cứng
+- Ràng buộc cứng (Hard Constraints): Không trùng lịch giảng viên, không trùng lịch phòng, đủ thời lượng tiết. Những ràng buộc này KHÔNG THỂ vi phạm.
+- Ràng buộc mềm (Soft Constraints): Ưu tiên phòng gần, ưu tiên tiết đẹp, ưu tiên ngày liền kề. Thuật toán sẽ cố gắng tối đa hóa tổng điểm của các ràng buộc này thông qua quá trình tìm kiếm Heuristic.
+
+4.2.6. Phân tích độ phức tạp và hiệu năng thực tế
+Mặc dù Backtracking có độ phức tạp lũy thừa trong trường hợp xấu nhất, nhưng nhờ các Heuristics và Bitmask:
+- Với dữ liệu thực tế khoảng 500 lớp học và 50 phòng, hệ thống tìm ra lời giải trong dưới 2 giây.
+- Khả năng quay lui thông minh giúp tránh được các "hố đen" tính toán (dead-ends) mà các thuật toán tham lam (Greedy) thường mắc phải.
+
+4.2.7. Ý nghĩa kinh doanh của thuật toán
+Việc tự động hóa lập lịch bằng trí tuệ nhân tạo mang lại giá trị to lớn cho Nhà trường:
+1. Giảm thời gian lập lịch: Từ vài tuần xuống còn vài phút.
+2. Công bằng và minh bạch: Loại bỏ sự thiên vị cá nhân trong việc phân chia tiết đẹp.
+3. Tối ưu hóa tài nguyên: Sử dụng ít phòng học nhất có thể nhưng vẫn đảm bảo chất lượng giảng dạy.
+
+[Placeholder: Diagram 4.2 - Luồng hoạt động của thuật toán Backtracking với các bước Check -> Assign -> Recurse -> Backtrack]
+
+Kết luận: Thuật toán Backtracking trong QuickUni không chỉ là một công cụ giải toán khô khan, mà là sự kết hợp tinh tế giữa logic máy tính và am hiểu sâu sắc về nghiệp vụ giáo dục, tạo nên một "bộ não" điều hành thông minh cho toàn bộ hệ thống.

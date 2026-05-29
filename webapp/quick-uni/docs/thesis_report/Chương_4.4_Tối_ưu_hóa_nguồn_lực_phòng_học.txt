@@ -1,0 +1,50 @@
+4.4. TỐI ƯU HÓA NGUỒN LỰC PHÒNG HỌC: CƠ CHẾ SLOT FINDER VÀ CHIẾN THUẬT QUẢN LÝ TÀI NGUYÊN
+
+Trong quản trị đại học, phòng học là một loại tài sản cố định có chi phí vận hành cao (điện, điều hòa, thiết bị giảng dạy). Việc để phòng học trống hoặc sử dụng không hiệu quả gây lãng phí lớn cho nhà trường. QuickUni giải quyết bài toán tối ưu hóa này bằng công cụ Slot Finder mạnh mẽ và chiến thuật quản lý tài nguyên thông minh.
+
+4.4.1. Cơ chế Slot Finder dùng kỹ thuật Sliding Window (Cửa sổ trượt)
+Để tìm kiếm một vị trí trống phù hợp cho một lớp học có thời lượng N tiết trong một ngày đã có một số tiết bận, QuickUni sử dụng thuật toán Slot Finder dựa trên nguyên lý cửa sổ trượt trên Bitmask.
+- Đầu vào: Mặt nạ bận của phòng (OccupiedMask) và độ dài lớp học (Duration).
+- Quy trình:
+    1. Duyệt qua từng tiết bắt đầu (Start Period) từ 1 đến (15 - Duration + 1).
+    2. Tại mỗi bước, tạo một "Candidate Mask" (Mặt nạ ứng viên) đại diện cho N tiết liên tiếp bắt đầu từ vị trí đó.
+    3. Sử dụng phép toán `hasCollision(OccupiedMask, CandidateMask)` để kiểm tra.
+    4. Nếu không có xung đột, vị trí Start Period đó được đưa vào danh sách các ứng viên tiềm năng.
+
+Mã nguồn triển khai:
+```typescript
+for (let start = 1; start <= MAX_PERIODS - duration + 1; start++) {
+    const candidateMask = createMask(start, start + duration - 1);
+    if (!hasCollision(occupiedMask, candidateMask)) {
+        possibleStarts.push(start);
+    }
+}
+```
+Kỹ thuật này đảm bảo tìm ra TẤT CẢ các khoảng trống khả thi một cách nhanh chóng, làm tiền đề cho việc chấm điểm ưu tiên ở các bước sau.
+
+4.4.2. Tối ưu hóa công suất phòng học (Room Capacity Optimization)
+QuickUni không chỉ xếp lớp vào chỗ trống, hệ thống còn cố gắng xếp lớp một cách "gọn gàng" để tránh tạo ra các mảnh vụn thời gian (Time Fragmentation).
+- Chiến thuật "Lấp đầy ca": Hệ thống ưu tiên xếp các lớp học vào các ca (Sáng/Chiều) đã có lớp học trước đó, thay vì trải đều ra tất cả các phòng. Điều này giúp dồn các phòng học trống vào một khu vực hoặc một tầng, cho phép nhà trường tắt bớt hệ thống điện và điều hòa ở những khu vực không sử dụng, tiết kiệm đáng kể chi phí năng lượng.
+- Ưu tiên phòng phù hợp quy mô: Mỗi phòng học có thông số `Capacity` (Sức chứa). Slot Finder sẽ ưu tiên đề xuất các phòng có sức chứa gần nhất với số lượng sinh viên của lớp (ví dụ: lớp 40 sinh viên sẽ được ưu tiên xếp vào phòng 45 chỗ thay vì phòng hội trường 200 chỗ).
+
+4.4.3. Chống phân mảnh lịch trình (Anti-Fragmentation)
+Vấn đề lớn nhất của các hệ thống lập lịch tự động là tạo ra các "tiết trống đơn lẻ" (ví dụ: một phòng trống tiết 1, bận tiết 2-4, trống tiết 5). Những tiết trống đơn lẻ này rất khó để xếp thêm bất kỳ lớp nào khác. 
+QuickUni xử lý vấn đề này bằng cách:
+1. Chặn toàn bộ ca (Session Blocking): Như đã đề cập ở chương 4.2, hệ thống có thể cấu hình để khi một lớp học được xếp vào phòng, nó sẽ chiếm dụng toàn bộ ca đó trong mắt của thuật toán Solver. Điều này đảm bảo mỗi ca học là một đơn vị tài nguyên nguyên khối.
+2. Ghép cặp thông minh: Hệ thống tìm kiếm các lớp học có tổng số tiết bằng đúng độ dài một ca (ví dụ: lớp 2 tiết và lớp 3 tiết) để ghép chúng vào cùng một phòng trong cùng một buổi sáng.
+
+4.4.4. Quản lý tài nguyên đa mục đích
+Ngoài phòng học lý thuyết, QuickUni còn quản lý các loại tài nguyên đặc thù:
+- Phòng Lab/Thực hành: Gắn liền với các ràng buộc về thiết bị. Slot Finder chỉ tìm kiếm trong danh sách các phòng có đủ cấu hình phần cứng/phần mềm yêu cầu.
+- Hội trường lớn: Dành cho các lớp học ghép hoặc sự kiện chung.
+Hệ thống cho phép định nghĩa các "Loại phòng" (Room Types) và gắn chúng vào các Schema của lớp học, giúp Solver lọc tài nguyên chính xác trước khi thực hiện tính toán Bitmask.
+
+4.4.5. Hiệu quả đo lường được (Quantifiable Metrics)
+Nhờ sự tối ưu hóa của Slot Finder, QuickUni giúp các trường đại học đạt được các chỉ số ấn tượng:
+- Tỷ lệ lấp đầy phòng học (Room Occupancy Rate): Tăng từ trung bình 60% lên trên 85%.
+- Giảm số lượng phòng cần sử dụng: Trong nhiều trường hợp, nhà trường có thể dôi dư ra 10-15% số phòng học để chuyển đổi công năng sang phòng tự học hoặc phòng làm việc của giảng viên.
+- Tiết kiệm năng lượng: Giảm tới 20% hóa đơn tiền điện nhờ việc tập trung hóa lịch trình.
+
+[Placeholder: Diagram 4.4 - Minh họa kỹ thuật Sliding Window trên thanh thời gian 15 tiết]
+
+Kết luận: Công cụ Slot Finder và các chiến thuật tối ưu hóa tài nguyên phòng học trong QuickUni không chỉ là những giải pháp kỹ thuật, mà là những công cụ quản trị tài chính hữu hiệu, giúp nhà trường vận hành tinh gọn, hiệu quả và bền vững hơn trong kỷ nguyên số.

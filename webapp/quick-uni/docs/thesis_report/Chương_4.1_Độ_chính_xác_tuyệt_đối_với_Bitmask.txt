@@ -1,0 +1,71 @@
+CHƯƠNG 4. HỆ THỐNG LẬP LỊCH THÔNG MINH (SCHEDULING ENGINE)
+
+4.1. ĐỘ CHÍNH XÁC TUYỆT ĐỐI VỚI KỸ THUẬT BITMASK
+
+Trong các hệ thống quản lý đào tạo (SIS - Student Information Systems), bài toán lập lịch (Scheduling) luôn là thách thức lớn nhất về mặt kỹ thuật. Một sai sót nhỏ trong việc tính toán trùng lịch có thể dẫn đến sự hỗn loạn trong vận hành thực tế: giảng viên phải đứng ở hai phòng học khác nhau cùng một lúc, hoặc hai lớp học khác nhau cùng được xếp vào một phòng. Để giải quyết triệt để vấn đề này với hiệu năng tối ưu, QuickUni đã triển khai cơ chế Bitmask 15-bit – một giải pháp toán học tinh gọn nhưng mang lại độ chính xác tuyệt đối.
+
+4.1.1. Bản chất toán học của Bitmask trong lập lịch
+Mỗi ngày học trong hệ thống QuickUni được chia thành tối đa 15 tiết (Periods). Thay vì lưu trữ trạng thái của 15 tiết học này dưới dạng mảng (Array) hoặc danh sách (List) các đối tượng – vốn gây tốn kém bộ nhớ và làm chậm quá trình so sánh – chúng tôi sử dụng một số nguyên duy nhất (integer) làm mặt nạ bit (bitmask).
+
+Cụ thể, hệ thống sử dụng 15 bit thấp nhất của một số nguyên 32-bit để đại diện cho 15 tiết học. 
+- Tiết 1 tương ứng với bit thứ 0 (2^0 = 1).
+- Tiết 2 tương ứng với bit thứ 1 (2^1 = 2).
+- ...
+- Tiết 15 tương ứng với bit thứ 14 (2^14 = 16.384).
+
+Tổng giá trị mặt nạ cho một ngày học đầy đủ (15 tiết đều bận) được xác định bằng hằng số TOTAL_PERIODS_MASK:
+TOTAL_PERIODS_MASK = 0x7FFF (tương đương 32.767 trong hệ thập phân, hay chuỗi nhị phân "111 1111 1111 1111").
+
+4.1.2. Các phép toán Bitwise – Chìa khóa của hiệu năng O(1)
+Việc sử dụng Bitmask cho phép thực hiện các kiểm tra xung đột và gán lịch thông qua các phép toán logic trực tiếp trên CPU, đạt độ phức tạp thời gian O(1).
+
+a) Phép toán AND (&) - Kiểm tra xung đột (Collision Detection):
+Để kiểm tra xem hai lịch trình (Lịch A và Lịch B) có bị trùng nhau hay không, hệ thống chỉ cần thực hiện phép tính:
+(Mask_A & Mask_B) !== 0
+Nếu kết quả khác 0, điều đó có nghĩa là ít nhất có một bit (một tiết học) đang ở trạng thái '1' (bận) ở cả hai lịch trình. Đây là phép toán cực nhanh, cho phép hệ thống kiểm tra hàng triệu khả năng xếp lịch trong vài giây.
+
+b) Phép toán OR (|) - Kết hợp trạng thái (State Merging):
+Khi một lớp học được xếp vào một phòng bởi một giảng viên, trạng thái bận của phòng và giảng viên đó sẽ được cập nhật bằng phép toán OR:
+New_Occupied_Mask = Old_Occupied_Mask | Class_Mask
+Điều này đảm bảo mọi tiết học trong lớp mới đều được đánh dấu là bận mà không làm mất đi thông tin các tiết bận trước đó.
+
+c) Phép toán NOT (~) và AND (&) - Tìm khoảng trống (Availability Search):
+Để xác định các tiết còn trống, hệ thống thực hiện nghịch đảo mặt nạ bận:
+Available_Mask = (~Occupied_Mask) & TOTAL_PERIODS_MASK
+Kết quả trả về một mặt nạ mà các bit '1' đại diện cho những tiết học đang sẵn sàng để xếp lịch.
+
+4.1.3. Tại sao 15-bit lại là con số tối ưu?
+Hệ thống giáo dục đại học Việt Nam thường chia một ngày thành 3 ca: Sáng (Tiết 1-5), Chiều (Tiết 6-10) và Tối (Tiết 11-15). Việc chọn 15-bit không chỉ khớp hoàn hảo với thực tế giảng dạy mà còn mang lại lợi ích về lập trình:
+- Tiết kiệm bộ nhớ: Chỉ cần 2 byte để lưu trữ trạng thái cả một ngày của một thực thể (Phòng, Giảng viên). Một học kỳ 20 tuần (140 ngày) chỉ tốn khoảng 280 bytes dữ liệu thô để kiểm soát toàn bộ lịch trình.
+- Tốc độ xử lý: Các phép toán trên số nguyên 15-bit luôn nằm trong thanh ghi CPU, không cần các cấu trúc dữ liệu phức tạp.
+- Khả năng mở rộng: Nếu cần mở rộng lên 16 tiết, hệ thống vẫn vận hành mượt mà trên kiểu dữ liệu số nguyên tiêu chuẩn.
+
+4.1.4. Loại bỏ hoàn toàn lỗi trùng lịch (Human-Error Proof)
+Trong các phương pháp truyền thống (như nhập liệu thủ công vào Excel), lỗi "Double Booking" xảy ra thường xuyên do mắt người không thể bao quát hết các ràng buộc chéo. Với Bitmask trong QuickUni:
+- Sự nhất quán dữ liệu (Data Consistency): Một bit chỉ có thể là 0 hoặc 1. Không bao giờ có trạng thái "nửa bận".
+- Ràng buộc cứng (Hard Constraints): Thuật toán Backtracking (sẽ được trình bày ở chương sau) sử dụng phép toán AND để loại bỏ ngay lập tức bất kỳ phương án nào gây xung đột bit, dù chỉ là 1 tiết lẻ.
+
+Ví dụ minh họa:
+Giả sử Lớp A học tiết 1-3 (Mask = 0x0007 - 111 nhị phân).
+Giả sử Lớp B học tiết 3-5 (Mask = 0x001C - 11100 nhị phân).
+Phép toán (0x0007 & 0x001C) sẽ cho kết quả là 0x0004 (4 thập phân, tức bit thứ 2 - tiết 3). Vì kết quả khác 0, hệ thống từ chối xếp lớp B vào cùng phòng/giảng viên với lớp A, đảm bảo tính đúng đắn tuyệt đối.
+
+4.1.5. Ý nghĩa đối với bài toán thực tế của QuickUni
+Trong môi trường đào tạo linh hoạt, việc thay đổi lịch diễn ra hàng ngày. Nhờ Bitmask, QuickUni có thể tính toán lại toàn bộ lịch trình cho hàng ngàn sinh viên chỉ trong chớp mắt khi có một giảng viên báo nghỉ hoặc một phòng học gặp sự cố kỹ thuật. Đây chính là nền tảng vững chắc nhất để xây dựng các thuật toán AI phức tạp hơn phía trên.
+
+[Placeholder: Diagram 4.1 - Minh họa Bitmask 15 bit và các phép toán logic trên các ca học Sáng/Chiều/Tối]
+
+Cấu trúc mã nguồn triển khai (Pseudo-code):
+```typescript
+const TOTAL_PERIODS_MASK = 0x7FFF;
+
+function checkCollision(mask1: number, mask2: number): boolean {
+    return (mask1 & mask2) !== 0;
+}
+
+function mergeSchedules(...masks: number[]): number {
+    return masks.reduce((acc, mask) => acc | mask, 0);
+}
+```
+
+Tóm lại, kỹ thuật Bitmask không chỉ là một thủ thuật lập trình mà là một triết lý thiết kế hướng tới sự chính xác tuyệt đối và hiệu năng cực cao. Nó giúp QuickUni vượt xa các phần mềm quản lý truyền thống trong việc xử lý các bài toán lập lịch quy mô lớn.
