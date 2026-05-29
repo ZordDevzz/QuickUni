@@ -1,0 +1,111 @@
+# CHƯƠNG 2: TRẢI NGHIỆM NGƯỜI DÙNG VÀ LOGIC NGHIỆP VỤ HỆ THỐNG
+
+## 2.2. Các Quy tắc Vận hành: Nghệ thuật của sự Cân bằng và Trí tuệ Toán học
+
+Trong quản trị đại học, việc xếp thời khóa biểu không đơn thuần là lấp đầy các ô trống trên một tờ lịch. Đó là một bài toán tối ưu hóa đa mục tiêu với hàng ngàn ràng buộc chồng chéo, nơi mỗi quyết định sai lầm có thể dẫn đến sự đứt gãy trong quá trình dạy và học. QuickUni giải quyết bài toán này bằng cách kết hợp giữa sức mạnh toán học (Bitmask & Backtracking) và sự am hiểu sâu sắc về thực tế vận hành tại các trường đại học Việt Nam.
+
+Phần này sẽ đi sâu vào 20+ quy tắc vận hành cốt lõi mà QuickUni áp dụng để đảm bảo tính khoa học, nhân văn và hiệu quả tối đa cho hệ thống.
+
+### 2.2.1. Triết lý của các Ràng buộc (Hard vs. Soft Constraints)
+
+Trước khi đi vào chi tiết, cần hiểu cách QuickUni phân loại các quy tắc:
+- **Ràng buộc Cứng (Hard Constraints):** Là những quy tắc tuyệt đối không được vi phạm. Nếu vi phạm, thời khóa biểu sẽ trở nên vô giá trị (ví dụ: Một giảng viên không thể ở 2 phòng cùng lúc).
+- **Ràng buộc Mềm (Soft Constraints):** Là những quy tắc mang tính ưu tiên và tối ưu hóa. Hệ thống sẽ cố gắng thỏa mãn tối đa nhưng có thể chấp nhận vi phạm nhẹ để tìm ra lời giải tổng thể (ví dụ: Ưu tiên giảng viên dạy gần nhà).
+
+### 2.2.2. Nhóm Quy tắc về Tài nguyên (Room & Infrastructure)
+
+**Quy tắc 1: Đảm bảo Sức chứa (Capacity Matching)**
+Hệ thống tuyệt đối không xếp một lớp học có 100 sinh viên vào phòng học chỉ có 50 chỗ ngồi. Thuật toán sẽ tự động lọc danh sách phòng thỏa mãn điều kiện `Room.Capacity >= Class.StudentCount`.
+
+**Quy tắc 2: Tương thích Thiết bị (Equipment Compatibility)**
+Một môn học về "Lập trình nhúng" không thể diễn ra trong một phòng học lý thuyết thông thường không có máy tính và thiết bị chuyên dụng. CBĐT có thể gắn nhãn (Tags) cho môn học và phòng học. Hệ thống chỉ xếp lịch khi có sự khớp nối về nhãn thiết bị.
+
+**Quy tắc 3: Hiệu suất sử dụng Phòng (Room Utilization Optimization)**
+Thay vì để các lớp học rải rác ở nhiều tòa nhà khác nhau gây lãng phí điện năng và quản lý, hệ thống ưu tiên dồn các lớp vào cùng một tòa nhà hoặc cùng một tầng trong các khung giờ thấp điểm.
+
+**Quy tắc 4: Tránh xung đột Phòng (Room Overlap Prevention)**
+Đây là quy tắc cơ bản nhất: Một phòng học tại một thời điểm (slot) chỉ được phép có tối đa một lớp học phần diễn ra. Cơ chế Bitmask giúp kiểm tra điều này trong 1 phép toán AND logic.
+
+**Quy tắc 5: Thời gian bảo trì (Maintenance Blacklist)**
+CBĐT có thể khóa một phòng học trong một khoảng thời gian cụ thể để sửa chữa. Hệ thống sẽ coi phòng đó là "không tồn tại" trong bộ nhớ của bộ giải trong suốt thời gian bảo trì.
+
+### 2.2.3. Nhóm Quy tắc về Giảng viên (Faculty & Human Factors)
+
+**Quy tắc 6: Không trùng lịch giảng dạy (Teacher Overlap Prevention)**
+Một giảng viên không thể "phân thân" để dạy ở 2 lớp khác nhau trong cùng một slot học. Quy tắc này được ưu tiên hàng đầu để đảm bảo tính khả thi của lịch.
+
+**Quy tắc 7: Ràng buộc khung giờ bận (Teacher Availability/Blacklist)**
+Giảng viên có thể đăng ký các khung giờ bận cố định (ví dụ: Đi làm nghiên cứu sinh vào sáng Thứ Ba, hoặc nghỉ đưa đón con vào chiều Thứ Sáu). Hệ thống sẽ tôn trọng các "khoảng trắng" này khi tìm slot.
+
+**Quy tắc 8: Giới hạn số tiết tối đa trong ngày (Max Periods per Day)**
+Để đảm bảo sức khỏe và chất lượng bài giảng, hệ thống không xếp một giảng viên dạy quá 8 tiết trong một ngày. Quy tắc này giúp tránh tình trạng giảng viên bị "cháy giáo án" hoặc kiệt sức.
+
+**Quy tắc 9: Tránh xếp tiết lẻ loi (Isolated Period Prevention)**
+Giảng viên thường không thích việc phải đến trường chỉ để dạy duy nhất 1 tiết rồi về, hoặc dạy 1 tiết sáng và 1 tiết chiều với khoảng nghỉ quá dài ở giữa. QuickUni ưu tiên xếp các tiết dạy của giảng viên thành các khối liên tục.
+
+**Quy tắc 10: Ưu tiên khoảng cách di chuyển (Campus Proximity)**
+Đối với các trường có nhiều cơ sở, hệ thống ưu tiên xếp các lớp của giảng viên tại cơ sở gần với địa chỉ thường trú của họ nhất, giúp tiết kiệm thời gian và chi phí đi lại.
+
+### 2.2.4. Nhóm Quy tắc về Đa cơ sở (Multi-campus Dynamics)
+
+**Quy tắc 11: Thời gian di chuyển giữa các cơ sở (Travel Time Buffer)**
+Nếu một giảng viên bắt buộc phải dạy ở cơ sở A vào buổi sáng và cơ sở B vào buổi chiều, hệ thống sẽ tự động chèn một "khoảng nghỉ di chuyển" tối thiểu 60-90 phút giữa 2 tiết học cuối sáng và đầu chiều.
+
+**Quy tắc 12: Giới hạn thay đổi cơ sở trong ngày (Max Campus Switch)**
+Hệ thống hạn chế việc giảng viên phải di chuyển giữa quá 2 cơ sở trong cùng một ngày làm việc. Lý tưởng nhất là cả ngày chỉ dạy tại 1 cơ sở duy nhất.
+
+### 2.2.5. Nhóm Quy tắc về Học thuật và Sinh viên (Academic & Student-centric)
+
+**Quy tắc 13: Trùng lịch Lớp hành chính (Class Overlap Prevention)**
+Tất cả sinh viên trong cùng một lớp hành chính (ví dụ: Lớp K20-CNTT1) phải có thời khóa biểu không bị chồng chéo để họ có thể tham gia đầy đủ các môn học theo lộ trình.
+
+**Quy tắc 14: Giới hạn số tiết liên tục (Max Consecutive Periods)**
+Sinh viên không nên ngồi học quá 5 tiết liên tục một môn. Hệ thống sẽ tự động ngắt quãng hoặc chuyển sang môn khác để duy trì sự tập trung.
+
+**Quy tắc 15: Phân bổ đều trong tuần (Weekly Distribution)**
+Thay vì xếp dồn tất cả các môn vào Thứ Hai và Thứ Ba, khiến sinh viên bị quá tải, hệ thống cố gắng trải đều các môn học ra từ Thứ Hai đến Thứ Sáu.
+
+**Quy tắc 16: Ràng buộc Môn tiên quyết (Prerequisite Logic)**
+Mặc dù quy tắc này thường nằm ở khâu đăng ký, nhưng trong khâu lập lịch, hệ thống đảm bảo các môn cơ sở được xếp vào các khung giờ "vàng" (sáng sớm) để tăng tỉ lệ tiếp thu.
+
+**Quy tắc 17: Ưu tiên môn thực hành (Lab Session Priority)**
+Các môn thực hành thường yêu cầu phòng lab chuyên dụng với số lượng có hạn. QuickUni ưu tiên xếp lịch cho các môn này trước, sau đó mới đến các môn lý thuyết để tối ưu hóa tài nguyên hiếm.
+
+### 2.2.6. Nhóm Quy tắc về Logic thời gian (Time Logic)
+
+**Quy tắc 18: Tính toàn vẹn của buổi học (Session Integrity)**
+Một buổi học 3 tiết phải diễn ra liên tục, không được phép xếp tiết 1 vào lúc 7h, tiết 2 vào lúc 10h. QuickUni luôn xếp các khối tiết học (Blobs) một cách nguyên khối.
+
+**Quy tắc 19: Thời gian nghỉ giải lao (Break Time Assurance)**
+Hệ thống đảm bảo giữa các buổi học (Sáng - Chiều) luôn có một khoảng nghỉ ít nhất 60 phút để sinh viên và giảng viên nghỉ trưa và tái tạo năng lượng.
+
+**Quy tắc 20: Tôn trọng Ngày lễ và Sự kiện (Holiday & Event Blacklist)**
+Các ngày lễ quốc gia hoặc ngày kỷ niệm trường được khai báo trong hệ thống sẽ được đánh dấu là "Global Blacklist". Bộ giải sẽ bỏ qua toàn bộ các slot trong những ngày này.
+
+### 2.2.7. Nhóm Quy tắc Nâng cao và Tùy chỉnh (Advanced & Custom)
+
+**Quy tắc 21: Ưu tiên Gi giảng viên thỉnh giảng (Guest Lecturer Priority)**
+Gi giảng viên thỉnh giảng thường chỉ có mặt tại trường vào những khung giờ rất hạn hẹp. Hệ thống cung cấp trọng số ưu tiên cao nhất cho nhóm này để đảm bảo họ có lịch trước khi các giảng viên cơ hữu được xếp.
+
+**Quy tắc 22: Ràng buộc về quy mô lớp học (Group Size Constraint)**
+Đối với các lớp học ngoại ngữ hoặc kỹ năng mềm yêu cầu chia nhóm nhỏ, hệ thống sẽ tự động tìm các phòng học có không gian linh hoạt hoặc các phòng nhỏ gần nhau để dễ dàng quản lý.
+
+### 2.2.8. Sự kỳ diệu của thuật toán: Biến quy tắc thành hiện thực
+
+Tất cả 22 quy tắc trên được QuickUni chuyển hóa thành các trọng số toán học. Khi bộ giải (Solver) chạy, nó không chỉ đơn giản là tìm chỗ trống, mà là đang thực hiện hàng triệu phép so sánh để tìm ra phương án có **Tổng số vi phạm ràng buộc mềm là nhỏ nhất**.
+
+Cơ chế **Bitmask 15-bit** đóng vai trò quan trọng:
+- Mỗi ngày được đại diện bởi 15 bit (tương ứng 15 tiết).
+- Một lịch bận của giảng viên là một số nguyên: `100000000000001` (bận tiết 1 và tiết 15).
+- Kiểm tra trùng lịch chỉ mất 1 phép `(schedule1 & schedule2) != 0`.
+
+Nhờ tốc độ xử lý cực nhanh của Bitmask, QuickUni có thể áp dụng đồng thời cả 22 quy tắc này cho hàng ngàn lớp học mà vẫn trả về kết quả trong thời gian tính bằng giây. Đây chính là sự khác biệt giữa một hệ thống "nhập liệu" và một hệ thống "trí tuệ".
+
+### 2.2.9. Kết luận: Giá trị của sự kỷ luật trong lập lịch
+
+Việc áp dụng khắt khe các quy tắc vận hành mang lại 3 giá trị cốt lõi:
+1. **Sự Công bằng:** Không có sự thiên vị trong việc xếp lịch; mọi giảng viên đều được đối xử dựa trên các quy tắc và ưu tiên đã định nghĩa.
+2. **Sự Hiệu quả:** Tài nguyên phòng học được khai thác tối đa, giảm thiểu lãng phí.
+3. **Sự Hài lòng:** Sinh viên và giảng viên có một lịch học khoa học, nhân văn, giúp nâng cao chất lượng giáo dục toàn diện.
+
+QuickUni không chỉ giải bài toán xếp lịch, chúng tôi đang xây dựng một nền móng vững chắc cho sự vận hành trơn tru của một môi trường đại học hiện đại.

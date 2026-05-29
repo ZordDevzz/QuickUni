@@ -1,0 +1,92 @@
+# CHƯƠNG 2: TRẢI NGHIỆM NGƯỜI DÙNG VÀ LOGIC NGHIỆP VỤ HỆ THỐNG
+
+## 2.1. Hành trình Người dùng: Từ Hồ sơ đến Thời khóa biểu - Sự chuyển mình của Cán bộ Đào tạo
+
+Trong hệ sinh thái giáo dục hiện đại, Cán bộ Đào tạo đóng vai trò như những "nhạc trưởng" điều phối toàn bộ hoạt động của nhà trường. Tuy nhiên, với các công cụ truyền thống, họ thường bị nhấn chìm trong biển giấy tờ, file Excel rời rạc và những cuộc gọi phàn nàn về sự cố trùng lịch. QuickUni được thiết kế với mục tiêu giải phóng họ khỏi những tác vụ lặp đi lặp lại, mang đến một hành trình người dùng mượt mà, tập trung vào sự hiệu quả và tính chính xác.
+
+### 2.1.1. Khởi đầu hành trình: Không gian làm việc cá nhân hóa (Workspace)
+
+Hành trình của một Cán bộ Đào tạo (sau đây gọi tắt là CBĐT) bắt đầu tại màn hình Dashboard của **Academic Workspace**. Thay vì một giao diện khô khan với các bảng số liệu vô hồn, CBĐT được đón nhận bởi một bảng điều khiển (Dashboard) trực quan, hiển thị các thông số vận hành quan trọng: số lượng sinh viên mới tiếp nhận trong tuần, số lớp học phần đang mở, và quan trọng nhất là trạng thái của các "Phiên lập lịch" (Scheduling Sessions) đang diễn ra.
+
+Hệ thống Sidebar (thanh điều hướng bên trái) được phân loại khoa học theo nhóm nghiệp vụ:
+- **Quản lý Nhân sự & Sinh viên:** Nơi thực hiện các chiến dịch Onboarding.
+- **Quản lý Tài nguyên:** Quản lý phòng học, thiết bị và hạ tầng cơ sở.
+- **Quản lý Học thuật:** Định nghĩa chương trình đào tạo, môn học và lớp học phần.
+- **Hệ thống Lập lịch:** Trái tim của QuickUni, nơi biến các ràng buộc thành thời khóa biểu thực tế.
+
+Mỗi khi CBĐT đăng nhập, hệ thống sẽ tự động nhắc nhở các công việc cần ưu tiên qua mục "Task To-do". Ví dụ: "Có 50 hồ sơ sinh viên chưa được cấp tài khoản" hoặc "Kỳ học mùa Thu 2024 chưa được xuất bản thời khóa biểu". Điều này giúp CBĐT không bao giờ bỏ lỡ các mốc thời gian quan trọng trong chu trình đào tạo.
+
+### 2.1.2. Bước đột phá: Quy trình Onboarding 3 bước thông minh
+
+Một trong những điểm chạm (touchpoint) quan trọng nhất là khi nhà trường tiếp nhận một đợt sinh viên hoặc giảng viên mới. QuickUni không yêu cầu CBĐT phải nhập liệu thủ công từng người một. Thay vào đó, hệ thống triển khai mô hình "Onboarding Session" (Phiên tiếp nhận tập trung).
+
+**Bước 1: Khởi tạo Hồ sơ linh hoạt (Create Profile)**
+CBĐT chọn Schema tương ứng (ví dụ: "Sinh viên Chính quy"). Ngay lập tức, giao diện hiển thị các trường dữ liệu động mà Admin đã định nghĩa trước đó. Nếu nhà trường cần thu thập thêm thông tin về "Địa chỉ thường trú" hay "Sở thích cá nhân", CBĐT chỉ việc sử dụng tính năng Import Excel. Điểm đặc biệt là QuickUni cung cấp một cơ chế **Excel Validator** cực kỳ mạnh mẽ. Khi CBĐT tải file lên, hệ thống sẽ thực hiện kiểm tra thời gian thực (Real-time validation): định dạng ngày sinh có đúng không, số điện thoại có trùng lặp không, các trường bắt buộc đã được điền chưa. Bất kỳ lỗi nào cũng được đánh dấu đỏ trực tiếp trên giao diện để CBĐT sửa chữa ngay lập tức trước khi dữ liệu được ghi vào cơ sở dữ liệu.
+
+Cơ chế này giúp loại bỏ hoàn toàn việc "đẩy rác vào hệ thống". CBĐT có thể tải file mẫu (Template) đã được hệ thống tự động sinh ra dựa trên Schema hiện tại. Template này đã được tích hợp sẵn các ràng buộc (Data Validation) trong chính file Excel, giúp người dùng hạn chế lỗi ngay từ khâu nhập liệu offline.
+
+**Bước 2: Liên kết Thực thể (Link Entity)**
+Sau khi hồ sơ được phê duyệt và đảm bảo tính sạch sẽ của dữ liệu, hệ thống tự động thực hiện bước liên kết. Tại đây, hồ sơ (Profile) sẽ được gắn với một định danh thực tế trong nhà trường (Mã sinh viên hoặc Mã nhân viên). CBĐT không cần phải tạo mã bằng tay; hệ thống tự động sinh mã theo quy tắc đã định nghĩa (ví dụ: Năm nhập học + Mã ngành + Số thứ tự). Việc tách biệt giữa "Hồ sơ" và "Thực thể" cho phép một người có thể vừa là sinh viên, vừa có thể là nhân viên hỗ trợ trong tương lai mà không cần tạo lại thông tin cá nhân. Điều này phản ánh tư duy "User-centric" (lấy người dùng làm trung tâm) trong thiết kế kiến trúc của QuickUni.
+
+**Bước 3: Cấp tài khoản và Quyền truy cập (Issue Account)**
+Đây là bước hoàn tất hành trình tiếp nhận. Chỉ với một nút nhấn "Bulk Provisioning", hàng ngàn tài khoản người dùng sẽ được khởi tạo. Hệ thống sẽ tự động tạo Username dựa trên mã định danh và mật khẩu ngẫu nhiên (hoặc theo quy chuẩn của trường). CBĐT có thể theo dõi tiến độ cấp phát tài khoản qua một thanh ProgressBar thời gian thực. Sau khi hoàn tất, hệ thống cung cấp tính năng xuất file báo cáo tài khoản để CBĐT gửi cho các đơn vị liên quan hoặc in ấn thẻ sinh viên/giảng viên. Trải nghiệm này mang lại sự an tâm tuyệt đối, loại bỏ hoàn toàn rủi ro sai sót mật khẩu hay trùng lặp username.
+
+### 2.1.3. Thiết kế Chương trình đào tạo và Lộ trình học tập
+
+Trước khi xếp lịch, CBĐT cần thiết lập "khung xương" cho hoạt động học thuật. QuickUni cung cấp một giao diện quản lý **Curriculum (Chương trình đào tạo)** đầy cảm hứng.
+- **Xây dựng môn học:** CBĐT nhập thông tin về số tín chỉ, số tiết lý thuyết/thực hành, và các điều kiện tiên quyết.
+- **Thiết kế lộ trình:** Thay vì nhìn các bảng mã môn học khô khan, CBĐT được cung cấp giao diện dạng Flowchart để kéo-thả các môn học vào từng học kỳ. Hệ thống sẽ tự động kiểm tra logic: "Môn A là tiên quyết của môn B, nên môn A không thể nằm sau môn B".
+- **Quản lý Nhóm môn học:** CBĐT có thể gom các môn học vào nhóm tự chọn, nhóm bắt buộc, giúp sinh viên có cái nhìn tổng quan về khối lượng kiến thức mình cần tích lũy.
+
+### 2.1.4. Điều phối Tài nguyên Cơ sở vật chất
+
+Khi danh sách môn học đã sẵn sàng, CBĐT chuyển sang giai đoạn chuẩn bị "hạ tầng". Giao diện **Facility Management** được thiết kế để CBĐT quản lý mọi thứ từ quy mô tòa nhà đến từng trang thiết bị nhỏ lẻ.
+- **Phòng học thông minh:** CBĐT khai báo sức chứa tối đa, các trang bị có sẵn (Điều hòa, Máy chiếu, Bảng tương tác, Lab máy tính).
+- **Phân loại khu vực:** Hệ thống hỗ trợ quản lý đa cơ sở (Multi-campus). CBĐT có thể định nghĩa khoảng cách và thời gian di chuyển giữa các cơ sở để hệ thống tự động tính toán khi xếp lịch cho giảng viên.
+- **Trạng thái sẵn sàng:** CBĐT có thể đánh dấu các phòng đang bảo trì hoặc trưng dụng cho sự kiện đột xuất, đảm bảo bộ giải (Solver) sẽ không bao giờ xếp lịch vào những không gian này.
+
+### 2.1.5. Đỉnh cao công nghệ: Phiên Lập lịch Tự động (Scheduling Session)
+
+Giai đoạn xếp thời khóa biểu thường là "cơn ác mộng" với CBĐT, nhưng với QuickUni, nó trở thành một quy trình khoa học và có kiểm soát.
+
+**Khởi tạo Phiên lập lịch (Sandbox Mode):**
+CBĐT không xếp lịch trực tiếp lên hệ thống đang chạy. Thay vào đó, họ tạo một "Phiên lập lịch" (Session). Điều này giống như một phòng thí nghiệm ảo. Họ có thể thử phương án A (ưu tiên giảng viên dạy sáng), phương án B (ưu tiên tiết kiệm điện bằng cách dồn phòng), sau đó so sánh hiệu quả của các phương án này để chọn ra kết quả tốt nhất.
+
+**Thiết lập ràng buộc (Constraint Configuration):**
+Giao diện quản lý ràng buộc được thiết kế theo phong cách "Natural Language Rules". CBĐT có thể chọn các quy tắc từ thư viện có sẵn:
+- "Giảng viên X không dạy vào sáng Thứ Hai".
+- "Lớp Y cần học 3 tiết liên tục tại phòng Lab".
+- "Không xếp lịch dạy cho giảng viên tại 2 cơ sở khác nhau trong cùng một buổi sáng".
+Việc cấu hình các "Blacklist" được thực hiện qua giao diện Grid 15x7 (15 tiết x 7 ngày), giúp CBĐT hình dung rõ ràng các khoảng thời gian bị khóa.
+
+**Kích hoạt Bộ giải (Solver) và Theo dõi thời gian thực:**
+Khi nhấn nút "Generate Schedule", bộ não của QuickUni (thuật toán Backtracking kết hợp Bitmask) bắt đầu vận hành. CBĐT sẽ thấy một Dashboard tiến độ:
+- "Tỉ lệ lấp đầy: 85%..."
+- "Số lượng xung đột đã xử lý: 1,200..."
+- "Thời gian dự kiến còn lại: 15 giây..."
+Chỉ trong chớp mắt, một bài toán tối ưu mà con người phải mất hàng tuần đã được giải quyết xong.
+
+**Hiệu chỉnh thủ công (Fine-tuning & Manual Override):**
+Sau khi hệ thống gợi ý lịch, CBĐT có quyền tối cao trong việc điều chỉnh. Giao diện **Timegrid** của QuickUni cho phép CBĐT kéo-thả các khối tiết học. Khi một khối tiết học được nhấc lên, các vị trí trống khả dụng trên lưới sẽ sáng lên màu xanh, trong khi các vị trí xung đột sẽ hiện màu đỏ kèm lý do (ví dụ: "Giảng viên bận", "Phòng đã có lớp"). Sự tương tác thời gian thực này mang lại cảm giác làm chủ hoàn toàn, biến việc xếp lịch trở thành một trò chơi xếp hình thú vị thay vì một công việc căng thẳng.
+
+[PLACEHOLDER: Hình ảnh minh họa Giao diện kéo-thả Thời khóa biểu với cảnh báo xung đột màu đỏ]
+
+### 2.1.6. Xuất bản, Truyền thông và Phản hồi học vụ
+
+Sau khi phương án cuối cùng được phê duyệt, CBĐT thực hiện bước "Publish" (Xuất bản). Đây là lúc "điểm chạm" lan tỏa đến toàn bộ hệ sinh thái:
+- **Thông báo đa kênh:** Hệ thống tự động đẩy thông báo Push tới ứng dụng di động của sinh viên, gửi email lịch dạy cho giảng viên.
+- **Đồng bộ hóa lịch trình:** Giảng viên có thể nhấn nút "Sync to My Calendar" để đưa lịch dạy vào Google Calendar hoặc Outlook của họ.
+- **Cổng thông tin sinh viên (Student Portal):** Sinh viên đăng nhập và thấy ngay thời khóa biểu cá nhân được trình bày đẹp mắt, hỗ trợ in ấn trực tiếp hoặc lưu file PDF.
+
+**Hỗ trợ điều chỉnh sau xuất bản:**
+Nếu có giảng viên xin nghỉ đột xuất, CBĐT sử dụng tính năng "Quick Swap". Chỉ cần chọn lớp cần đổi, hệ thống sẽ tự động tìm các slot trống tương ứng của giảng viên đó hoặc đề xuất giảng viên dạy thay phù hợp dựa trên chuyên môn. Mọi thay đổi sẽ được thông báo ngay lập tức cho sinh viên liên quan, loại bỏ tình trạng sinh viên đến lớp rồi mới biết giảng viên nghỉ.
+
+### 2.1.7. Phân tích trải nghiệm và Giá trị mang lại
+
+Hành trình người dùng của QuickUni không chỉ là một chuỗi các thao tác kỹ thuật, mà là một sự chuyển đổi về vị thế của người cán bộ:
+1. **Từ người nhập liệu thành nhà điều phối:** CBĐT không còn mất thời gian cho những việc tay chân, họ dành thời gian để lắng nghe nguyện vọng của giảng viên và sinh viên để tinh chỉnh hệ thống.
+2. **Sự tin cậy tuyệt đối:** Với thuật toán kiểm tra xung đột O(1), CBĐT không bao giờ phải lo lắng về việc "xin lỗi vì trùng lịch".
+3. **Giảm thiểu Stress công việc:** Quy trình làm việc có trình tự (Wizard) và khả năng Sandbox giúp loại bỏ nỗi sợ hãi khi thực hiện các thay đổi lớn trên hệ thống.
+4. **Minh bạch thông tin:** Mọi dữ liệu đều được lưu vết (Audit log), giúp CBĐT dễ dàng giải trình các quyết định sắp xếp lịch khi có thắc mắc.
+
+Kết thúc một chu kỳ học kỳ, CBĐT có thể mỉm cười hài lòng khi nhìn vào biểu đồ hiệu suất sử dụng phòng học đạt mức tối ưu, giảng viên hài lòng với lịch dạy, và sinh viên có một lộ trình học tập khoa học. Đó chính là giá trị cốt lõi mà QuickUni mang lại thông qua một hành trình trải nghiệm người dùng được thiết kế tỉ mỉ.
