@@ -3,5 +3,5 @@ echo "Starting deployment..."
 git pull origin main
 npm install
 npm run build
-pm2 reload next-app
+pm2 restart next-app
 echo "Deployment successful!"

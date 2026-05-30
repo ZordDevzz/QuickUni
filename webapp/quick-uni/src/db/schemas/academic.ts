@@ -223,3 +223,25 @@ export const registrationPeriod = academicSchema.table(
     }),
   ],
 );
+
+export const departmentPosition = academicSchema.table(
+  "department_position",
+  {
+    id: uuid().primaryKey().notNull(),
+    departmentId: uuid("department_id").notNull(),
+    code: varchar({ length: 30 }).notNull(),
+    name: varchar({ length: 255 }).notNull(),
+    des: varchar({ length: 512 }),
+    createAt: timestamp("create_at", { withTimezone: true, mode: "string" })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.departmentId],
+      foreignColumns: [department.id],
+      name: "fk_dept_position_dept_id_dept_id",
+    }),
+    unique("dept_position_dept_id_code_key").on(table.departmentId, table.code),
+  ],
+);

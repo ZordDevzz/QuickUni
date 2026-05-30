@@ -1,0 +1,38 @@
+## 1.3. Tổng quan Hệ sinh thái QuickUni: Kết nối Đa tác nhân
+
+QuickUni không chỉ là một công cụ riêng lẻ mà là một hệ sinh thái đồng nhất, được thiết kế để tạo ra sự kết nối liền mạch giữa các chủ thể trong một cơ sở giáo dục. Mỗi tác nhân trong hệ thống đều được cung cấp một không gian làm việc (Workspace) chuyên biệt, tối ưu cho nghiệp vụ của họ.
+
+### 1.3.1. Phân hệ Quản trị & Vận hành (Admin & Academic Workspace)
+
+Đây là "trung tâm điều khiển" của toàn bộ hệ thống. Đối tượng sử dụng chính là các Cán bộ quản trị và Cán bộ Phòng đào tạo.
+
+- **Quản trị Cấu trúc Dữ liệu:** Admin là người nắm quyền định nghĩa "luật chơi" của dữ liệu. Thông qua trình quản lý Schema, Admin có thể tùy biến hồ sơ cho từng nhóm đối tượng (Sinh viên chính quy, Sinh viên liên thông, Giảng viên cơ hữu, Giảng viên thỉnh giảng). Khả năng này giúp hệ thống luôn tương thích với mọi sự thay đổi trong mô hình quản lý của nhà trường.
+- **Chiến dịch Onboarding thông minh:** Quá trình tiếp nhận hàng ngàn sinh viên mỗi năm được quản lý theo dạng "Session". Admin có thể kiểm soát tiến độ, xử lý file Excel tập trung và thực hiện cấp tài khoản tự động (Bulk Provisioning). Hệ thống sẽ tự động tạo mã sinh viên, tạo username theo quy chuẩn và gửi thông tin về cho sinh viên chỉ trong một quy trình duy nhất.
+- **Điều phối Thời khóa biểu:** Cán bộ đào tạo có cái nhìn tổng thể về tài nguyên toàn trường. Họ có thể khởi chạy các phiên lập lịch tự động, kiểm tra các xung đột tiềm ẩn và thực hiện các điều chỉnh thủ công (Override) khi cần thiết trước khi xuất bản lịch học chính thức tới toàn trường.
+
+### 1.3.2. Phân hệ Giảng viên (Faculty Space)
+
+Giảng viên nhận được một công cụ hỗ trợ công tác giảng dạy trực quan và tinh gọn, giúp họ giảm bớt các thủ tục hành chính giấy tờ.
+
+- **Quản lý Lịch dạy cá nhân:** Giảng viên có thể xem thời khóa biểu của mình dưới dạng Grid (lưới) trực quan, theo dõi các thay đổi lịch dạy thời gian thực. Hệ thống hỗ trợ xem theo tuần, tháng hoặc theo từng học kỳ.
+- **Tương tác với Lớp học phần:** Giảng viên có thể xem danh sách sinh viên của từng lớp mình phụ trách, thực hiện điểm danh, cập nhật tài liệu học tập và quản lý các cột điểm thành phần.
+- **Hỗ trợ Đăng ký và Đề xuất:** Khi có nhu cầu thay đổi lịch dạy (nghỉ ốm, công tác), giảng viên có thể gửi yêu cầu trực tiếp qua hệ thống. Cán bộ đào tạo sẽ nhận được thông báo và xử lý, đảm bảo mọi sự thay đổi đều được ghi nhận và cập nhật tới sinh viên ngay lập tức.
+
+### 1.3.3. Phân hệ Sinh viên (Student Portal)
+
+Sinh viên là trung tâm của hệ sinh thái QuickUni, với mục tiêu mang lại trải nghiệm học vụ mượt mà và hiện đại.
+
+- **Đăng ký học tập thông minh:** Sinh viên có thể xem danh sách các lớp học phần mở trong kỳ, đăng ký học tập với tính năng kiểm tra trùng lịch tự động. Hệ thống sẽ cảnh báo ngay nếu sinh viên chọn các lớp có khung giờ chồng chéo.
+- **Quản lý Lộ trình và Kết quả:** Sinh viên dễ dàng theo dõi thời khóa biểu cá nhân, xem điểm số, nhận thông báo về học phí và các thông báo quan trọng từ nhà trường.
+- **Hồ sơ cá nhân số hóa:** Mọi thông tin, thành tích và hoạt động của sinh viên được lưu trữ trọn đời trong hệ thống dưới dạng hồ sơ điện tử (E-Portfolio), phục vụ cho việc tra cứu và xác thực sau khi tốt nghiệp.
+
+### 1.3.4. Nền tảng Công nghệ và Sự ổn định
+
+Hệ sinh thái QuickUni vận hành trên nền tảng Cloud-native, đảm bảo:
+- **Tốc độ phản hồi cực nhanh:** Nhờ kiến trúc Server Components của Next.js 15, người dùng cảm nhận được sự mượt mà như đang sử dụng ứng dụng desktop.
+- **Tính sẵn sàng cao:** Hệ thống có khả năng chịu tải tốt trong những giai đoạn cao điểm như mùa đăng ký học phần hay mùa nhập học.
+- **Bảo mật đa lớp:** Dữ liệu được mã hóa, phân quyền dựa trên vai trò (RBAC) và được sao lưu định kỳ, đảm bảo an toàn tuyệt đối cho tài sản dữ liệu của nhà trường.
+
+[PLACEHOLDER: Sơ đồ tương tác giữa các tác nhân trong hệ sinh thái QuickUni]
+
+Hệ sinh thái QuickUni hướng tới một môi trường đại học không giấy tờ, nơi mọi quy trình đều được số hóa, tự động hóa và tối ưu hóa vì lợi ích của cả người quản lý, người dạy và người học.

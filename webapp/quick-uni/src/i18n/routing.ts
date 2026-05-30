@@ -8,6 +8,9 @@ export const routing = defineRouting({
   // Used when no locale matches
   defaultLocale: 'vi',
   
+  // Force the default locale by disabling browser language detection
+  localeDetection: false,
+  
   // Optional: Don't use a prefix for the default locale
   localePrefix: 'as-needed'
 });

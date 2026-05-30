@@ -72,3 +72,13 @@ export const mainClassSchema = z.object({
 
 export type MainClassInput = z.infer<typeof mainClassSchema>;
 
+export const departmentPositionSchema = z.object({
+  id: z.string().uuid().optional(),
+  departmentId: z.string().uuid(),
+  code: z.string().min(1, "Mã chức vụ là bắt buộc").max(30),
+  name: z.string().min(1, "Tên chức vụ là bắt buộc").max(255),
+  des: z.string().max(512).optional().nullable(),
+});
+
+export type DepartmentPositionInput = z.infer<typeof departmentPositionSchema>;
+

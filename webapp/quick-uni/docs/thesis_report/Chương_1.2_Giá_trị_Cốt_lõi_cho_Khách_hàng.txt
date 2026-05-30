@@ -1,0 +1,37 @@
+## 1.2. Giá trị Cốt lõi cho Khách hàng: Hiệu quả thực tế và Tối ưu hóa nguồn lực
+
+### 1.2.1. Tiết kiệm 80% thời gian lập lịch và vận hành học thuật
+
+Giá trị hữu hình lớn nhất mà QuickUni mang lại cho khách hàng – đặc biệt là các cán bộ Phòng Đào tạo – chính là khả năng giải phóng sức lao động. Trong các mô hình quản lý cũ, việc lập thời khóa biểu cho một học kỳ thường kéo dài hàng tuần, thậm chí hàng tháng với vô số lần chỉnh sửa, đối soát thủ công.
+
+Với QuickUni, quy trình này được rút ngắn kỷ lục:
+- **Tự động hóa hoàn toàn:** Nhờ thuật toán Backtracking mạnh mẽ, hệ thống có thể xử lý hàng ngàn lớp học phần và tìm ra phương án tối ưu chỉ trong vài phút. Khách hàng chỉ cần nhập các ràng buộc đầu vào (giảng viên, phòng học, khung giờ), hệ thống sẽ lo phần "cân não" còn lại.
+- **Kiểm tra xung đột tức thời:** Cơ chế Bitmask cho phép hệ thống phát hiện ngay lập tức bất kỳ sự trùng lặp nào về lịch giảng dạy hoặc sử dụng phòng học. Điều này loại bỏ hoàn toàn tình trạng "dở khóc dở cười" khi giảng viên đến lớp nhưng phòng đã có người ngồi, hoặc một giảng viên bị xếp dạy 2 nơi cùng lúc.
+- **Phản ứng nhanh với thay đổi:** Khi có một giảng viên xin nghỉ đột xuất hoặc một phòng học cần bảo trì, QuickUni cho phép điều chỉnh (Override) và tự động tính toán lại các slot trống để bù đắp lịch mà không làm xáo trộn toàn bộ hệ thống.
+
+Ước tính, QuickUni giúp giảm tới **80% thời gian** dành cho các tác vụ lập lịch và quản lý thời gian biểu, cho phép đội ngũ nhân sự tập trung vào các công việc mang tính chiến lược hơn như nâng cao chất lượng chương trình đào tạo.
+
+### 1.2.2. Quản lý hồ sơ không giới hạn và chuẩn hóa dữ liệu tuyệt đối
+
+Dữ liệu là tài sản quý giá nhất của một tổ chức giáo dục. QuickUni đảm bảo tài sản này được lưu trữ một cách khoa học, linh hoạt và sạch sẽ.
+
+- **Khả năng tự chủ dữ liệu:** Khách hàng không còn phụ thuộc vào đơn vị phần mềm để thay đổi cấu trúc dữ liệu. Khả năng thêm/sửa trường thông tin trong 30 giây giúp nhà trường luôn bắt kịp với các yêu cầu báo cáo mới từ Bộ Giáo dục hoặc các tổ chức kiểm định quốc tế.
+- **Chuẩn hóa đầu vào:** Thông qua hệ thống Validator (Zod) tích hợp sâu, mọi dữ liệu nhập vào hệ thống – dù là nhập tay hay import từ Excel – đều phải vượt qua các vòng kiểm tra nghiêm ngặt về kiểu dữ liệu, định dạng và tính bắt buộc. Điều này giúp loại bỏ hoàn toàn dữ liệu "rác", đảm bảo tính nhất quán cho toàn hệ thống.
+- **Lưu trữ tập trung, truy xuất tức thì:** Mọi thông tin từ hồ sơ cá nhân, lịch sử giảng dạy đến kết quả học tập đều được liên kết chặt chẽ thông qua mô hình Entity-Profile, giúp việc tra cứu thông tin diễn ra trong tích tắc.
+
+### 1.2.3. Tối ưu hóa hiệu suất sử dụng cơ sở vật chất
+
+Phòng học và cơ sở hạ tầng là nguồn lực hữu hạn và tốn kém. QuickUni giúp khách hàng tối đa hóa công suất sử dụng của nguồn lực này:
+- **Nhận diện "khe hở" thời gian:** Tính năng Slot Finder (Sliding Window) giúp tìm kiếm nhanh các khoảng thời gian trống giữa các ca học để tận dụng cho việc học bù, tổ chức hội thảo hoặc các lớp học ngắn hạn.
+- **Phân bổ phòng học thông minh:** Hệ thống ưu tiên sắp xếp các lớp học có quy mô phù hợp với sức chứa của phòng, tránh lãng phí diện tích hoặc gây ra tình trạng quá tải.
+- **Báo cáo trực quan:** Khách hàng có thể dễ dàng theo dõi biểu đồ mật độ sử dụng phòng học theo từng tòa nhà, từng cơ sở để có kế hoạch đầu tư hoặc bảo trì hợp lý.
+
+### 1.2.4. Tính minh bạch và Khả năng kiểm soát (Audit Trail)
+
+Trong môi trường giáo dục, tính minh bạch và trách nhiệm giải trình là cực kỳ quan trọng. QuickUni mang lại sự yên tâm cho các nhà quản lý thông qua:
+- **Hệ thống Nhật ký (Audit Log) chi tiết:** Mọi thao tác thay đổi dữ liệu, đặc biệt là các thay đổi liên quan đến tài khoản và quyền hạn, đều được hệ thống lưu vết (Ai làm? Làm gì? Lúc nào? Dữ liệu cũ và mới là gì?). Điều này giúp ngăn chặn các hành vi trục lợi hoặc sai sót cố ý.
+- **Phân quyền chặt chẽ (RBAC):** Hệ thống đảm bảo mỗi nhân sự chỉ được tiếp cận và thao tác trên đúng phạm vi trách nhiệm của mình, bảo vệ an toàn cho các dữ liệu nhạy cảm.
+
+[PLACEHOLDER: Biểu đồ so sánh hiệu quả vận hành trước và sau khi áp dụng QuickUni]
+
+QuickUni không chỉ bán một phần mềm, chúng tôi bán sự an tâm, tính chuyên nghiệp và hiệu quả vượt trội cho hệ thống quản trị của khách hàng.

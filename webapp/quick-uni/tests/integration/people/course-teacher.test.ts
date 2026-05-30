@@ -77,6 +77,7 @@ describe("Teacher Workspace Server Actions", () => {
         allowWeekend: false,
         startDate: null,
         endDate: null,
+        preferredStartPeriod: null,
         createAt: new Date().toISOString(),
         updateAt: null,
         deletedAt: null

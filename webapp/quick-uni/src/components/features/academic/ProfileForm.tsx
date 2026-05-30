@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 interface ProfileFormProps {
   profile?: ProfileWithAccount | Profile; // Optional for creation
-  onSuccess?: () => void;
+  onSuccess?: (profileId?: string, fullname?: string) => void;
   schemas?: { id: number; schemaCode: string }[];
 }
 
@@ -56,7 +56,7 @@ export function ProfileForm({ profile, onSuccess, schemas = [] }: ProfileFormPro
 
         if (result.success) {
           notify(isEdit ? toastT("AccountUpdated") : toastT("AccountCreated"), { type: "success" });
-          onSuccess?.();
+          onSuccess?.((result as any).profileId, value.fullname);
           router.refresh();
         } else {
           notify(result.error || toastT("SubmitFailed"), { type: "error" });

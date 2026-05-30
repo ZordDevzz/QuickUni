@@ -1,5 +1,5 @@
 import { db } from "../index";
-import { department, major } from "../schema";
+import { department, major, departmentPosition } from "../schema";
 import { building, room } from "../schema";
 import { randomUUID } from "crypto";
 
@@ -23,6 +23,49 @@ export const seedOrg = async () => {
     des: d.des,
   }));
   const insertedDepts = await db.insert(department).values(depts).returning();
+
+  // 1.1 Department Positions Seeding
+  const positionsToSeed: any[] = [];
+  
+  const academicDefaults = [
+    { code: "TRUONG_KHOA", name: "Trưởng khoa", des: "Điều hành và quản lý chung toàn khoa" },
+    { code: "PHO_KHOA", name: "Phó Trưởng khoa", des: "Hỗ trợ Trưởng khoa quản lý học thuật/khảo thí" },
+    { code: "TRUONG_BO_MON", name: "Trưởng bộ môn", des: "Quản lý tổ chuyên môn học phần" },
+    { code: "GIANG_VIEN", name: "Giảng viên", des: "Công tác giảng dạy và nghiên cứu khoa học" },
+    { code: "TRO_GIANG", name: "Trợ giảng", des: "Hỗ trợ giảng dạy, chấm bài" },
+    { code: "GIAO_VU", name: "Giáo vụ khoa", des: "Quản lý hồ sơ học tập và thời khóa biểu khoa" },
+    { code: "NHAN_VIEN", name: "Nhân viên văn phòng", des: "Công tác hành chính hỗ trợ tại văn phòng khoa" },
+  ];
+  
+  const adminDefaults = [
+    { code: "TRUONG_PHONG", name: "Trưởng phòng", des: "Chỉ đạo, quản lý và điều hành các hoạt động của phòng" },
+    { code: "PHO_PHONG", name: "Phó Trưởng phòng", des: "Phụ trách các mảng công việc chuyên biệt theo phân công" },
+    { code: "CHUYEN_VIEN", name: "Chuyên viên", des: "Nghiên cứu, tham mưu và thực thi các nghiệp vụ chuyên môn" },
+    { code: "NHAN_VIEN", name: "Nhân viên", des: "Thực hiện các công việc văn thư, hỗ trợ hành chính" },
+  ];
+
+  for (const dept of insertedDepts) {
+    const isAcademic = dept.name?.toLowerCase().includes("khoa") || 
+                       dept.code?.toLowerCase().startsWith("k") || 
+                       dept.name?.toLowerCase().includes("faculty") || 
+                       dept.name?.toLowerCase().includes("bộ môn") || 
+                       dept.name?.toLowerCase().includes("subject") ||
+                       ["FITI", "FET", "FBA", "FFL"].includes(dept.code || "");
+    const defaults = isAcademic ? academicDefaults : adminDefaults;
+    
+    for (const pos of defaults) {
+      positionsToSeed.push({
+        id: randomUUID(),
+        departmentId: dept.id,
+        code: pos.code,
+        name: pos.name,
+        des: pos.des,
+      });
+    }
+  }
+
+  await db.insert(departmentPosition).values(positionsToSeed);
+  console.log(`✅ Seeded ${positionsToSeed.length} default department positions.`);
 
   // 2. Majors
   const fitiDept = insertedDepts.find(d => d.code === "FITI")!;

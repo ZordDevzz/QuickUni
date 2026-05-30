@@ -61,8 +61,8 @@ export const seedPeople = async (
     employeeId: adminEmployeeId,
     departmentId: aaoDept.id,
     assignDate: "2020-09-01",
-    roleCode: "ADMINISTRATOR",
-    roleName: "Giám đốc hệ thống thông tin"
+    roleCode: "CHUYEN_VIEN",
+    roleName: "Chuyên viên"
   });
 
   // 2. Academic Office Staff
@@ -100,8 +100,8 @@ export const seedPeople = async (
     employeeId: academicEmployeeId,
     departmentId: aaoDept.id,
     assignDate: "2020-09-01",
-    roleCode: "DEPT_HEAD",
-    roleName: "Trưởng phòng Đào tạo"
+    roleCode: "TRUONG_PHONG",
+    roleName: "Trưởng phòng"
   });
 
   // 3. Teachers & Departments Mapping
@@ -158,20 +158,20 @@ export const seedPeople = async (
     const dept = departments.find(d => d.code === t.deptCode)!;
     
     // Assign Department Head roles for realistic setup
-    let roleCode = "TEACHER";
+    let roleCode = "GIANG_VIEN";
     let roleName = "Giảng viên";
     if (t.code === "GV00001") {
-      roleCode = "DEPT_HEAD";
-      roleName = "Trưởng khoa CNTT";
+      roleCode = "TRUONG_KHOA";
+      roleName = "Trưởng khoa";
     } else if (t.code === "GV00003") {
-      roleCode = "DEPT_HEAD";
-      roleName = "Trưởng khoa ĐTVT";
+      roleCode = "TRUONG_KHOA";
+      roleName = "Trưởng khoa";
     } else if (t.code === "GV00005") {
-      roleCode = "DEPT_HEAD";
-      roleName = "Trưởng khoa QTKD";
+      roleCode = "TRUONG_KHOA";
+      roleName = "Trưởng khoa";
     } else if (t.code === "GV00007") {
-      roleCode = "DEPT_HEAD";
-      roleName = "Trưởng khoa Ngoại ngữ";
+      roleCode = "TRUONG_KHOA";
+      roleName = "Trưởng khoa";
     }
 
     await db.insert(departmentEmployment).values({

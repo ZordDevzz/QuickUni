@@ -64,18 +64,19 @@ export async function createAccountAction(formData: CreateAccountInput, profileI
   }
 }
 
-export async function createProfileAction(formData: CreateProfileInput): Promise<ActionResponse> {
+export async function createProfileAction(formData: CreateProfileInput): Promise<ActionResponse & { profileId?: string }> {
   try {
     const validatedData = nullifyEmptyStrings(createProfileSchema.parse(formData));
+    const profileId = randomUUID();
     await createProfileWorkflow({
       ...validatedData,
-      id: randomUUID(),
+      id: profileId,
       dob: new Date(validatedData.dob).toISOString().split('T')[0],
     });
     revalidatePath("/admin/profiles");
     revalidatePath("/admin/personnel");
     revalidatePath("/admin/students");
-    return { success: true };
+    return { success: true, profileId };
   } catch (error: unknown) {
     return { 
       success: false, 

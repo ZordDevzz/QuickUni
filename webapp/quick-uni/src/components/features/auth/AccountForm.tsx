@@ -18,9 +18,18 @@ interface AccountFormProps {
   onSuccess?: () => void;
   profiles?: Profile[]; // List of available profiles to link
   restrictType?: "student" | "personnel";
+  initialProfileId?: string;
+  initialProfileName?: string;
 }
 
-export function AccountForm({ account, onSuccess, profiles = [], restrictType }: AccountFormProps) {
+export function AccountForm({ 
+  account, 
+  onSuccess, 
+  profiles = [], 
+  restrictType,
+  initialProfileId,
+  initialProfileName 
+}: AccountFormProps) {
   const router = useRouter();
   const isEdit = !!account;
   const t = useTranslations("Account");
@@ -36,7 +45,7 @@ export function AccountForm({ account, onSuccess, profiles = [], restrictType }:
       type: (account?.type as "student" | "employee" | "tech" | "dev") || defaultType,
       status: (account?.status as "active" | "suspended" | "banned" | "expired") || "active",
       password: "",
-      profileId: "",
+      profileId: initialProfileId || "",
     },
     onSubmit: async ({ value }) => {
       try {
@@ -230,33 +239,45 @@ export function AccountForm({ account, onSuccess, profiles = [], restrictType }:
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t("LinkToProfile")}</FieldLabel>
                   <FieldContent>
-                    <Select
-                      onValueChange={(val) => field.handleChange(val)}
-                      value={field.state.value}
-                    >
-                      <SelectTrigger id={field.name} className="w-full">
-                        <SelectValue placeholder={t("SelectProfile")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {profiles
-                          .filter((p: any) => {
-                            if (p.accountId) return false;
-                            const isStudent = (p.students && p.students.length > 0) || p.profileSchema?.schemaCode?.startsWith("STD");
-                            if (restrictType === "student") {
-                              return isStudent;
-                            }
-                            if (restrictType === "personnel") {
-                              return !isStudent;
-                            }
-                            return true;
-                          })
-                          .map((p) => (
-                            <SelectItem key={p.id} value={p.id}>
-                              {p.fullname} ({p.nationalId})
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
+                    {initialProfileId ? (
+                      <div className="p-3.5 bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 dark:border-emerald-500/30 rounded-xl flex items-center justify-between shadow-sm animate-in fade-in zoom-in-95 duration-200">
+                        <div className="space-y-0.5">
+                          <span className="font-semibold text-sm text-foreground">{initialProfileName || "Hồ sơ đã chọn"}</span>
+                          <p className="text-[10px] font-mono text-muted-foreground/80">{initialProfileId}</p>
+                        </div>
+                        <span className="px-2.5 py-1 rounded-full text-[10px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold tracking-wider uppercase">
+                          Đã liên kết
+                        </span>
+                      </div>
+                    ) : (
+                      <Select
+                        onValueChange={(val) => field.handleChange(val)}
+                        value={field.state.value}
+                      >
+                        <SelectTrigger id={field.name} className="w-full">
+                          <SelectValue placeholder={t("SelectProfile")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {profiles
+                            .filter((p: any) => {
+                              if (p.accountId) return false;
+                              const isStudent = (p.students && p.students.length > 0) || p.profileSchema?.schemaCode?.startsWith("STD");
+                              if (restrictType === "student") {
+                                return isStudent;
+                              }
+                              if (restrictType === "personnel") {
+                                return !isStudent;
+                              }
+                              return true;
+                            })
+                            .map((p) => (
+                              <SelectItem key={p.id} value={p.id}>
+                                {p.fullname} ({p.nationalId})
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                     <FieldError errors={field.state.meta.errors.map(e => ({ message: e as unknown as string }))} />
                   </FieldContent>
                 </Field>

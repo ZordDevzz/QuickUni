@@ -14,7 +14,8 @@ import {
   X,
   Briefcase,
   GraduationCap,
-  FolderTree
+  FolderTree,
+  BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,18 @@ const navItems: NavItem[] = [
     href: "/admin/onboarding", 
     icon: UserPlus 
   },
+  { 
+    key: "Academic", 
+    href: "/admin/academic", 
+    icon: BookOpen,
+    category: "Academic",
+    items: [
+      { key: "Departments", href: "/admin/academic/departments" },
+      { key: "Rooms", href: "/admin/academic/rooms" },
+      { key: "Buildings", href: "/admin/academic/buildings" },
+      { key: "Semesters", href: "/admin/academic/semesters" },
+    ]
+  },
   { key: "Settings", href: "/admin/system/settings", icon: Settings, category: "System" },
   { key: "Roles", href: "/admin/system/roles", icon: Users },
   { 
@@ -77,7 +90,7 @@ export function AdminSidebar({
 }: AdminSidebarProps) {
   const pathname = usePathname();
   const t = useTranslations("Navigation");
-  const [expandedItems, setExpandedItems] = useState<string[]>(["Profiles"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Profiles", "Academic"]);
 
   const toggleExpand = (key: string) => {
     setExpandedItems(prev => 
@@ -133,7 +146,8 @@ export function AdminSidebar({
         <nav className="flex-1 space-y-1 p-2 overflow-y-auto overflow-x-hidden scrollbar-none">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname.endsWith(item.href);
+            const isChildActive = item.items?.some(subItem => pathname.endsWith(subItem.href) || pathname.includes(subItem.href));
+            const isActive = pathname.endsWith(item.href) || (item.href !== "/admin" && item.href !== "/academic" && pathname.includes(item.href)) || isChildActive;
             const hasSubItems = item.items && item.items.length > 0;
             const isExpanded = expandedItems.includes(item.key);
             const label = t(item.key);
@@ -150,11 +164,12 @@ export function AdminSidebar({
                     <button
                       onClick={() => toggleExpand(item.key)}
                       className={cn(
-                        "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                        isActive && "text-foreground font-semibold"
                       )}
                     >
                       <div className="flex items-center gap-3">
-                        <Icon className="h-4 w-4 shrink-0" />
+                        <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
                         <span className="truncate">{label}</span>
                       </div>
                       <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
@@ -162,7 +177,7 @@ export function AdminSidebar({
                     {isExpanded && (
                       <div className="mt-1 ml-4 space-y-1 border-l pl-4">
                         {item.items!.map((subItem) => {
-                          const isSubActive = pathname.endsWith(subItem.href);
+                          const isSubActive = pathname.endsWith(subItem.href) || pathname.includes(subItem.href);
                           return (
                             <Link
                               key={subItem.href}
@@ -170,7 +185,7 @@ export function AdminSidebar({
                               className={cn(
                                 "block rounded-md px-3 py-2 text-sm font-medium transition-colors",
                                 isSubActive 
-                                  ? "text-primary" 
+                                  ? "text-primary font-semibold" 
                                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                               )}
                             >

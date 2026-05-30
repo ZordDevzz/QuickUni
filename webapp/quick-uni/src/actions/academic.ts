@@ -1,11 +1,11 @@
 "use server";
 
 import { db } from "../db";
-import { semester, department, major, subject, subjectPrerequisite, educationType } from "../db/schemas/academic";
+import { semester, department, major, subject, subjectPrerequisite, educationType, departmentPosition } from "../db/schemas/academic";
 import { departmentEmployment } from "../db/schemas/system";
 import { mainClass } from "../db/schemas/course";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { eq, ne, desc, asc, isNull, sql } from "drizzle-orm";
+import { eq, ne, desc, asc, isNull, sql, and } from "drizzle-orm";
 import {
   semesterSchema,
   SemesterInput,
@@ -19,6 +19,8 @@ import {
   SubjectInput,
   mainClassSchema,
   MainClassInput,
+  departmentPositionSchema,
+  DepartmentPositionInput,
 } from "../lib/validators/academic";
 import { revalidatePath } from "next/cache";
 
@@ -343,4 +345,99 @@ export async function getMainClassDetails(id: string) {
       }
     }
   });
+}
+
+export async function unassignStaffFromDepartment(employeeId: string, departmentId: string) {
+  await db
+    .delete(departmentEmployment)
+    .where(
+      and(
+        eq(departmentEmployment.employeeId, employeeId),
+        eq(departmentEmployment.departmentId, departmentId)
+      )
+    );
+  revalidatePath("/[locale]/admin/academic/departments/[id]", "page");
+  return { success: true };
+}
+
+export async function getDepartmentPositions(departmentId: string) {
+  return await db.query.departmentPosition.findMany({
+    where: eq(departmentPosition.departmentId, departmentId),
+    orderBy: [asc(departmentPosition.code)],
+  });
+}
+
+export async function upsertDepartmentPosition(data: DepartmentPositionInput) {
+  const validated = departmentPositionSchema.parse(data);
+  const { id, ...values } = validated;
+
+  let result;
+  if (id) {
+    [result] = await db
+      .update(departmentPosition)
+      .set(values)
+      .where(eq(departmentPosition.id, id))
+      .returning();
+  } else {
+    [result] = await db
+      .insert(departmentPosition)
+      .values({
+        id: crypto.randomUUID(),
+        ...values,
+      })
+      .returning();
+  }
+
+  revalidatePath("/[locale]/admin/academic/departments/[id]", "page");
+  return result;
+}
+
+export async function deleteDepartmentPosition(id: string) {
+  await db.delete(departmentPosition).where(eq(departmentPosition.id, id));
+  revalidatePath("/[locale]/admin/academic/departments/[id]", "page");
+  return { success: true };
+}
+
+export async function initializeDefaultPositions(departmentId: string, isAcademic: boolean) {
+  const defaults = isAcademic 
+    ? [
+        { code: "TRUONG_KHOA", name: "Trưởng khoa", des: "Điều hành và quản lý chung toàn khoa" },
+        { code: "PHO_KHOA", name: "Phó Trưởng khoa", des: "Hỗ trợ Trưởng khoa quản lý học thuật/khảo thí" },
+        { code: "TRUONG_BO_MON", name: "Trưởng bộ môn", des: "Quản lý tổ chuyên môn học phần" },
+        { code: "GIANG_VIEN", name: "Giảng viên", des: "Công tác giảng dạy và nghiên cứu khoa học" },
+        { code: "TRO_GIANG", name: "Trợ giảng", des: "Hỗ trợ giảng dạy, chấm bài" },
+        { code: "GIAO_VU", name: "Giáo vụ khoa", des: "Quản lý hồ sơ học tập và thời khóa biểu khoa" },
+        { code: "NHAN_VIEN", name: "Nhân viên văn phòng", des: "Công tác hành chính hỗ trợ tại văn phòng khoa" },
+      ]
+    : [
+        { code: "TRUONG_PHONG", name: "Trưởng phòng", des: "Chỉ đạo, quản lý và điều hành các hoạt động của phòng" },
+        { code: "PHO_PHONG", name: "Phó Trưởng phòng", des: "Phụ trách các mảng công việc chuyên biệt theo phân công" },
+        { code: "CHUYEN_VIEN", name: "Chuyên viên", des: "Nghiên cứu, tham mưu và thực thi các nghiệp vụ chuyên môn" },
+        { code: "NHAN_VIEN", name: "Nhân viên", des: "Thực hiện các công việc văn thư, hỗ trợ hành chính" },
+      ];
+
+  await db.transaction(async (tx) => {
+    for (const item of defaults) {
+      // Check if code already exists for this department
+      const existing = await tx.query.departmentPosition.findFirst({
+        where: and(
+          eq(departmentPosition.departmentId, departmentId),
+          eq(departmentPosition.code, item.code)
+        )
+      });
+      
+      if (!existing) {
+        await tx.insert(departmentPosition).values({
+          id: crypto.randomUUID(),
+          departmentId,
+          code: item.code,
+          name: item.name,
+          des: item.des,
+        });
+      }
+    }
+  });
+
+  revalidatePath("/[locale]/admin/academic/departments/[id]", "page");
+  return { success: true };
 }
