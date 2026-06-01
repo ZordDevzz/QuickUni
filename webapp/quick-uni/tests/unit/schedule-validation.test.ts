@@ -45,7 +45,7 @@ describe('Schedule Validation Service', () => {
 
     const result = await validateManualEdit(baseParams);
     expect(result.valid).toBe(false);
-    expect(result.reason).toBe('Teacher is busy in this time slot');
+    expect(result.reason).toBe('Giảng viên đã có lịch dạy trong khung giờ này.');
   });
 
   it('should detect room collisions', async () => {
@@ -58,7 +58,7 @@ describe('Schedule Validation Service', () => {
 
     const result = await validateManualEdit(baseParams);
     expect(result.valid).toBe(false);
-    expect(result.reason).toBe('Room is occupied in this time slot');
+    expect(result.reason).toBe('Phòng học đã được sử dụng trong khung giờ này.');
   });
 
   it('should ignore the current schedule ID being edited', async () => {

@@ -21,7 +21,7 @@ export const seedPeople = async (
   majors: any[]
 ) => {
   console.log("👥 Seeding people (realistic Vietnamese accounts)...");
-  const pwdHash = await hash("password123", 10);
+  const pwdHash = await hash("QuickUni@2026", 10);
 
   // 1. Seed Education Type first
   const [eduType] = await db.insert(educationType).values({
@@ -45,7 +45,7 @@ export const seedPeople = async (
     gender: "male",
     dob: "1980-01-01",
     nationalId: "001080000001",
-    dynamicData: { personal_email: "admin@gmail.com", phone: "0999999999" }
+    dynamicData: { bank_name: "Vietcombank", bank_account: "0011000123456" }
   });
 
   // Insert Admin Employee Record
@@ -87,7 +87,7 @@ export const seedPeople = async (
     gender: "male",
     dob: "1985-04-12",
     nationalId: "001085002934",
-    dynamicData: { personal_email: "haipm@gmail.com", phone: "0912345678" }
+    dynamicData: { bank_name: "BIDV", bank_account: "1231000987654" }
   });
   await db.insert(employee).values({
     id: academicEmployeeId,
@@ -144,7 +144,7 @@ export const seedPeople = async (
       gender: t.gender,
       dob: t.dob,
       nationalId: `0010${Math.floor(10000000 + Math.random() * 90000000)}`,
-      dynamicData: { personal_email: `${accId.substring(0, 5)}@gmail.com`, phone: `09${Math.floor(10000000 + Math.random() * 90000000)}` }
+      dynamicData: { bank_name: "VietinBank", bank_account: `10187${Math.floor(100000 + Math.random() * 900000)}` }
     });
     const [empRecord] = await db.insert(employee).values({
       id: empId,
@@ -251,7 +251,7 @@ export const seedPeople = async (
       gender: i % 2 === 0 ? "male" : "female",
       dob: classIndex < 2 ? "2003-05-12" : "2004-09-18",
       nationalId: `00120300${1000 + i}`,
-      dynamicData: { personal_email: `${username}@gmail.com`, phone: `0987${100000 + i}` }
+      dynamicData: { bank_name: "Agribank", bank_account: `150520${100000 + i}` }
     });
     const [studRecord] = await db.insert(student).values({
       id: studId,

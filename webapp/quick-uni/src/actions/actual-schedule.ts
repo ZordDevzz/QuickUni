@@ -7,7 +7,7 @@ import { subject } from "@/db/schemas/academic";
 import { and, eq, ne, between, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { validateManualEdit } from "@/services/schedule-validation";
-import { createMask } from "@/lib/scheduling/bitmask";
+import { createMask, hasCollision } from "@/lib/scheduling/bitmask";
 import { findEmptySlots } from "@/lib/scheduling/slot-finder";
 
 export async function getActualScheduleByEntity(
@@ -323,4 +323,73 @@ export async function approveRelocationAction(params: {
     return { success: false, error: "Không thể di dời lịch học." };
   }
 }
+
+export async function getOccupiedRoomsAction(params: {
+  viewMode: 'template' | 'actual';
+  schDate?: string;
+  dayOfWeek?: number;
+  startPeriod: number;
+  endPeriod: number;
+  semesterId: number | null;
+  excludeScheduleId?: string;
+}) {
+  try {
+    const occupiedRoomIds: number[] = [];
+    const newMask = createMask(params.startPeriod, params.endPeriod);
+
+    if (params.viewMode === 'actual' && params.schDate) {
+      const conditions = [
+        eq(schedule.schDate, params.schDate),
+        isNull(schedule.deletedAt),
+      ];
+      if (params.excludeScheduleId) {
+        const numId = parseInt(params.excludeScheduleId);
+        if (!isNaN(numId)) {
+          conditions.push(ne(schedule.id, numId));
+        }
+      }
+
+      const roomSchedules = await db.query.schedule.findMany({
+        where: and(...conditions)
+      });
+
+      for (const s of roomSchedules) {
+        if (s.roomId && s.period && s.endPeriod) {
+          const existingMask = createMask(s.period, s.endPeriod);
+          if (hasCollision(newMask, existingMask)) {
+            occupiedRoomIds.push(s.roomId);
+          }
+        }
+      }
+    } else if (params.viewMode === 'template' && params.semesterId && params.dayOfWeek !== undefined) {
+      const conditions = [
+        eq(weeklyTemplate.dayOfWeek, params.dayOfWeek),
+      ];
+      if (params.excludeScheduleId) {
+        conditions.push(ne(weeklyTemplate.id, params.excludeScheduleId));
+      }
+
+      const templates = await db.query.weeklyTemplate.findMany({
+        where: and(...conditions),
+        with: {
+          courseClass: true
+        }
+      });
+
+      for (const t of templates) {
+        if (t.roomId && t.courseClass?.semesterId === params.semesterId) {
+          if (hasCollision(newMask, t.occupyMask)) {
+            occupiedRoomIds.push(t.roomId);
+          }
+        }
+      }
+    }
+
+    return { success: true, occupiedRoomIds: Array.from(new Set(occupiedRoomIds)) };
+  } catch (error) {
+    console.error("Error in getOccupiedRoomsAction:", error);
+    return { success: false, occupiedRoomIds: [] };
+  }
+}
+
 

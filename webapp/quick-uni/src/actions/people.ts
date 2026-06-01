@@ -162,6 +162,11 @@ export async function getPeople(type: "employee" | "student") {
             },
           },
         },
+        departmentEmployments: {
+          with: {
+            department: true,
+          },
+        },
       },
       orderBy: (e, { desc }) => [desc(e.createAt)],
     });

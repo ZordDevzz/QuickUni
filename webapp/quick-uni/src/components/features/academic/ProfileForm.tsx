@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { createProfileSchema, updateProfileSchema } from "@/lib/validators/profile";
 import { createProfileAction, updateProfileAction } from "@/actions/admin";
@@ -12,10 +13,12 @@ import { z } from "zod";
 import { ProfileWithAccount, Profile } from "@/types/profile";
 import { useTranslations } from "next-intl";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { getFieldsForSchema, SchemaField } from "@/actions/schema-field";
 
 interface ProfileFormProps {
   profile?: ProfileWithAccount | Profile; // Optional for creation
-  onSuccess?: (profileId?: string, fullname?: string) => void;
+  onSuccess?: (profileId?: string, fullname?: string, code?: string) => void;
   schemas?: { id: number; schemaCode: string }[];
 }
 
@@ -36,7 +39,9 @@ export function ProfileForm({ profile, onSuccess, schemas = [] }: ProfileFormPro
       ethnic: profile?.ethnic || "",
       religious: profile?.religious || "",
       schemaId: profile?.schemaId || (schemas.length > 0 ? schemas[0].id : 0),
+      dynamicData: (profile?.dynamicData || {}) as Record<string, any>,
     },
+
     onSubmit: async ({ value }) => {
       try {
         const schema = isEdit ? updateProfileSchema : createProfileSchema;
@@ -56,7 +61,7 @@ export function ProfileForm({ profile, onSuccess, schemas = [] }: ProfileFormPro
 
         if (result.success) {
           notify(isEdit ? toastT("AccountUpdated") : toastT("AccountCreated"), { type: "success" });
-          onSuccess?.((result as any).profileId, value.fullname);
+          onSuccess?.((result as any).profileId, value.fullname, (result as any).code);
           router.refresh();
         } else {
           notify(result.error || toastT("SubmitFailed"), { type: "error" });
@@ -306,6 +311,12 @@ export function ProfileForm({ profile, onSuccess, schemas = [] }: ProfileFormPro
         </form.Field>
       </div>
 
+      <form.Subscribe selector={(state) => state.values.schemaId}>
+        {(schemaId) => (
+          <DynamicFields schemaId={Number(schemaId)} form={form} />
+        )}
+      </form.Subscribe>
+
       <form.Subscribe
         selector={(state) => [state.canSubmit, state.isSubmitting]}
       >
@@ -316,5 +327,129 @@ export function ProfileForm({ profile, onSuccess, schemas = [] }: ProfileFormPro
         )}
       </form.Subscribe>
     </form>
+  );
+}
+
+interface DynamicFieldsProps {
+  schemaId: number;
+  form: any;
+}
+
+function DynamicFields({ schemaId, form }: DynamicFieldsProps) {
+  const [fields, setFields] = useState<SchemaField[]>([]);
+
+  useEffect(() => {
+    async function loadFields() {
+      if (schemaId) {
+        const data = await getFieldsForSchema(schemaId);
+        setFields(data);
+      } else {
+        setFields([]);
+      }
+    }
+    loadFields();
+  }, [schemaId]);
+
+  if (fields.length === 0) return null;
+
+  const sections = fields.reduce((acc, field) => {
+    const section = field.profileField.uiSection || "Extra";
+    if (!acc[section]) acc[section] = [];
+    acc[section].push(field);
+    return acc;
+  }, {} as Record<string, SchemaField[]>);
+
+  return (
+    <form.Field name="dynamicData">
+      {(dynamicDataField: any) => {
+        const dynamicValue = (dynamicDataField.state.value || {}) as Record<string, any>;
+        return (
+          <div className="space-y-6 pt-4 border-t border-border/40">
+            {Object.entries(sections).map(([sectionName, sectionFields]) => (
+              <div key={sectionName} className="space-y-4">
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground border-b pb-1.5 capitalize">
+                  {sectionName}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {sectionFields.map((field) => {
+                    const fieldName = field.profileField.name;
+                    if (!fieldName) return null;
+                    const value = dynamicValue[fieldName] ?? "";
+                    const isRequired = field.isRequired;
+
+                    const handleFieldChange = (val: any) => {
+                      dynamicDataField.handleChange({
+                        ...dynamicValue,
+                        [fieldName]: val,
+                      });
+                    };
+
+                    const datatype = field.profileField.datatype;
+
+                    return (
+                      <Field key={field.fieldId}>
+                        {datatype !== "boolean" && (
+                          <FieldLabel htmlFor={fieldName}>
+                            {field.profileField.label}
+                            {isRequired && <span className="text-destructive ml-1">*</span>}
+                          </FieldLabel>
+                        )}
+                        <FieldContent>
+                          {datatype === "boolean" ? (
+                            <div className="flex items-center space-x-2 py-2">
+                              <Checkbox
+                                id={fieldName}
+                                checked={!!value}
+                                onCheckedChange={handleFieldChange}
+                              />
+                              <FieldLabel
+                                htmlFor={fieldName}
+                                className="cursor-pointer font-normal text-sm"
+                              >
+                                {field.profileField.label}
+                                {isRequired && <span className="text-destructive ml-1">*</span>}
+                              </FieldLabel>
+                            </div>
+                          ) : datatype === "number" ? (
+                            <Input
+                              id={fieldName}
+                              type="number"
+                              value={value}
+                              onChange={(e) =>
+                                handleFieldChange(
+                                  e.target.value === "" ? "" : Number(e.target.value)
+                                )
+                              }
+                              placeholder={field.profileField.label || ""}
+                              required={isRequired}
+                            />
+                          ) : datatype === "date" ? (
+                            <Input
+                              id={fieldName}
+                              type="date"
+                              value={value}
+                              onChange={(e) => handleFieldChange(e.target.value)}
+                              required={isRequired}
+                            />
+                          ) : (
+                            <Input
+                              id={fieldName}
+                              value={value}
+                              onChange={(e) => handleFieldChange(e.target.value)}
+                              placeholder={field.profileField.label || ""}
+                              required={isRequired}
+                            />
+                          )}
+                        </FieldContent>
+                      </Field>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      }}
+    </form.Field>
   );
 }

@@ -26,6 +26,19 @@ export const getColumns = (t: TranslationFunction, isStudent?: boolean): ColumnD
       cell: ({ row }) => row.getValue("fullname") || "N/A",
     },
     {
+      id: "code",
+      header: isStudent ? "Mã SV" : "Mã NV",
+      cell: ({ row }) => {
+        if (isStudent) {
+          const studentObj = (row.original as any).students?.[0];
+          return studentObj?.code || "N/A";
+        } else {
+          const employeeObj = (row.original as any).employees?.[0];
+          return employeeObj?.code || "N/A";
+        }
+      }
+    },
+    {
       accessorKey: "gender",
       header: t("Gender"),
       cell: ({ row }) => {

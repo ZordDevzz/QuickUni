@@ -1,20 +1,41 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { getMainClassDetails, deleteMainClass } from '@/actions/academic';
+import { 
+  getMainClassDetails, 
+  deleteMainClass, 
+  addStudentToClass, 
+  removeStudentFromClass, 
+  getAvailableStudents 
+} from '@/actions/academic';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { DataTable } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Users, Info, Edit, Trash2 } from 'lucide-react';
+import { Loader2, Users, Info, Edit, Trash2, Plus, UserPlus } from 'lucide-react';
 import { ColumnDef } from '@tanstack/react-table';
 import { ClassDialog } from '@/components/features/academic/ClassDialogs';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { notify } from '@/lib/custom-toast';
 import { FormattedDate } from '@/components/shared/FormattedDate';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface DetailViewProps {
   classId: string;
@@ -29,6 +50,12 @@ export function DetailView({ classId }: DetailViewProps) {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  // Manual student add states
+  const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
+  const [availableStudents, setAvailableStudents] = useState<any[]>([]);
+  const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [loadingStudents, setLoadingStudents] = useState(false);
 
   const load = useCallback(async () => {
     await Promise.resolve();
@@ -49,6 +76,56 @@ export function DetailView({ classId }: DetailViewProps) {
       load();
     }
   }, [classId, load]);
+
+  const loadAvailableStudents = async () => {
+    setLoadingStudents(true);
+    try {
+      const students = await getAvailableStudents();
+      setAvailableStudents(students);
+    } catch (error) {
+      console.error("Failed to load available students:", error);
+      notify("Không thể tải danh sách sinh viên khả dụng.", { type: "error" });
+    } finally {
+      setLoadingStudents(false);
+    }
+  };
+
+  const handleOpenAddStudent = () => {
+    setIsAddStudentOpen(true);
+    loadAvailableStudents();
+  };
+
+  const handleAddStudent = async () => {
+    if (!selectedStudentId) return;
+    try {
+      const res = await addStudentToClass(classId, selectedStudentId);
+      if (res.success) {
+        notify("Thêm sinh viên thành công!", { type: "success" });
+        setIsAddStudentOpen(false);
+        setSelectedStudentId("");
+        load();
+      } else {
+        notify(res.error || "Thêm sinh viên thất bại.", { type: "error" });
+      }
+    } catch (err: any) {
+      notify(err.message || "Đã xảy ra lỗi khi thêm sinh viên.", { type: "error" });
+    }
+  };
+
+  const handleRemoveStudent = async (studentId: string) => {
+    if (!confirm("Bạn có chắc chắn muốn xóa sinh viên này khỏi lớp hành chính?")) return;
+    try {
+      const res = await removeStudentFromClass(classId, studentId);
+      if (res.success) {
+        notify("Xóa sinh viên khỏi lớp thành công!", { type: "success" });
+        load();
+      } else {
+        notify(res.error || "Không thể xóa sinh viên.", { type: "error" });
+      }
+    } catch (err: any) {
+      notify(err.message || "Đã xảy ra lỗi khi xóa sinh viên.", { type: "error" });
+    }
+  };
 
   const handleDelete = async () => {
     if (confirm(t("DeleteConfirm"))) {
@@ -121,6 +198,21 @@ export function DetailView({ classId }: DetailViewProps) {
           <span className="text-muted-foreground text-xs">{t("RoleMember")}</span>
         );
       }
+    },
+    {
+      id: "actions",
+      header: "Thao tác",
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleRemoveStudent(row.original.studentId)}
+          className="h-8 w-8 p-0 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-lg transition-colors"
+          title="Xóa khỏi lớp"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      )
     }
   ];
 
@@ -151,16 +243,27 @@ export function DetailView({ classId }: DetailViewProps) {
       </div>
 
       <Tabs defaultValue="roster" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-[300px]">
-          <TabsTrigger value="roster" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            {t("ClassRoster")}
-          </TabsTrigger>
-          <TabsTrigger value="about" className="flex items-center gap-2">
-            <Info className="h-4 w-4" />
-            {t("GeneralInfo")}
-          </TabsTrigger>
-        </TabsList>
+        <div className="flex justify-between items-center border-b border-border/40 pb-px">
+          <TabsList className="grid w-full grid-cols-2 max-w-[300px]">
+            <TabsTrigger value="roster" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              {t("ClassRoster")}
+            </TabsTrigger>
+            <TabsTrigger value="about" className="flex items-center gap-2">
+              <Info className="h-4 w-4" />
+              {t("GeneralInfo")}
+            </TabsTrigger>
+          </TabsList>
+
+          <Button 
+            onClick={handleOpenAddStudent}
+            size="sm"
+            className="rounded-lg h-9 bg-primary hover:bg-primary/90 transition-all font-semibold shadow-xs"
+          >
+            <UserPlus className="h-4 w-4 mr-1.5" />
+            Thêm sinh viên
+          </Button>
+        </div>
 
         <TabsContent value="roster" className="mt-6">
           <Card>
@@ -227,6 +330,58 @@ export function DetailView({ classId }: DetailViewProps) {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Add Student Dialog */}
+      <Dialog open={isAddStudentOpen} onOpenChange={setIsAddStudentOpen}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>Thêm sinh viên vào lớp hành chính</DialogTitle>
+            <DialogDescription>
+              Chọn sinh viên từ danh sách những người chưa được xếp vào lớp hành chính nào.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="student-select">Chọn sinh viên</Label>
+              {loadingStudents ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground p-3 border rounded-lg bg-muted/20">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  Đang tải danh sách sinh viên...
+                </div>
+              ) : availableStudents.length === 0 ? (
+                <div className="text-sm text-rose-500 p-3 border border-rose-500/20 rounded-lg bg-rose-500/5 font-medium">
+                  Tất cả sinh viên hiện tại đã được xếp lớp hành chính!
+                </div>
+              ) : (
+                <Select value={selectedStudentId} onValueChange={setSelectedStudentId}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Chọn một sinh viên" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[250px]">
+                    {availableStudents.map(s => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.profile?.fullname} - {s.code}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddStudentOpen(false)}>Hủy</Button>
+            <Button 
+              onClick={handleAddStudent} 
+              disabled={!selectedStudentId || loadingStudents}
+              className="bg-primary hover:bg-primary/90 font-semibold"
+            >
+              Thêm vào lớp
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <ClassDialog 
         open={isEditDialogOpen} 

@@ -266,8 +266,8 @@ export function DetailView({ departmentId }: DetailViewProps) {
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">{data.name}</h1>
           <div className="flex gap-2 mt-2">
-            <span className="px-2.5 py-1 bg-muted/60 dark:bg-muted/30 border border-border/30 rounded-xl text-xs font-mono font-semibold text-muted-foreground">
-              Mã đơn vị: {data.code || 'N/A'}
+            <span className="px-2.5 py-1 bg-muted/60 dark:bg-muted/30 border border-border/30 rounded-xl text-xs font-semibold text-muted-foreground">
+              Mã đơn vị: <span className="font-mono">{data.code || 'N/A'}</span>
             </span>
             <span className={`px-2.5 py-1 rounded-xl text-xs font-bold border ${
               isAcademicDept 

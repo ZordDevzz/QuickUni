@@ -22,10 +22,104 @@ import {
   deleteWeeklyTemplate,
   validateWeeklyTemplateEdit
 } from "@/actions/scheduling-data";
-import { upsertActualScheduleAction, deleteActualScheduleAction } from "@/actions/actual-schedule";
+import { upsertActualScheduleAction, deleteActualScheduleAction, getOccupiedRoomsAction } from "@/actions/actual-schedule";
 import { weeklyTemplateValidator, WeeklyTemplateInput } from "@/lib/validators/scheduling";
 import { Loader2, Trash2, RefreshCw, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+type RoomOption = Awaited<ReturnType<typeof getRooms>>[number];
+type CourseClassOption = Awaited<ReturnType<typeof getCourseClasses>>[number];
+type ScheduleTypeOption = Awaited<ReturnType<typeof getScheduleTypes>>[number];
+
+interface RoomSelectFieldProps {
+  field: any;
+  rooms: RoomOption[];
+  t: any;
+  tSM: any;
+  viewMode?: 'template' | 'actual';
+  schDate?: string;
+  dayOfWeek: number;
+  startPeriod: number;
+  endPeriod: number;
+  semesterId: number | null;
+  excludeScheduleId?: string;
+}
+
+function RoomSelectField({
+  field,
+  rooms,
+  t,
+  tSM,
+  viewMode,
+  schDate,
+  dayOfWeek,
+  startPeriod,
+  endPeriod,
+  semesterId,
+  excludeScheduleId
+}: RoomSelectFieldProps) {
+  const [occupiedRoomIds, setOccupiedRoomIds] = useState<number[]>([]);
+  const [checking, setChecking] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    async function checkOccupancy() {
+      setChecking(true);
+      try {
+        const result = await getOccupiedRoomsAction({
+          viewMode: viewMode || 'template',
+          schDate,
+          dayOfWeek,
+          startPeriod,
+          endPeriod,
+          semesterId,
+          excludeScheduleId
+        });
+        if (active && result.success) {
+          setOccupiedRoomIds(result.occupiedRoomIds);
+        }
+      } catch (err) {
+        console.error("Failed to fetch occupied rooms", err);
+      } finally {
+        if (active) setChecking(false);
+      }
+    }
+
+    if (startPeriod && endPeriod) {
+      checkOccupancy();
+    }
+
+    return () => {
+      active = false;
+    };
+  }, [viewMode, schDate, dayOfWeek, startPeriod, endPeriod, semesterId, excludeScheduleId]);
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <Label htmlFor={field.name}>{t("Room")}</Label>
+        {checking && <span className="text-[10px] text-muted-foreground animate-pulse">{tSM("CheckingRooms") || "Đang kiểm tra phòng..."}</span>}
+      </div>
+      <select
+        id={field.name}
+        name={field.name}
+        value={field.state.value}
+        onChange={(e) => field.handleChange(Number(e.target.value))}
+        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      >
+        <option value="0">{t("SelectRoom")}</option>
+        {rooms.map((room) => {
+          const isOccupied = occupiedRoomIds.includes(room.id);
+          return (
+            <option key={room.id} value={room.id} disabled={isOccupied} className={isOccupied ? "text-muted-foreground line-through bg-muted/30" : ""}>
+              {room.code} ({room.building?.name}){isOccupied ? ` - 🔴 ${tSM("BusyLocked") || "BẬN/KHÓA"}` : ""}
+            </option>
+          );
+        })}
+      </select>
+    </div>
+  );
+}
 
 interface ScheduleSlotDialogProps {
   isOpen: boolean;
@@ -35,10 +129,6 @@ interface ScheduleSlotDialogProps {
   onSuccess: () => void;
   viewMode?: 'template' | 'actual';
 }
-
-type RoomOption = Awaited<ReturnType<typeof getRooms>>[number];
-type CourseClassOption = Awaited<ReturnType<typeof getCourseClasses>>[number];
-type ScheduleTypeOption = Awaited<ReturnType<typeof getScheduleTypes>>[number];
 
 export function ScheduleSlotDialog({ 
   isOpen, 
@@ -290,27 +380,27 @@ export function ScheduleSlotDialog({
               )}
             </form.Field>
 
-            <form.Field name="roomId">
-              {(field) => (
-                <div className="space-y-2">
-                  <Label htmlFor={field.name}>{t("Room")}</Label>
-                  <select
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value}
-                    onChange={(e) => field.handleChange(Number(e.target.value))}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  >
-                    <option value="0">{t("SelectRoom")}</option>
-                    {rooms.map((room) => (
-                      <option key={room.id} value={room.id}>
-                        {room.code} ({room.building?.name})
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            <form.Subscribe selector={(state) => [state.values.dayOfWeek, state.values.startPeriod, state.values.endPeriod]}>
+              {([dayOfWeek, startPeriod, endPeriod]) => (
+                <form.Field name="roomId">
+                  {(field) => (
+                    <RoomSelectField
+                      field={field}
+                      rooms={rooms}
+                      t={t}
+                      tSM={tSM}
+                      viewMode={viewMode}
+                      schDate={(initialData as any)?.schDate}
+                      dayOfWeek={dayOfWeek as number}
+                      startPeriod={startPeriod as number}
+                      endPeriod={endPeriod as number}
+                      semesterId={semesterId}
+                      excludeScheduleId={initialData?.id}
+                    />
+                  )}
+                </form.Field>
               )}
-            </form.Field>
+            </form.Subscribe>
 
             <div className="grid grid-cols-3 gap-4">
               <form.Field name="dayOfWeek">

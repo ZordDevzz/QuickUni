@@ -13,6 +13,8 @@ import { Account, Profile } from "@/types/profile";
 import { useTranslations } from "next-intl";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+import { Sparkles } from "lucide-react";
+
 interface AccountFormProps {
   account?: Account; // If provided, we are in edit mode
   onSuccess?: () => void;
@@ -20,6 +22,7 @@ interface AccountFormProps {
   restrictType?: "student" | "personnel";
   initialProfileId?: string;
   initialProfileName?: string;
+  initialCode?: string;
 }
 
 export function AccountForm({ 
@@ -28,7 +31,8 @@ export function AccountForm({
   profiles = [], 
   restrictType,
   initialProfileId,
-  initialProfileName 
+  initialProfileName,
+  initialCode
 }: AccountFormProps) {
   const router = useRouter();
   const isEdit = !!account;
@@ -92,6 +96,14 @@ export function AccountForm({
     return undefined;
   };
 
+  const handleAutoFill = () => {
+    if (!initialCode) return;
+    form.setFieldValue("username", initialCode);
+    form.setFieldValue("email", `${initialCode.toLowerCase()}@quickuni.edu.vn`);
+    form.setFieldValue("password", "QuickUni@2026");
+    notify("Đã tự động điền Username, Email học viện và Mật khẩu mặc định!", { type: "success" });
+  };
+
   return (
     <form
       onSubmit={(e) => {
@@ -101,6 +113,21 @@ export function AccountForm({
       }}
       className="space-y-4"
     >
+      {initialCode && !isEdit && (
+        <div className="flex justify-end mb-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAutoFill}
+            className="text-xs bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/20 hover:border-indigo-500/30 gap-1.5 font-semibold py-1 h-8 rounded-lg transition-all duration-300 hover:shadow-sm"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-indigo-500 animate-pulse" />
+            Tự động điền thông tin
+          </Button>
+        </div>
+      )}
+
       <form.Field 
         name="username"
         validators={{

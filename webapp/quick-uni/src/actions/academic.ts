@@ -3,7 +3,8 @@
 import { db } from "../db";
 import { semester, department, major, subject, subjectPrerequisite, educationType, departmentPosition } from "../db/schemas/academic";
 import { departmentEmployment } from "../db/schemas/system";
-import { mainClass } from "../db/schemas/course";
+import { mainClass, mainClassMember } from "../db/schemas/course";
+import { student } from "../db/schemas/user";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { eq, ne, desc, asc, isNull, sql, and } from "drizzle-orm";
 import {
@@ -23,6 +24,12 @@ import {
   DepartmentPositionInput,
 } from "../lib/validators/academic";
 import { revalidatePath } from "next/cache";
+
+export type ActionResponse = {
+  success: boolean;
+  error?: string;
+  data?: unknown;
+};
 
 export async function getSemesters() {
   return await db.query.semester.findMany({
@@ -440,4 +447,48 @@ export async function initializeDefaultPositions(departmentId: string, isAcademi
 
   revalidatePath("/[locale]/admin/academic/departments/[id]", "page");
   return { success: true };
+}
+
+export async function addStudentToClass(classId: string, studentId: string): Promise<ActionResponse> {
+  try {
+    await db.insert(mainClassMember).values({
+      studentId,
+      classId,
+      roleId: 3, // Default role 'Member'
+    });
+    revalidatePath("/[locale]/academic/classes/[id]", "page");
+    revalidatePath("/academic/classes/[id]");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to add student to class:", error);
+    return { success: false, error: error.message || "Failed to add student to class" };
+  }
+}
+
+export async function removeStudentFromClass(classId: string, studentId: string): Promise<ActionResponse> {
+  try {
+    await db.delete(mainClassMember).where(
+      and(
+        eq(mainClassMember.studentId, studentId),
+        eq(mainClassMember.classId, classId)
+      )
+    );
+    revalidatePath("/[locale]/academic/classes/[id]", "page");
+    revalidatePath("/academic/classes/[id]");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to remove student from class:", error);
+    return { success: false, error: error.message || "Failed to remove student from class" };
+  }
+}
+
+export async function getAvailableStudents() {
+  const allStudents = await db.query.student.findMany({
+    with: {
+      profile: true,
+      mainClassMembers: true,
+    }
+  });
+  // Filter out students who are already members of any administrative class
+  return allStudents.filter(s => !s.mainClassMembers || s.mainClassMembers.length === 0);
 }

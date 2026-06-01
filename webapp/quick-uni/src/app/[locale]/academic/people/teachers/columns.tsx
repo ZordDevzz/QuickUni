@@ -27,6 +27,15 @@ export const getColumns = (t: any): ColumnDef<any>[] => [
     ),
   },
   {
+    id: "department",
+    header: "Khoa/Phòng ban",
+    cell: ({ row }) => {
+      const depts = row.original.departmentEmployments || [];
+      if (depts.length === 0) return "N/A";
+      return depts.map((d: any) => d.department?.name).filter(Boolean).join(", ");
+    },
+  },
+  {
     accessorKey: "profile.gender",
     header: t("Gender") || "Gender",
     cell: ({ row }) => {

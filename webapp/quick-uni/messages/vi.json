@@ -945,7 +945,9 @@
     "InvalidActualDate": "Ngày không hợp lệ trong học kỳ đã chọn",
     "ErrorSaveActual": "Lưu lịch học thất bại",
     "ErrorDeleteActual": "Xóa lịch học thất bại",
-    "MainSchedule": "Lịch chính thức"
+    "MainSchedule": "Lịch chính thức",
+    "CheckingRooms": "Đang kiểm tra phòng...",
+    "BusyLocked": "BẬN/KHÓA"
   },
 
   "MainClasses": {

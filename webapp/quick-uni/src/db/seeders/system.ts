@@ -6,6 +6,8 @@ import {
   profileSchema, 
   profileField, 
   profileSchemaField,
+  profileSection,
+  systemSetting,
   enrollStatus,
   classRole,
   gradeScale,
@@ -14,6 +16,7 @@ import {
 } from "../schema";
 import { hash } from "bcryptjs";
 import { randomUUID } from "crypto";
+import { sql } from "drizzle-orm";
 
 export const seedSystem = async () => {
   console.log("⚙️ Seeding system data...");
@@ -32,7 +35,7 @@ export const seedSystem = async () => {
   const [adminAccount] = await db.insert(account).values({
     id: adminId,
     username: "admin",
-    pwdHash: await hash("admin", 10),
+    pwdHash: await hash("QuickUni@2026", 10),
     type: "dev",
     status: "active",
     email: "admin@quickuni.edu.vn",
@@ -57,10 +60,23 @@ export const seedSystem = async () => {
     createAt: new Date().toISOString(),
   }).returning();
 
+  // 3.5. Profile Sections
+  const [studentSection] = await db.insert(profileSection).values({
+    schemaId: schema.id,
+    name: "Thông tin thanh toán",
+    order: 1,
+  }).returning();
+
+  const [employeeSection] = await db.insert(profileSection).values({
+    schemaId: empSchema.id,
+    name: "Thông tin thanh toán",
+    order: 1,
+  }).returning();
+
   // 4. Profile Fields
   const fields = [
-    { name: "personal_email", datatype: "string", uiSection: "contact", label: "Personal Email", des: "External email address", createAt: new Date().toISOString() },
-    { name: "phone", datatype: "string", uiSection: "contact", label: "Phone Number", des: "Contact phone", createAt: new Date().toISOString() },
+    { name: "bank_name", datatype: "string", uiSection: "banking", label: "Tên ngân hàng", des: "Tên ngân hàng nhận học bổng / lương", createAt: new Date().toISOString() },
+    { name: "bank_account", datatype: "string", uiSection: "banking", label: "Số tài khoản ngân hàng", des: "Số tài khoản ngân hàng nhận học bổng / lương", createAt: new Date().toISOString() },
   ];
   const insertedFields = await db.insert(profileField).values(fields).returning();
 
@@ -70,14 +86,16 @@ export const seedSystem = async () => {
     schemaFieldsToInsert.push({
       fieldId: f.id,
       schemaId: schema.id,
+      sectionId: studentSection.id,
       order: i * 2,
-      isRequired: true,
+      isRequired: false, // Optional as requested (not required)
     });
     schemaFieldsToInsert.push({
       fieldId: f.id,
       schemaId: empSchema.id,
+      sectionId: employeeSection.id,
       order: i * 2 + 1,
-      isRequired: true,
+      isRequired: false, // Optional as requested (not required)
     });
   });
   await db.insert(profileSchemaField).values(schemaFieldsToInsert);
@@ -124,7 +142,54 @@ export const seedSystem = async () => {
     { id: 1, code: "NORMAL",    name: "Bình thường", isComplete: false },
     { id: 2, code: "CANCELLED", name: "Đã hủy",     isComplete: false },
   ];
-  await db.insert(scheduleStatus).values(scheduleStatuses).onConflictDoNothing();
+  // 11. Default Schema IDs & Auto Code Rules in System Settings
+  await db.insert(systemSetting).values([
+    {
+      key: "DEFAULT_STUDENT_SCHEMA_ID",
+      value: schema.id,
+      displayName: "Default Student Profile Structure",
+      des: "System default profile schema ID for students",
+      isSensitive: false,
+    },
+    {
+      key: "DEFAULT_EMPLOYEE_SCHEMA_ID",
+      value: empSchema.id,
+      displayName: "Default Employee Profile Structure",
+      des: "System default profile schema ID for employees/teachers",
+      isSensitive: false,
+    },
+    {
+      key: "AUTO_STUDENT_CODE_RULE",
+      value: {
+        prefix: "SV",
+        hasYear: true,
+        yearFormat: "YY",
+        seqPadding: 4,
+        currentSeq: 1000,
+        isActive: true,
+      },
+      displayName: "Student Auto Code Generation Rule",
+      des: "Automatic student code generation rules and sequence tracking",
+      isSensitive: false,
+    },
+    {
+      key: "AUTO_EMPLOYEE_CODE_RULE",
+      value: {
+        prefix: "NV",
+        hasYear: true,
+        yearFormat: "YY",
+        seqPadding: 4,
+        currentSeq: 1000,
+        isActive: true,
+      },
+      displayName: "Employee Auto Code Generation Rule",
+      des: "Automatic employee code generation rules and sequence tracking",
+      isSensitive: false,
+    }
+  ]).onConflictDoUpdate({
+    target: systemSetting.key,
+    set: { value: sql`excluded.value` }
+  });
 
   console.log("✅ System data seeded.");
   return { 

@@ -65,6 +65,7 @@ export function ProfileRowActions({ profile }: ProfileRowActionsProps) {
             onSuccess={() => setIsAccountOpen(false)} 
             initialProfileId={profile.id}
             initialProfileName={profile.fullname || undefined}
+            initialCode={isStudent ? (profile as any).students?.[0]?.code : (profile as any).employees?.[0]?.code}
             restrictType={isStudent ? "student" : "personnel"}
           />
         </DialogContent>

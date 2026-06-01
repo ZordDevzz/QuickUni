@@ -3,26 +3,23 @@
 import { db } from "../db";
 import { 
   courseClass, 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
   courseClassType, 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
   employee, 
   subject, 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
   semester, 
   enrollment, 
   profile,
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
   student,
   courseMaterial,
   grade,
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
   gradeType,
   weeklyTemplate,
   department,
-  major
+  major,
+  mainClass,
+  mainClassMember
 } from "../db/schema";
-import { eq, and, isNull, exists } from "drizzle-orm";
+import { eq, and, isNull, exists, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { 
   CourseClassInsertInput, 
@@ -309,5 +306,224 @@ export async function getStudentClassDetails(classId: string) {
   ]);
 
   return { materials, grades, schedule };
+}
+
+export async function enrollMainClassIntoCourseClass(courseClassId: string, mainClassId: string): Promise<ActionResponse> {
+  try {
+    return await db.transaction(async (tx) => {
+      // 1. Get all students in the main class
+      const members = await tx.query.mainClassMember.findMany({
+        where: eq(mainClassMember.classId, mainClassId),
+      });
+
+      if (members.length === 0) {
+        return { success: false, error: "Lớp hành chính này không có sinh viên nào." };
+      }
+
+      let enrolledCount = 0;
+
+      // 2. Enroll each student if not already enrolled
+      for (const member of members) {
+        const existing = await tx.query.enrollment.findFirst({
+          where: and(
+            eq(enrollment.studentId, member.studentId),
+            eq(enrollment.courseClassId, courseClassId),
+            isNull(enrollment.deletedAt)
+          ),
+        });
+
+        if (!existing) {
+          await tx.insert(enrollment).values({
+            studentId: member.studentId,
+            courseClassId: courseClassId,
+            status: 1, // e.g., default enrolled status
+          });
+          enrolledCount++;
+        }
+      }
+
+      if (enrolledCount > 0) {
+        // 3. Increment currentSlot
+        await tx.update(courseClass)
+          .set({ currentSlot: sql`${courseClass.currentSlot} + ${enrolledCount}` })
+          .where(eq(courseClass.id, courseClassId));
+      }
+
+      revalidatePath("/[locale]/academic/courses/classes", "page");
+      revalidatePath("/academic/courses/classes");
+      return { success: true };
+    });
+  } catch (error: any) {
+    console.error("Failed to enroll main class into course class:", error);
+    return { success: false, error: error.message || "Không thể đăng ký lớp hành chính." };
+  }
+}
+
+export async function unenrollMainClassFromCourseClass(courseClassId: string, mainClassId: string): Promise<ActionResponse> {
+  try {
+    return await db.transaction(async (tx) => {
+      // 1. Get all students in the main class
+      const members = await tx.query.mainClassMember.findMany({
+        where: eq(mainClassMember.classId, mainClassId),
+      });
+
+      if (members.length === 0) {
+        return { success: false, error: "Lớp hành chính này không có sinh viên nào." };
+      }
+
+      let unenrolledCount = 0;
+
+      // 2. Remove each student's enrollment
+      for (const member of members) {
+        const existing = await tx.query.enrollment.findFirst({
+          where: and(
+            eq(enrollment.studentId, member.studentId),
+            eq(enrollment.courseClassId, courseClassId),
+            isNull(enrollment.deletedAt)
+          ),
+        });
+
+        if (existing) {
+          await tx.update(enrollment)
+            .set({ deletedAt: new Date().toISOString() })
+            .where(eq(enrollment.id, existing.id));
+          unenrolledCount++;
+        }
+      }
+
+      if (unenrolledCount > 0) {
+        // 3. Decrement currentSlot
+        await tx.update(courseClass)
+          .set({ currentSlot: sql`${courseClass.currentSlot} - ${unenrolledCount}` })
+          .where(eq(courseClass.id, courseClassId));
+      }
+
+      revalidatePath("/[locale]/academic/courses/classes", "page");
+      revalidatePath("/academic/courses/classes");
+      return { success: true };
+    });
+  } catch (error: any) {
+    console.error("Failed to unenroll main class from course class:", error);
+    return { success: false, error: error.message || "Không thể hủy đăng ký lớp hành chính." };
+  }
+}
+
+export async function getCourseClassMainClasses(courseClassId: string) {
+  const enrolls = await db.query.enrollment.findMany({
+    where: and(
+      eq(enrollment.courseClassId, courseClassId),
+      isNull(enrollment.deletedAt)
+    ),
+    with: {
+      student: {
+        with: {
+          mainClassMembers: {
+            with: {
+              mainClass: true
+            }
+          }
+        }
+      }
+    }
+  });
+
+  const mainClassesMap = new Map<string, any>();
+  enrolls.forEach(e => {
+    const mainClassObj = e.student?.mainClassMembers?.[0]?.mainClass;
+    if (mainClassObj) {
+      mainClassesMap.set(mainClassObj.id, mainClassObj);
+    }
+  });
+
+  return Array.from(mainClassesMap.values());
+}
+
+export async function enrollStudentIntoCourseClass(courseClassId: string, studentId: string): Promise<ActionResponse> {
+  try {
+    return await db.transaction(async (tx) => {
+      const existing = await tx.query.enrollment.findFirst({
+        where: and(
+          eq(enrollment.studentId, studentId),
+          eq(enrollment.courseClassId, courseClassId),
+          isNull(enrollment.deletedAt)
+        ),
+      });
+
+      if (existing) {
+        return { success: false, error: "Sinh viên đã đăng ký lớp học phần này rồi." };
+      }
+
+      await tx.insert(enrollment).values({
+        studentId,
+        courseClassId,
+        status: 1, // e.g. default status Enrolled
+      });
+
+      await tx.update(courseClass)
+        .set({ currentSlot: sql`${courseClass.currentSlot} + 1` })
+        .where(eq(courseClass.id, courseClassId));
+
+      revalidatePath("/[locale]/academic/courses/classes", "page");
+      revalidatePath("/academic/courses/classes");
+      return { success: true };
+    });
+  } catch (error: any) {
+    console.error("Failed to enroll student into course class:", error);
+    return { success: false, error: error.message || "Không thể đăng ký sinh viên." };
+  }
+}
+
+export async function unenrollStudentFromCourseClass(courseClassId: string, studentId: string): Promise<ActionResponse> {
+  try {
+    return await db.transaction(async (tx) => {
+      const existing = await tx.query.enrollment.findFirst({
+        where: and(
+          eq(enrollment.studentId, studentId),
+          eq(enrollment.courseClassId, courseClassId),
+          isNull(enrollment.deletedAt)
+        ),
+      });
+
+      if (!existing) {
+        return { success: false, error: "Sinh viên chưa đăng ký lớp học phần này." };
+      }
+
+      await tx.update(enrollment)
+        .set({ deletedAt: new Date().toISOString() })
+        .where(eq(enrollment.id, existing.id));
+
+      await tx.update(courseClass)
+        .set({ currentSlot: sql`${courseClass.currentSlot} - 1` })
+        .where(eq(courseClass.id, courseClassId));
+
+      revalidatePath("/[locale]/academic/courses/classes", "page");
+      revalidatePath("/academic/courses/classes");
+      return { success: true };
+    });
+  } catch (error: any) {
+    console.error("Failed to unenroll student from course class:", error);
+    return { success: false, error: error.message || "Không thể hủy đăng ký sinh viên." };
+  }
+}
+
+export async function getCourseClassManagementData(courseClassId: string) {
+  const [mainClasses, participating, enrolls, allStudents] = await Promise.all([
+    db.query.mainClass.findMany({
+      orderBy: (mc, { asc }) => [asc(mc.code)],
+    }),
+    getCourseClassMainClasses(courseClassId),
+    getClassStudents(courseClassId),
+    db.query.student.findMany({
+      with: {
+        profile: true,
+      }
+    })
+  ]);
+
+  // Find available students (not currently enrolled in the course class)
+  const enrolledStudentIds = new Set(enrolls.map(e => e.studentId));
+  const availableStudents = allStudents.filter(s => !enrolledStudentIds.has(s.id));
+
+  return { mainClasses, participatingMainClasses: participating, enrolledStudents: enrolls, availableStudents };
 }
 

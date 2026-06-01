@@ -949,7 +949,9 @@
     "InvalidActualDate": "Invalid date for the selected semester",
     "ErrorSaveActual": "Failed to save schedule slot",
     "ErrorDeleteActual": "Failed to delete schedule slot",
-    "MainSchedule": "Main Schedule"
+    "MainSchedule": "Main Schedule",
+    "CheckingRooms": "Checking room...",
+    "BusyLocked": "BUSY/LOCKED"
   },
 
   "MainClasses": {

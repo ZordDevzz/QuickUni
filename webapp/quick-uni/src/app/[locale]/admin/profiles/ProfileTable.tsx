@@ -15,7 +15,6 @@ import {
   UserCheck, 
   FilterX,
   ShieldCheck,
-  Search,
   BookOpen
 } from "lucide-react";
 
@@ -36,46 +35,107 @@ export function ProfileTable({ data, isStudent }: ProfileTableProps) {
 
   const columns = useMemo(() => getColumns(t as unknown as TranslationFunction, isStudent), [t, isStudent]);
 
-  // Extract unique metadata from data dynamically for Student profiles
-  const uniqueMetadata = useMemo(() => {
-    if (!isStudent) {
-      // For Personnel: extract unique schemas
-      const schemas = new Set<string>();
-      data.forEach((p: any) => {
-        if (p.profileSchema?.schemaCode) {
-          schemas.add(p.profileSchema.schemaCode);
-        }
-      });
-      return { schemas: Array.from(schemas).sort() };
-    }
-
-    const classes = new Set<string>();
-    const majors = new Set<string>();
-    const departments = new Set<string>();
+  // Extract structured and associated metadata for dynamic relational cascading
+  const allStudentMetadata = useMemo(() => {
+    if (!isStudent) return [];
+    
+    const items: Array<{
+      classCode: string;
+      majorCode: string;
+      majorLabel: string;
+      deptName: string;
+    }> = [];
 
     data.forEach((p: any) => {
       const studentObj = p.students?.[0];
       const mainClass = studentObj?.mainClassMembers?.[0]?.mainClass;
-      
-      if (mainClass?.code) classes.add(mainClass.code);
-      
       const major = mainClass?.major;
-      if (major) {
-        const majorLabel = major.des || major.code;
-        majors.add(JSON.stringify({ code: major.code, label: majorLabel }));
-      }
-
-      if (major?.department?.name) {
-        departments.add(major.department.name);
+      
+      if (mainClass?.code && major?.code && major?.department?.name) {
+        items.push({
+          classCode: mainClass.code,
+          majorCode: major.code,
+          majorLabel: major.des || major.code,
+          deptName: major.department.name,
+        });
       }
     });
 
-    return {
-      classes: Array.from(classes).sort(),
-      majors: Array.from(majors).map(m => JSON.parse(m)).sort((a, b) => a.label.localeCompare(b.label)),
-      departments: Array.from(departments).sort()
-    };
+    return items;
   }, [data, isStudent]);
+
+  // Extract unique schemas for personnel
+  const uniquePersonnelSchemas = useMemo(() => {
+    if (isStudent) return [];
+    const schemas = new Set<string>();
+    data.forEach((p: any) => {
+      if (p.profileSchema?.schemaCode) {
+        schemas.add(p.profileSchema.schemaCode);
+      }
+    });
+    return Array.from(schemas).sort();
+  }, [data, isStudent]);
+
+  // Compute cascading options dynamically
+  const departmentOptions = useMemo(() => {
+    const depts = new Set<string>();
+    allStudentMetadata.forEach(item => depts.add(item.deptName));
+    return Array.from(depts).sort();
+  }, [allStudentMetadata]);
+
+  const majorOptions = useMemo(() => {
+    const majorsMap = new Map<string, string>(); // majorCode -> majorLabel
+    allStudentMetadata.forEach(item => {
+      if (selectedDepartment === "all" || item.deptName === selectedDepartment) {
+        majorsMap.set(item.majorCode, item.majorLabel);
+      }
+    });
+    return Array.from(majorsMap.entries())
+      .map(([code, label]) => ({ code, label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [allStudentMetadata, selectedDepartment]);
+
+  const classOptions = useMemo(() => {
+    const classes = new Set<string>();
+    allStudentMetadata.forEach(item => {
+      const matchDept = selectedDepartment === "all" || item.deptName === selectedDepartment;
+      const matchMajor = selectedMajor === "all" || item.majorCode === selectedMajor;
+      if (matchDept && matchMajor) {
+        classes.add(item.classCode);
+      }
+    });
+    return Array.from(classes).sort();
+  }, [allStudentMetadata, selectedDepartment, selectedMajor]);
+
+  // Handlers for cascading selects
+  const handleDepartmentChange = (dept: string) => {
+    setSelectedDepartment(dept);
+    
+    // Cascading reset: If selectedMajor doesn't belong to the newly selected department, reset it
+    if (dept !== "all") {
+      const majorsInDept = allStudentMetadata
+        .filter(item => item.deptName === dept)
+        .map(item => item.majorCode);
+      if (selectedMajor !== "all" && !majorsInDept.includes(selectedMajor)) {
+        setSelectedMajor("all");
+        setSelectedClass("all");
+      }
+    }
+  };
+
+  const handleMajorChange = (major: string) => {
+    setSelectedMajor(major);
+
+    // Cascading reset: If selectedClass doesn't belong to the newly selected major, reset it
+    if (major !== "all") {
+      const classesInMajor = allStudentMetadata
+        .filter(item => item.majorCode === major)
+        .map(item => item.classCode);
+      if (selectedClass !== "all" && !classesInMajor.includes(selectedClass)) {
+        setSelectedClass("all");
+      }
+    }
+  };
 
   // Filter logic
   const filteredData = useMemo(() => {
@@ -91,10 +151,10 @@ export function ProfileTable({ data, isStudent }: ProfileTableProps) {
         const studentObj = p.students?.[0];
         const mainClass = studentObj?.mainClassMembers?.[0]?.mainClass;
 
-        // 2. Filter by Class
-        if (selectedClass !== "all") {
-          const classCode = mainClass?.code || "";
-          if (classCode !== selectedClass) return false;
+        // 2. Filter by Department
+        if (selectedDepartment !== "all") {
+          const deptName = mainClass?.major?.department?.name || "";
+          if (deptName !== selectedDepartment) return false;
         }
 
         // 3. Filter by Major
@@ -103,10 +163,10 @@ export function ProfileTable({ data, isStudent }: ProfileTableProps) {
           if (majorCode !== selectedMajor) return false;
         }
 
-        // 4. Filter by Department
-        if (selectedDepartment !== "all") {
-          const deptName = mainClass?.major?.department?.name || "";
-          if (deptName !== selectedDepartment) return false;
+        // 4. Filter by Class
+        if (selectedClass !== "all") {
+          const classCode = mainClass?.code || "";
+          if (classCode !== selectedClass) return false;
         }
       } else {
         // 5. Filter by Schema/Role for Personnel
@@ -148,19 +208,18 @@ export function ProfileTable({ data, isStudent }: ProfileTableProps) {
             </div>
             <div>
               <h3 className="text-sm font-bold text-foreground">Bộ lọc nâng cao</h3>
-              <p className="text-[10px] text-muted-foreground">Thu hẹp danh sách theo các điều kiện cụ thể</p>
+              <p className="text-[10px] text-muted-foreground">Thu hẹp danh sách theo các điều kiện cụ thể (Ràng buộc thực tế)</p>
             </div>
           </div>
-          {hasActiveFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={resetFilters}
-              className="h-8 text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 gap-1.5 font-bold transition-all rounded-lg"
-            >
-              <FilterX className="h-3.5 w-3.5" /> Xóa bộ lọc
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={resetFilters}
+            disabled={!hasActiveFilters}
+            className="h-8 text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 disabled:opacity-50 disabled:hover:bg-transparent disabled:text-muted-foreground gap-1.5 font-bold transition-all rounded-lg"
+          >
+            <FilterX className="h-3.5 w-3.5" /> Xóa bộ lọc
+          </Button>
         </div>
 
         {isStudent ? (
@@ -188,13 +247,13 @@ export function ProfileTable({ data, isStudent }: ProfileTableProps) {
               <label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase flex items-center gap-1.5">
                 <Building className="h-3.5 w-3.5 text-indigo-500" /> Khoa / Ban
               </label>
-              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+              <Select value={selectedDepartment} onValueChange={handleDepartmentChange}>
                 <SelectTrigger className="h-9.5 rounded-xl border-border/50 bg-background/50 hover:bg-background/80 hover:border-border transition-all">
                   <SelectValue placeholder="Tất cả Khoa" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-border/40">
                   <SelectItem value="all">Tất cả Khoa</SelectItem>
-                  {uniqueMetadata.departments?.map(d => (
+                  {departmentOptions.map(d => (
                     <SelectItem key={d} value={d}>{d}</SelectItem>
                   ))}
                 </SelectContent>
@@ -206,13 +265,13 @@ export function ProfileTable({ data, isStudent }: ProfileTableProps) {
               <label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase flex items-center gap-1.5">
                 <Layers className="h-3.5 w-3.5 text-purple-500" /> Ngành / Chuyên ngành
               </label>
-              <Select value={selectedMajor} onValueChange={setSelectedMajor}>
+              <Select value={selectedMajor} onValueChange={handleMajorChange}>
                 <SelectTrigger className="h-9.5 rounded-xl border-border/50 bg-background/50 hover:bg-background/80 hover:border-border transition-all">
                   <SelectValue placeholder="Tất cả ngành" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-border/40">
                   <SelectItem value="all">Tất cả ngành</SelectItem>
-                  {uniqueMetadata.majors?.map(m => (
+                  {majorOptions.map(m => (
                     <SelectItem key={m.code} value={m.code}>{m.label}</SelectItem>
                   ))}
                 </SelectContent>
@@ -230,7 +289,7 @@ export function ProfileTable({ data, isStudent }: ProfileTableProps) {
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-border/40">
                   <SelectItem value="all">Tất cả lớp</SelectItem>
-                  {uniqueMetadata.classes?.map(c => (
+                  {classOptions.map(c => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
                 </SelectContent>
@@ -268,7 +327,7 @@ export function ProfileTable({ data, isStudent }: ProfileTableProps) {
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-border/40">
                   <SelectItem value="all">Tất cả loại hồ sơ</SelectItem>
-                  {uniqueMetadata.schemas?.map(s => (
+                  {uniquePersonnelSchemas.map(s => (
                     <SelectItem key={s} value={s}>{s}</SelectItem>
                   ))}
                 </SelectContent>

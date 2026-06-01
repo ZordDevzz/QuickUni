@@ -24,7 +24,7 @@ export function CreateProfileButton({ schemas = [] }: CreateProfileButtonProps) 
   const [open, setOpen] = useState(false);
   const [promptOpen, setPromptOpen] = useState(false);
   const [accountFormOpen, setAccountFormOpen] = useState(false);
-  const [createdProfile, setCreatedProfile] = useState<{ id: string; name: string } | null>(null);
+  const [createdProfile, setCreatedProfile] = useState<{ id: string; name: string; code?: string } | null>(null);
 
   const t = useTranslations("Profile");
   const accT = useTranslations("Account");
@@ -32,10 +32,10 @@ export function CreateProfileButton({ schemas = [] }: CreateProfileButtonProps) 
   // Determine schema type (student vs personnel) based on active schemas
   const isStudentType = schemas.some(s => s.schemaCode.startsWith("STD"));
 
-  const handleProfileSuccess = (profileId?: string, fullname?: string) => {
+  const handleProfileSuccess = (profileId?: string, fullname?: string, code?: string) => {
     setOpen(false);
     if (profileId && fullname) {
-      setCreatedProfile({ id: profileId, name: fullname });
+      setCreatedProfile({ id: profileId, name: fullname, code });
       // Short delay to allow first dialog to close smoothly before opening prompt
       setTimeout(() => {
         setPromptOpen(true);
@@ -118,6 +118,7 @@ export function CreateProfileButton({ schemas = [] }: CreateProfileButtonProps) 
             <AccountForm
               initialProfileId={createdProfile.id}
               initialProfileName={createdProfile.name}
+              initialCode={createdProfile.code}
               restrictType={isStudentType ? "student" : "personnel"}
               onSuccess={() => {
                 setAccountFormOpen(false);
