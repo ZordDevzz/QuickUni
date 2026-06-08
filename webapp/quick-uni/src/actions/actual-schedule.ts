@@ -402,20 +402,20 @@ export async function getActualScheduleByStudent(
 ) {
   try {
     const data = await db.query.schedule.findMany({
-      where: and(
-        between(schedule.schDate, startDateStr, endDateStr),
-        isNull(schedule.deletedAt),
+      where: (sch, { and, eq, exists, isNull, between }) => and(
+        between(sch.schDate, startDateStr, endDateStr),
+        isNull(sch.deletedAt),
         exists(
           db.select()
             .from(enrollment)
             .where(and(
-              eq(enrollment.courseClassId, schedule.courseClassId),
+              eq(enrollment.courseClassId, sch.courseClassId),
               eq(enrollment.studentId, studentId),
               exists(
                 db.select()
                   .from(courseClass)
                   .where(and(
-                    eq(courseClass.id, schedule.courseClassId),
+                    eq(courseClass.id, sch.courseClassId),
                     eq(courseClass.semesterId, semesterId)
                   ))
               )
