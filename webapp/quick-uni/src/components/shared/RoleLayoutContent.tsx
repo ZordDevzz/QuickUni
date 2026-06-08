@@ -40,12 +40,12 @@ export default function RoleLayoutContent({ children, Sidebar }: RoleLayoutConte
       />
       
       <div className={cn(
-        "flex flex-1 flex-col transition-all duration-300",
+        "flex flex-1 flex-col transition-all duration-300 min-w-0 overflow-hidden",
         isCollapsed ? "lg:pl-16" : "lg:pl-64"
       )}>
         <RoleHeader setIsMobileOpen={setIsMobileOpen} />
         
-        <main className="flex-1 p-4 lg:p-8">
+        <main className="flex-1 p-4 lg:p-8 min-w-0 overflow-hidden">
           <div className="mx-auto max-w-8xl">
             {children}
           </div>

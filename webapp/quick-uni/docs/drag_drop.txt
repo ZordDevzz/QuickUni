@@ -1,0 +1,47 @@
+================================================================================
+PHÂN TÍCH ƯU VÀ NHƯỢC ĐIỂM (PROS & CONS) - DRAG & DROP (@DND-KIT)
+================================================================================
+
+Tài liệu này phân tích chi tiết các ưu và nhược điểm của bộ công cụ kéo thả 
+@dnd-kit được sử dụng trong dự án QuickUni.
+
+--------------------------------------------------------------------------------
+1. @DND-KIT (CORE, SORTABLE, UTILITIES)
+--------------------------------------------------------------------------------
+Hệ thống thư viện hỗ trợ tính năng tương tác kéo thả (Drag and Drop) hiện đại 
+cho React. Trong QuickUni, thư viện này thường được dùng cho các tính năng sắp xếp 
+danh sách môn học, thời khóa biểu, kéo thả tài liệu học tập hoặc quản lý bảng Kanban.
+
+* ƯU ĐIỂM (PROS):
+  - Thiết kế Mô-đun (Modular Design): Thư viện được chia nhỏ thành nhiều gói chuyên 
+    biệt như `@dnd-kit/core` (cho các chức năng cơ bản), `@dnd-kit/sortable` (cho 
+    các danh sách có thứ tự), `@dnd-kit/modifiers` (để giới hạn chuyển động), giúp 
+    giảm thiểu kích thước bundle tải về bằng cách chỉ cài các phần thực sự cần thiết.
+  - Hỗ trợ tốt khả năng tiếp cận (Accessibility): Cung cấp sẵn các thuộc tính ARIA, 
+    hỗ trợ điều khiển bằng bàn phím (Keyboard navigation) và trình đọc màn hình, 
+    đạt tiêu chuẩn tiếp cận Web mà nhiều thư viện kéo thả cũ không có.
+  - Hiệu năng vượt trội: Sử dụng CSS Transforms thay vì liên tục thay đổi vị trí 
+    (top/left) trực tiếp của phần tử, đảm bảo chuyển động kéo thả luôn đạt tốc độ 
+    60 FPS (hoặc cao hơn trên màn hình tần số quét cao) mà không kích hoạt re-render 
+    React liên tục ở mỗi pixel di chuyển.
+  - Cảm biến đa dạng (Sensors): Hỗ trợ Pointer Sensor (kết hợp Chuột và Cảm ứng), 
+    Keyboard Sensor và Touch Sensor, cho phép ứng dụng hoạt động mượt mà cả trên 
+    máy tính để bàn lẫn thiết bị di động.
+  - Thuật toán va chạm linh hoạt (Collision Detection): Cung cấp nhiều thuật toán 
+    như Closest Center, Closest Corners, Rect Intersection giúp phát hiện khu vực 
+    thả (drop zone) chính xác kể cả với các layout phức tạp hoặc lưới (grid).
+
+* NHƯỢC ĐIỂM (CONS):
+  - Cấu hình thiết lập ban đầu phức tạp: Để dựng một tính năng kéo thả cơ bản, lập 
+    trình viên cần thiết lập nhiều tầng component: `<DndContext>`, `<SortableContext>`, 
+    `<DragOverlay>`, các Hook như `useSortable`, và viết hàm xử lý sự kiện `onDragEnd` 
+    để cập nhật lại mảng dữ liệu trong state của React một cách thủ công.
+  - Tài liệu thiếu ví dụ thực tế nâng cao: Dù trang tài liệu chính thức rất đẹp, 
+    nó vẫn thiếu các ví dụ thực tế cho các tình huống nâng cao, chẳng hạn như kéo 
+    thả giữa nhiều danh sách độc lập với cấu trúc dữ liệu khác nhau, hoặc kéo thả 
+    trong các danh sách cuộn ảo (virtualized lists). Lập trình viên phải tự nghiên cứu 
+    và thử nghiệm nhiều phương án.
+  - Khó tích hợp với các thư viện ảo hóa: Việc kết hợp @dnd-kit với các thư viện 
+    hiển thị danh sách siêu lớn (như React Window, TanStack Virtual) đòi hỏi các 
+    kỹ thuật xử lý DOM rất phức tạp và dễ phát sinh lỗi giật màn hình hoặc tính 
+    toán sai tọa độ.

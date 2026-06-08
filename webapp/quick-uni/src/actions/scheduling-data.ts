@@ -474,11 +474,11 @@ export async function getScheduleByRole(role: string, accountId: string, semeste
   try {
     if (role === 'teacher') {
       const emp = await db.query.employee.findFirst({
-        where: exists(
+        where: (emp, { exists }) => exists(
           db.select()
             .from(profile)
             .where(and(
-              eq(profile.id, employee.profileId),
+              eq(profile.id, emp.profileId),
               eq(profile.accountId, accountId)
             ))
         )
@@ -495,11 +495,11 @@ export async function getScheduleByRole(role: string, accountId: string, semeste
 
     if (role === 'student') {
       const stu = await db.query.student.findFirst({
-        where: exists(
+        where: (stu, { exists }) => exists(
           db.select()
             .from(profile)
             .where(and(
-              eq(profile.id, student.profileId),
+              eq(profile.id, stu.profileId),
               eq(profile.accountId, accountId)
             ))
         )

@@ -36,7 +36,7 @@ import { submitRequest, getClassScheduleSlots } from "@/actions/workflow";
 import { notify } from "@/lib/custom-toast";
 
 const teacherRequestSchema = z.object({
-  type: z.enum(["class_cancellation", "teacher_schedule_change"]),
+  type: z.enum(["teacher_schedule_change"]),
   classId: z.string().min(1, "Required"),
   scheduleId: z.string().min(1, "Required"),
   newDate: z.string().optional(),
@@ -72,7 +72,7 @@ export default function TeacherRequestWizard({ classes, rooms }: TeacherRequestW
   const form = useForm<TeacherRequestFormValues>({
     resolver: zodResolver(teacherRequestSchema),
     defaultValues: {
-      type: "class_cancellation",
+      type: "teacher_schedule_change",
       classId: "",
       scheduleId: "",
       newDate: "",
@@ -177,7 +177,6 @@ export default function TeacherRequestWizard({ classes, rooms }: TeacherRequestW
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="class_cancellation">{tWorkflow("Type.class_cancellation")}</SelectItem>
                           <SelectItem value="teacher_schedule_change">{tWorkflow("Type.teacher_schedule_change")}</SelectItem>
                         </SelectContent>
                       </Select>
@@ -216,34 +215,41 @@ export default function TeacherRequestWizard({ classes, rooms }: TeacherRequestW
                 />
 
                 {selectedClassId && (
-                  <FormField
-                    control={form.control}
-                    name="scheduleId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{tWorkflow("Form.SelectSlot")}</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          value={field.value}
-                          disabled={isLoadingSlots || slots.length === 0}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder={isLoadingSlots ? "Loading slots..." : (slots.length === 0 ? "No slots scheduled" : tWorkflow("Form.SelectSlotPlaceholder"))} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {slots.map((s) => (
-                              <SelectItem key={s.id} value={s.id}>
-                                {s.schDate} (Tiết {s.period}-{s.endPeriod}, Phòng {s.roomCode})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  (() => {
+                    const todayStr = new Date().toISOString().split("T")[0];
+                    const activeSlots = slots.filter((s) => s.schDate >= todayStr);
+                    
+                    return (
+                      <FormField
+                        control={form.control}
+                        name="scheduleId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{tWorkflow("Form.SelectSlot")}</FormLabel>
+                            <Select 
+                              onValueChange={field.onChange} 
+                              value={field.value}
+                              disabled={isLoadingSlots || activeSlots.length === 0}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder={isLoadingSlots ? "Loading slots..." : (activeSlots.length === 0 ? "Không có buổi học sắp tới nào" : tWorkflow("Form.SelectSlotPlaceholder"))} />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {activeSlots.map((s) => (
+                                  <SelectItem key={s.id} value={s.id}>
+                                    {s.schDate} (Tiết {s.period}-{s.endPeriod}, Phòng {s.roomCode})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    );
+                  })()
                 )}
 
                 {selectedType === 'teacher_schedule_change' && (
@@ -255,7 +261,11 @@ export default function TeacherRequestWizard({ classes, rooms }: TeacherRequestW
                         <FormItem>
                           <FormLabel>{tWorkflow("Form.NewDate")}</FormLabel>
                           <FormControl>
-                            <Input type="date" {...field} />
+                            <Input 
+                              type="date" 
+                              min={new Date().toISOString().split("T")[0]} 
+                              {...field} 
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

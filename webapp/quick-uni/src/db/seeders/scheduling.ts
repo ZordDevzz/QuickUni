@@ -1,7 +1,7 @@
 import { db } from "../index";
-import { 
-  courseClass, 
-  courseClassType, 
+import {
+  courseClass,
+  courseClassType,
   enrollment,
   request,
   profile
@@ -10,18 +10,18 @@ import { randomUUID } from "crypto";
 import { eq, and, isNull } from "drizzle-orm";
 
 export const seedScheduling = async (
-  semesterId: number, 
+  semesterId: number,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  subjects: any[], 
+  subjects: any[],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  teachers: any[], 
+  teachers: any[],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rooms: any[],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   students: any[]
 ) => {
   console.log("🗓️ Seeding scheduling data (classes, enrollments, requests)...");
-  
+
   // 1. Ensure course class types exist
   const classTypes = [
     { id: 1, code: "LEC", name: "Lecture", des: "Theoretical session" },
@@ -98,7 +98,7 @@ export const seedScheduling = async (
 
   // 3. Seed enrollments based on student cohort/major
   console.log("📝 Registering students and generating enrollments...");
-  
+
   for (let sIdx = 0; sIdx < students.length; sIdx++) {
     const stud = students[sIdx];
     const isIT21 = sIdx < 12;      // First 12 students are CNTT/ATTT (cohort 2021)

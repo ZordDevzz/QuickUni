@@ -601,7 +601,11 @@
       "NoGrades": "No grades recorded for this class yet.",
       "GradeType": "Assessment Type",
       "GradeValue": "Grade",
-      "NoClassesFound": "No classes found."
+      "NoClassesFound": "No classes found.",
+      "CapacityLabel": "Class Size",
+      "DateStartEndLabel": "Schedule Period",
+      "StartDateLabel": "Start Date",
+      "EndDateLabel": "End Date"
     },
     "Schedule": {
       "Title": "Schedule",
@@ -875,8 +879,12 @@
     "TeacherCol": "Instructor",
     "MinPeriodsCol": "Min periods / session",
     "PreferredStartPeriodCol": "Preferred Start Period",
-    "AllowEveningCol": "Allow evening sessions?",
-    "AllowWeekendCol": "Allow weekend sessions?",
+    "AllowEveningCol": "Evening sessions?",
+    "AllowWeekendCol": "Weekend sessions?",
+    "AllowEveningCell": "Allowed",
+    "DefaultNoEveningCell": "No",
+    "AllowWeekendCell": "Allowed",
+    "DefaultNoWeekendCell": "No",
     "NoPreferenceDefault": "No preference (2 / 6)",
     "PeriodSlot": "Period {period}",
     "Period1": "1 period",
@@ -951,7 +959,8 @@
     "ErrorDeleteActual": "Failed to delete schedule slot",
     "MainSchedule": "Main Schedule",
     "CheckingRooms": "Checking room...",
-    "BusyLocked": "BUSY/LOCKED"
+    "BusyLocked": "BUSY/LOCKED",
+    "NoClassesToday": "No classes scheduled for today."
   },
 
   "MainClasses": {

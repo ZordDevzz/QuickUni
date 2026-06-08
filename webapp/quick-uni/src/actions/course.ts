@@ -118,7 +118,11 @@ export async function getClassStudents(classId: string) {
     with: {
       student: {
         with: {
-          profile: true
+          profile: {
+            with: {
+              account: true
+            }
+          }
         }
       }
     },

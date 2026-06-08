@@ -112,9 +112,11 @@ export async function validateOnboardingExcel(sessionId: string, formData: FormD
       results: validationResults,
     };
 
+    const serializedSummary = JSON.parse(JSON.stringify(summary));
+
     await db.update(onboardingSession)
       .set({
-        summary,
+        summary: serializedSummary,
         status: validCount > 0 ? "ready" : "validating",
         updateBy: userId,
         updateAt: new Date().toISOString(),
@@ -122,7 +124,7 @@ export async function validateOnboardingExcel(sessionId: string, formData: FormD
       .where(eq(onboardingSession.id, sessionId));
 
     revalidatePath(`/admin/onboarding/${sessionId}`);
-    return { success: true, summary };
+    return { success: true, summary: serializedSummary };
   } catch (error: unknown) {
     return { 
       success: false, 
@@ -275,12 +277,13 @@ export async function executeOnboardingSession(sessionId: string): Promise<Actio
       }
     }
 
-    const finalSummary = {
+    const finalSummary = JSON.parse(JSON.stringify({
       ...summary,
       success: successCount,
       failed: failCount,
+      currentProcessed: processedCount,
       executionResults: finalResults,
-    };
+    }));
 
     await db.update(onboardingSession)
       .set({

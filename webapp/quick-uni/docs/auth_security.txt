@@ -1,0 +1,57 @@
+================================================================================
+PHÂN TÍCH ƯU VÀ NHƯỢC ĐIỂM (PROS & CONS) - AUTHENTICATION & SECURITY
+================================================================================
+
+Tài liệu này phân tích chi tiết các ưu và nhược điểm của các thư viện xác thực 
+và bảo mật trong dự án QuickUni.
+
+--------------------------------------------------------------------------------
+1. NEXTAUTH.JS (v4.24.13)
+--------------------------------------------------------------------------------
+Thư viện quản lý đăng nhập và phiên làm việc (session) phổ biến nhất cho Next.js.
+
+* ƯU ĐIỂM (PROS):
+  - Tích hợp sâu với Next.js: Hỗ trợ cả Client-side (hooks như `useSession`), 
+    Server-side (`getServerSession`) và Route Handlers (APIs) một cách đồng bộ.
+  - Bảo mật mặc định cao: Tự động xử lý cơ chế bảo mật chống tấn công CSRF (Cross-Site 
+    Request Forgery), tự động mã hóa JWT (JSON Web Tokens) và quản lý Cookie an toàn 
+    (HTTP-Only, Secure, SameSite).
+  - Hỗ trợ đa dạng nhà cung cấp (Providers): Dễ dàng tích hợp đăng nhập bằng mạng xã hội 
+    (Google, Facebook, Microsoft, GitHub) cũng như cơ chế đăng nhập truyền thống 
+    (Credentials Provider: Email/Mật khẩu).
+  - Kết nối tốt với Drizzle: Có sẵn adapter chính thức để lưu trữ thông tin session, 
+    user, account trực tiếp vào PostgreSQL thông qua Drizzle ORM.
+
+* NHƯỢC ĐIỂM (CONS):
+  - Hạn chế ở môi trường Edge Runtime: NextAuth v4 phụ thuộc vào một số thư viện Node.js 
+    cũ, khiến việc chạy nó trong Middleware của Next.js (chạy trên môi trường Edge) 
+    gặp khó khăn hoặc phải dùng các giải pháp lách luật (workarounds).
+  - Credentials Provider bị hạn chế thiết kế: Nhà phát triển NextAuth cố tình giới hạn 
+    Credentials Provider để khuyến khích dùng OAuth. Do đó, việc tùy biến luồng 
+    đăng ký, quên mật khẩu, hoặc đồng bộ DB session khi dùng Credentials đòi hỏi phải 
+    tự viết thêm nhiều logic xử lý.
+  - Chuyển giao thế hệ (v4 lên v5): Phiên bản v5 (Auth.js) đang được viết lại hoàn toàn 
+    để hỗ trợ tốt hơn App Router và Edge. Việc dùng v4 trong dự án Next.js 16 mới 
+    có thể đòi hỏi phải nâng cấp lên v5 trong tương lai gần khi v5 chính thức ổn định, 
+    gây tốn chi phí refactor.
+
+--------------------------------------------------------------------------------
+2. BCRYPTJS (v3.0.3)
+--------------------------------------------------------------------------------
+Thư viện mã hóa mật khẩu người dùng bằng thuật toán băm (hashing) bcrypt viết hoàn toàn 
+bằng JavaScript.
+
+* ƯU ĐIỂM (PROS):
+  - Không phụ thuộc vào thư viện gốc (Pure JS - No Native Dependencies): Khác với thư 
+    viện `bcrypt` gốc yêu cầu trình biên dịch C++ (node-gyp) để cài đặt, `bcryptjs` 
+    chạy 100% bằng JavaScript. Điều này giúp tránh hoàn toàn các lỗi build phức tạp 
+    khi deploy ứng dụng lên các môi trường hosting khác nhau (Vercel, Docker, Windows, Linux).
+  - Độ bảo mật cao: Sử dụng cơ chế muối (salting) tự động và thuật toán băm chậm, 
+    chống lại các cuộc tấn công dò mật khẩu (brute-force) và bảng cầu vồng (rainbow tables).
+
+* NHƯỢC ĐIỂM (CONS):
+  - Hiệu năng chậm hơn: Vì chạy bằng JavaScript thuần thay vì mã máy C++, tốc độ băm 
+    mật khẩu của `bcryptjs` chậm hơn khoảng 3 - 5 lần so với `bcrypt` gốc. Tuy nhiên, 
+    đối với ứng dụng web thông thường (nơi việc băm mật khẩu chỉ diễn ra khi đăng ký/đăng nhập), 
+    đây không phải là nút thắt cổ chai về hiệu năng và hoàn toàn chấp nhận được để 
+    đổi lấy sự ổn định khi triển khai.

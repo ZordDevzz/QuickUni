@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { EntityType } from "./ScheduleManager";
 import { getWeeklyTemplateByEntity } from "@/actions/scheduling-data";
 import { useTranslations } from "next-intl";
@@ -7,6 +8,8 @@ import { Loader2, RefreshCw, BookOpen } from "lucide-react";
 import { hasCollision, createMask } from "@/lib/scheduling/bitmask";
 import { cn, stringToHslColor } from "@/lib/utils";
 import { format, addDays, parseISO } from "date-fns";
+import { FormattedDate } from "@/components/shared/FormattedDate";
+import { useTheme } from "next-themes";
 
 export type AssignmentWithRelations = Awaited<ReturnType<typeof getWeeklyTemplateByEntity>>[number] & {
   startDate?: string | null;
@@ -49,6 +52,16 @@ export function TimeGrid({
 }: TimeGridProps) {
   const t = useTranslations("Admin");
   const tSM = useTranslations("ScheduleManager");
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+
+  // Get current day of week (Monday = 0, Sunday = 6)
+  const getTodayDayIndex = () => {
+    const day = new Date().getDay();
+    return day === 0 ? 6 : day - 1;
+  };
+
+  const [activeDayIndex, setActiveDayIndex] = useState(getTodayDayIndex());
 
   if (showEmptyState) {
     return (
@@ -78,20 +91,153 @@ export function TimeGrid({
   };
 
   return (
-    <div className="flex flex-col border rounded-lg bg-background overflow-hidden h-[calc(100vh-250px)] relative">
-      {loading && (
-        <div className="absolute inset-0 bg-background/50 flex items-center justify-center z-50">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    <div className="w-full max-w-full overflow-hidden relative space-y-4">
+      {/* Mobile Day-by-Day View */}
+      <div className="block md:hidden w-full max-w-full overflow-hidden space-y-4">
+        {/* Horizontal Days Navigation */}
+        <div className="flex w-full max-w-full space-x-1.5 overflow-x-auto pb-2 scrollbar-none border-b shrink-0">
+          {DAYS.map((day, index) => {
+            const isActive = index === activeDayIndex;
+            const dayClasses = assignments.filter(a => ((a.dayOfWeek + 6) % 7) === index);
+            
+            return (
+              <button
+                key={day}
+                type="button"
+                onClick={() => setActiveDayIndex(index)}
+                className={cn(
+                  "flex-1 min-w-[85px] py-2 px-1 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shrink-0 active:scale-95",
+                  isActive 
+                    ? "bg-primary text-primary-foreground shadow-md scale-102" 
+                    : "bg-muted/60 hover:bg-muted text-muted-foreground"
+                )}
+              >
+                <span>{t(day)}</span>
+                {dayClasses.length > 0 ? (
+                  <span className={cn(
+                    "text-[9px] px-2 py-0.5 rounded-full font-bold",
+                    isActive ? "bg-primary-foreground/25 text-primary-foreground" : "bg-primary/10 text-primary"
+                  )}>
+                    {dayClasses.length}
+                  </span>
+                ) : (
+                  <span className="text-[9px] opacity-40 font-normal">—</span>
+                )}
+              </button>
+            );
+          })}
         </div>
-      )}
-      
-      <div className="overflow-auto flex-1 relative">
-        <div className="min-w-[1000px] relative">
-          {/* Header Row - Sticky Top */}
-          <div className="grid grid-cols-8 border-b bg-muted/50 sticky top-0 z-30">
-            <div className="p-2 border-r text-center text-xs font-bold uppercase tracking-wider text-muted-foreground bg-muted/50 sticky left-0 z-50">
-              {t("Period")}
+
+        {/* Selected Day's Class Cards */}
+        <div className="space-y-3 min-h-[200px]">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
+          ) : (() => {
+            const dayClasses = assignments
+              .filter(a => ((a.dayOfWeek + 6) % 7) === activeDayIndex)
+              .sort((a, b) => a.startPeriod - b.startPeriod);
+
+            if (dayClasses.length === 0) {
+              return (
+                <div className="text-center py-12 px-4 border border-dashed rounded-xl bg-muted/15 text-muted-foreground">
+                  <BookOpen className="h-8 w-8 mx-auto opacity-30 mb-2" />
+                  <p className="text-sm font-medium">{tSM("NoClassesToday") || "No classes scheduled for today."}</p>
+                </div>
+              );
+            }
+
+            return dayClasses.map((a) => {
+              const start = a.startPeriod;
+              const end = a.endPeriod;
+              const subjectId = a.courseClass?.subject?.id;
+              const borderLeftColor = subjectId 
+                ? stringToHslColor(subjectId, isDark ? 65 : 65, isDark ? 50 : 55) 
+                : "hsl(var(--primary))";
+              const labelColor = subjectId 
+                ? stringToHslColor(subjectId, isDark ? 85 : 65, isDark ? 80 : 40) 
+                : "hsl(var(--primary))";
+              const cardBg = subjectId 
+                ? stringToHslColor(subjectId, isDark ? 45 : 65, isDark ? 12 : 98) 
+                : "hsl(var(--card))";
+
+              return (
+                <div
+                  key={a.id}
+                  onClick={() => onAssignmentClick?.(a)}
+                  className="rounded-xl border p-4 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col gap-2 relative active:scale-[0.99]"
+                  style={{
+                    borderLeftWidth: "5px",
+                    borderLeftColor: borderLeftColor,
+                    backgroundColor: cardBg
+                  }}
+                >
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <span className="text-[10px] font-bold text-muted-foreground tracking-wide font-mono block uppercase">
+                        {a.courseClass?.code}
+                      </span>
+                      <h4 className="font-extrabold text-sm leading-snug mt-0.5 pr-4" style={{ color: labelColor }}>
+                        {a.courseClass?.subject?.name}
+                      </h4>
+                    </div>
+                    {a.scheduleTypeId === 2 && (
+                      <span className="inline-flex items-center gap-0.5 text-[8px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-800 border border-amber-500/20 shrink-0">
+                        <RefreshCw className="h-2 w-2" />
+                        {tSM("Makeup")}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-2 pt-2 border-t border-muted/65 text-xs text-muted-foreground">
+                    <div className="flex items-center space-x-1.5">
+                      <span className="font-semibold text-foreground">{t("Period")}:</span>
+                      <span className="font-mono text-foreground font-bold">{start} - {end}</span>
+                    </div>
+                    {type !== 'rooms' && (
+                      <div className="flex items-center space-x-1">
+                        <span className="text-foreground">📍</span>
+                        <span className="font-semibold text-foreground truncate">{a.room?.code}</span>
+                      </div>
+                    )}
+                    {type !== 'teachers' && (
+                      <div className="col-span-2 flex items-center space-x-1 truncate mt-0.5">
+                        <span className="text-foreground">👤</span>
+                        <span className="truncate text-foreground/90 font-medium">{a.courseClass?.employee?.profile?.fullname}</span>
+                      </div>
+                    )}
+                    {a.courseClass?.startDate && (
+                      <div className="col-span-2 text-[10px] text-muted-foreground/80 mt-0.5 flex items-center gap-1">
+                        <span>📅</span>
+                        <span>
+                          <FormattedDate date={a.courseClass.startDate} /> – <FormattedDate date={a.courseClass.endDate || ''} />
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            });
+          })()}
+        </div>
+      </div>
+
+      {/* Desktop Grid View */}
+      <div className="hidden md:flex flex-col border rounded-lg bg-background overflow-hidden h-[calc(100vh-250px)] relative">
+        {loading && (
+          <div className="absolute inset-0 bg-background/50 flex items-center justify-center z-50">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        )}
+        
+        <div className="overflow-auto flex-1 relative">
+          <div className="min-w-[1000px] relative">
+            {/* Header Row - Sticky Top */}
+            <div className="grid grid-cols-8 border-b bg-muted/50 sticky top-0 z-30">
+              <div className="p-2 border-r text-center text-xs font-bold uppercase tracking-wider text-muted-foreground bg-muted/50 sticky left-0 z-50">
+                {t("Period")}
+              </div>
             {DAYS.map((day, index) => (
               <div key={day} className="p-2 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground border-r last:border-r-0">
                 {getDayLabel(day, index)}
@@ -153,9 +299,17 @@ export function TimeGrid({
               const duration = end - start + 1;
  
               const subjectId = assignment.courseClass?.subject?.id;
-              const bgColor = subjectId ? stringToHslColor(subjectId, 65, 92) : "hsl(var(--muted))";
-              const borderColor = subjectId ? stringToHslColor(subjectId, 65, 75) : "hsl(var(--primary))";
-              const textColor = subjectId ? stringToHslColor(subjectId, 85, 15) : "hsl(var(--primary))";
+              
+              // Dynamic HSL lightness/saturation for desktop grid overlay on Dark Mode
+              const bgLightness = isDark ? 16 : 92;
+              const borderLightness = isDark ? 30 : 75;
+              const textLightness = isDark ? 88 : 15;
+              const saturation = isDark ? 55 : 65;
+              const textSaturation = isDark ? 85 : 85;
+
+              const bgColor = subjectId ? stringToHslColor(subjectId, saturation, bgLightness) : "hsl(var(--muted))";
+              const borderColor = subjectId ? stringToHslColor(subjectId, saturation, borderLightness) : "hsl(var(--primary))";
+              const textColor = subjectId ? stringToHslColor(subjectId, textSaturation, textLightness) : "hsl(var(--primary))";
 
               // Calculate width and left offset for side-by-side rendering
               const key = `${dayIndex}-${start}`;
@@ -249,5 +403,6 @@ export function TimeGrid({
         </div>
       </div>
     </div>
+  </div>
   );
 }

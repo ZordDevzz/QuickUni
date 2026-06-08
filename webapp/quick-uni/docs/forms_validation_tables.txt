@@ -1,0 +1,96 @@
+================================================================================
+PHÂN TÍCH ƯU VÀ NHƯỢC ĐIỂM (PROS & CONS) - FORMS, VALIDATION & TABLES
+================================================================================
+
+Tài liệu này phân tích chi tiết các ưu và nhược điểm của các công nghệ xử lý form, 
+xác thực dữ liệu và hiển thị bảng thông tin lớn trong dự án QuickUni.
+
+--------------------------------------------------------------------------------
+1. REACT HOOK FORM (v7.76.1)
+--------------------------------------------------------------------------------
+Thư viện quản lý trạng thái form hiệu năng cao dựa trên cơ chế Uncontrolled Components.
+
+* ƯU ĐIỂM (PROS):
+  - Hiệu năng tối ưu (Minimal Re-renders): Bằng cách sử dụng cơ chế không kiểm soát 
+    (uncontrolled inputs) thông qua `ref`, React Hook Form không kích hoạt render lại 
+    toàn bộ component khi người dùng gõ phím. Điều này cực kỳ hữu ích với các form 
+    nhập liệu học vụ nhiều trường thông tin.
+  - Tích hợp chuẩn hóa Zod: Kết hợp mượt mà với Zod qua thư viện `@hookform/resolvers`, 
+    giúp xử lý xác thực dữ liệu đầu vào tự động.
+  - Dung lượng nhẹ, API đơn giản: Thư viện rất nhẹ, dễ học, dễ áp dụng với cú pháp 
+    `register` truyền thống.
+
+* NHƯỢC ĐIỂM (CONS):
+  - Khó khăn với các Component được kiểm soát (Controlled Components): Khi tích hợp 
+    với các thành phần UI phức tạp (như DatePicker, Select, Switch của Shadcn/UI 
+    hoặc Radix UI sử dụng trạng thái controlled), lập trình viên phải sử dụng 
+    wrapper `<Controller />` hoặc `useController`, làm tăng độ phức tạp của code.
+  - Theo dõi giá trị động (Dynamic value watching): Việc sử dụng `watch` hoặc 
+    `useWatch` để theo dõi các thay đổi giá trị trong thời gian thực có thể làm mất 
+    đi lợi thế giảm thiểu re-render nếu không được cấu hình đúng cách.
+
+--------------------------------------------------------------------------------
+2. TANSTACK FORM (v1.28.0)
+--------------------------------------------------------------------------------
+Thư viện quản lý form độc lập framework, hướng tới sự an toàn về kiểu dữ liệu (Type-safety).
+
+* ƯU ĐIỂM (PROS):
+  - Type-safe tối đa ở cấp độ API: Mọi trường thông tin trong form, lỗi, trạng thái 
+    đều được kiểm soát chặt chẽ bằng kiểu dữ liệu TypeScript tĩnh, hạn chế tối đa 
+    lỗi gõ sai tên thuộc tính (typo).
+  - Khả năng mở rộng tốt: Rất phù hợp với các form có cấu trúc dữ liệu lồng nhau 
+    phức tạp (Nested objects/arrays), cho phép quản lý trạng thái độc lập của từng 
+    trường (Field-level state) một cách chi tiết.
+  - Độc lập nền tảng: Có thể chia sẻ logic form giữa các dự án sử dụng framework 
+    khác nhau (React, Vue, Solid).
+
+* NHƯỢC ĐIỂM (CONS):
+  - Cú pháp dài dòng (Verbose API): Cần viết nhiều code boilerplate hơn để thiết 
+    lập một form cơ bản so với React Hook Form.
+  - Cộng đồng nhỏ hơn: Là một thư viện mới hơn của hệ sinh thái TanStack, tài liệu, 
+    bài viết hướng dẫn và cộng đồng hỗ trợ chưa phong phú như React Hook Form.
+
+--------------------------------------------------------------------------------
+3. ZOD (v4.4.3)
+--------------------------------------------------------------------------------
+Thư viện khai báo và kiểm tra tính hợp lệ của lược đồ dữ liệu (Schema Validation).
+
+* ƯU ĐIỂM (PROS):
+  - Định nghĩa một lần, sử dụng mọi nơi: Viết schema một lần duy nhất, sau đó có thể 
+    suy luận ra kiểu TypeScript (`z.infer<typeof schema>`), dùng để kiểm tra dữ liệu 
+    ở client form, validate request body ở API và đồng bộ với schema database 
+    (qua `drizzle-zod`).
+  - Xử lý lỗi trực quan: Trả về danh sách lỗi chi tiết theo từng trường dữ liệu, 
+    hỗ trợ viết custom error messages.
+  - Tính năng biến đổi dữ liệu (Transformations): Cho phép ép kiểu, định dạng lại 
+    hoặc xử lý dữ liệu tự động trong quá trình xác thực (ví dụ: chuyển đổi chuỗi 
+    ngày thành đối tượng Date).
+
+* NHƯỢC ĐIỂM (CONS):
+  - Dung lượng bản build: Zod có dung lượng tương đối nặng so với một số thư viện 
+    xác thực khác như Yup hoặc Superstruct.
+  - Phức tạp khi dịch ngôn ngữ (Localization): Việc hiển thị thông báo lỗi bằng 
+    nhiều ngôn ngữ (i18n) thông qua Zod đòi hỏi cấu hình bổ sung (như `z.refine` 
+    hoặc thư viện map lỗi với `next-intl`).
+
+--------------------------------------------------------------------------------
+4. TANSTACK TABLE (v8.21.3 - REACT-TABLE)
+--------------------------------------------------------------------------------
+Thư viện quản lý hiển thị bảng dữ liệu không giao diện (Headless Table library).
+
+* ƯU ĐIỂM (PROS):
+  - Tự do thiết kế 100% (Headless Design): Thư viện không áp đặt bất kỳ thẻ HTML 
+    hay class CSS nào. Lập trình viên tự viết giao diện hiển thị (phù hợp với việc 
+    tự xây dựng bảng UI bằng Tailwind CSS).
+  - Tính năng đồ sộ: Hỗ trợ sẵn các nghiệp vụ quản lý bảng nâng cao: Sắp xếp (Sorting), 
+    Lọc (Filtering), Phân trang (Pagination), Chọn dòng (Row Selection), 
+    Ẩn/Hiện cột (Column Visibility), và Group dữ liệu.
+  - Hiệu năng xử lý cao: Quản lý hàng ngàn dòng dữ liệu mượt mà, hỗ trợ ảo hóa bảng 
+    (virtualization) nếu cần thiết.
+
+* NHƯỢC ĐIỂM (CONS):
+  - Đường cong học tập rất dốc: Vì là headless, lập trình viên không thể chỉ cần import 
+    một `<Table />` component ăn liền. Bạn phải tự viết vòng lặp render `table`, `thead`, 
+    `tbody`, `tr`, `td` và liên kết các sự kiện, hook của thư viện thủ công.
+  - Tăng thời gian phát triển ban đầu: Đòi hỏi nhiều thời gian để dựng nên một 
+    component Bảng dùng chung ổn định và đầy đủ chức năng.

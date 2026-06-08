@@ -597,7 +597,11 @@
       "NoGrades": "Chưa có điểm số nào cho lớp học này.",
       "GradeType": "Loại điểm/Đánh giá",
       "GradeValue": "Điểm",
-      "NoClassesFound": "Không tìm thấy lớp học nào."
+      "NoClassesFound": "Không tìm thấy lớp học nào.",
+      "CapacityLabel": "Sĩ số",
+      "DateStartEndLabel": "Thời gian học",
+      "StartDateLabel": "Ngày bắt đầu",
+      "EndDateLabel": "Ngày kết thúc"
     },
     "Schedule": {
       "Title": "Thời khóa biểu",
@@ -871,8 +875,12 @@
     "TeacherCol": "Giảng viên phụ trách",
     "MinPeriodsCol": "Số tiết tối thiểu / buổi học",
     "PreferredStartPeriodCol": "Tiết bắt đầu ưu tiên",
-    "AllowEveningCol": "Cho phép dạy ca tối?",
-    "AllowWeekendCol": "Cho phép dạy cuối tuần?",
+    "AllowEveningCol": "Dạy ca tối?",
+    "AllowWeekendCol": "Dạy cuối tuần?",
+    "AllowEveningCell": "Cho phép",
+    "DefaultNoEveningCell": "Không",
+    "AllowWeekendCell": "Cho phép",
+    "DefaultNoWeekendCell": "Không",
     "NoPreferenceDefault": "Không ưu tiên (2 / 6)",
     "PeriodSlot": "Tiết {period}",
     "Period1": "1 tiết",
@@ -947,7 +955,8 @@
     "ErrorDeleteActual": "Xóa lịch học thất bại",
     "MainSchedule": "Lịch chính thức",
     "CheckingRooms": "Đang kiểm tra phòng...",
-    "BusyLocked": "BẬN/KHÓA"
+    "BusyLocked": "BẬN/KHÓA",
+    "NoClassesToday": "Không có lớp học nào được lên lịch hôm nay."
   },
 
   "MainClasses": {

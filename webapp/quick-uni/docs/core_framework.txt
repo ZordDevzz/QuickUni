@@ -1,0 +1,94 @@
+================================================================================
+PHÂN TÍCH ƯU VÀ NHƯỢC ĐIỂM (PROS & CONS) - CORE FRAMEWORK & LANGUAGE
+================================================================================
+
+Tài liệu này phân tích chi tiết các ưu và nhược điểm của các công nghệ cốt lõi 
+được sử dụng làm nền tảng trong dự án QuickUni, bao gồm: Next.js (v16.2.4), 
+React (v19.2.3), và TypeScript (v5).
+
+--------------------------------------------------------------------------------
+1. NEXT.JS (v16.2.4)
+--------------------------------------------------------------------------------
+Next.js đóng vai trò là framework full-stack chính của dự án, quản lý cả phần 
+Frontend (giao diện, routing) và Backend (API, Server Actions).
+
+* ƯU ĐIỂM (PROS):
+  - Kiến trúc App Router & React Server Components (RSC): Cho phép render các 
+    thành phần giao diện trực tiếp trên Server theo mặc định. Điều này giúp giảm 
+    kích thước Javascript tải về phía Client, tối ưu hóa thời gian phản hồi trang 
+    đầu tiên (FCP) và cải thiện hiệu năng thiết bị của người dùng.
+  - Server Actions: Hỗ trợ gọi trực tiếp các hàm chạy trên máy chủ từ phía Client 
+    mà không cần phải tự tạo và quản lý các endpoint API REST thủ công, đơn giản 
+    hóa quá trình đồng bộ và đột biến dữ liệu (data mutation).
+  - Tối ưu hóa SEO mặc định: Hỗ trợ sẵn các cơ chế Metadata API, tự động tối ưu 
+    hóa Font chữ, hình ảnh (next/image), và các liên kết (next/link).
+  - Tích hợp sẵn Routing & API Routes: Quản lý routing theo cấu trúc thư mục, 
+    cho phép viết các API endpoint trực tiếp trong cùng một codebase giúp tiết 
+    kiệm thời gian thiết lập hạ tầng.
+
+* NHƯỢC ĐIỂM (CONS):
+  - Độ phức tạp trong việc quản lý Cache: Next.js áp dụng cơ chế caching rất mạnh 
+    ở nhiều cấp độ (Request Memoization, Data Cache, Full Route Cache, Router Cache). 
+    Việc cấu hình revalidate hoặc vô hiệu hóa cache (invalidate) đôi khi gây ra 
+    những hành vi không mong muốn nếu lập trình viên không nắm rõ cơ chế.
+  - Phiên bản mới (v16): Việc sử dụng Next.js 16 (một phiên bản rất mới) đem lại 
+    nhiều tính năng hiện đại nhưng cũng đi kèm rủi ro về độ ổn định, tài liệu 
+    hướng dẫn từ cộng đồng chưa nhiều, và có thể phát sinh lỗi tương thích với 
+    các thư viện cũ.
+  - Khó khăn khi Deploy ngoài Vercel: Dù có thể chạy container Docker hoặc chạy 
+    node server thông thường, Next.js hoạt động tối ưu nhất trên Vercel. Deploy 
+    trên các cloud provider khác (AWS, GCP, VPS tự quản lý) đòi hỏi cấu hình 
+    phức tạp để giữ được các tính năng như Image Optimization, ISR hay Edge Middleware.
+
+--------------------------------------------------------------------------------
+2. REACT (v19.2.3)
+--------------------------------------------------------------------------------
+Thư viện hiển thị giao diện người dùng dựa trên thành phần (component-based).
+
+* ƯU ĐIỂM (PROS):
+  - Tích hợp React Compiler (React Forget): Một bước tiến lớn trong React 19. 
+    Trình biên dịch tự động tối ưu hóa việc render lại (re-render) bằng cách ghi 
+    nhớ (memoization) các component và hook. Lập trình viên không còn phải viết 
+    các đoạn mã boilerplate như `useMemo` hay `useCallback` một cách thủ công.
+  - Hỗ trợ tốt hơn cho Actions & Hooks mới: Cung cấp các hook chuyên dụng như 
+    `useActionState`, `useFormStatus`, `useOptimistic` giúp quản lý trạng thái 
+    gửi form, hiển thị tiến trình load, và cập nhật giao diện trước khi server 
+    phản hồi (optimistic updates) một cách tự nhiên hơn.
+  - Cải tiến Document Metadata: React 19 hỗ trợ hiển thị các thẻ `<title>`, 
+    `<meta>`, và `<link>` ở bất kỳ component nào mà không cần các thư viện bên 
+    thứ ba như `react-helmet`.
+
+* NHƯỢC ĐIỂM (CONS):
+  - Vấn đề tương thích ngược: Vì React 19 là một phiên bản lớn có nhiều thay đổi 
+    cốt lõi (như loại bỏ một số API cũ, thay đổi hành vi ref, cơ chế hydration 
+    nghiêm ngặt hơn), một số thư viện npm chưa kịp cập nhật phiên bản tương thích 
+    (peer dependencies) có thể gây lỗi trong quá trình cài đặt hoặc chạy ứng dụng.
+  - Khái niệm mới cần học: Lập trình viên cần làm quen với mô hình lập trình bất 
+    đồng bộ mới xung quanh "Actions" và sự thay đổi trong vòng đời component khi 
+    kết hợp với Server Components.
+
+--------------------------------------------------------------------------------
+3. TYPESCRIPT (v5)
+--------------------------------------------------------------------------------
+Ngôn ngữ lập trình mở rộng của JavaScript, bổ sung kiểm tra kiểu tĩnh (static typing).
+
+* ƯU ĐIỂM (PROS):
+  - Phát hiện lỗi sớm: Tìm ra các lỗi logic, sai kiểu dữ liệu hoặc thiếu thuộc tính 
+    ngay trong quá trình viết code (compile-time) thay vì đợi ứng dụng chạy và 
+    gây lỗi ở phía người dùng (runtime).
+  - Tự động hoàn thành mã (IntelliSense) tuyệt vời: Giúp lập trình viên điều hướng 
+    nhanh trong các cấu trúc dữ liệu phức tạp của hệ thống quản lý trường học (như 
+    thông tin sinh viên, điểm số, học phí).
+  - Tích hợp chặt chẽ với ORM (Drizzle): Tạo ra sự nhất quán về kiểu dữ liệu từ 
+    tầng Database lên tới tầng UI (End-to-End Type Safety). Nếu cấu trúc bảng thay 
+    đổi, TypeScript sẽ ngay lập tức báo lỗi ở những nơi sử dụng dữ liệu cũ.
+
+* NHƯỢC ĐIỂM (CONS):
+  - Tăng thời gian phát triển ban đầu: Đòi hỏi lập trình viên phải viết thêm mã 
+    định nghĩa kiểu (interface, type), đôi khi rất phức tạp khi xử lý các kiểu dữ 
+    liệu động hoặc generics.
+  - Thời gian biên dịch: Việc kiểm tra kiểu (type-checking) của TypeScript làm 
+    tăng thời gian build ứng dụng, đặc biệt là khi dự án mở rộng quy mô lớn.
+  - Rào cản học tập: Yêu cầu đội ngũ phát triển phải có kiến thức tốt về TypeScript 
+    để tránh việc lạm dụng kiểu `any`, điều này sẽ làm mất đi hoàn toàn lợi thế 
+    của ngôn ngữ này.

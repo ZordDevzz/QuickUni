@@ -13,6 +13,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/services/auth";
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
+import { validateManualEdit } from "@/services/schedule-validation";
 
 type RequestType = (typeof enumRequestType.enumValues)[number];
 type WorkflowStatus = (typeof enumWorkflowStatus.enumValues)[number];
@@ -41,6 +42,60 @@ export async function submitRequest(type: RequestType, data: unknown) {
       targetId = classInfo.teacherId;
     } else {
       throw new Error("Course class not found");
+    }
+  }
+
+  // Logic to validate teacher_schedule_change
+  if (type === 'teacher_schedule_change') {
+    const reqData = data as {
+      classId?: string;
+      scheduleId?: string;
+      newDate?: string;
+      newStartPeriod?: string | number;
+      newEndPeriod?: string | number;
+      newRoomId?: string | number;
+    };
+
+    if (!reqData.scheduleId || !reqData.newDate || !reqData.newStartPeriod || !reqData.newEndPeriod || !reqData.newRoomId || !reqData.classId) {
+      throw new Error("Thông tin yêu cầu thay đổi lịch học không đầy đủ.");
+    }
+
+    // 1. Check if the original schedule date or new date is in the past
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (reqData.newDate < todayStr) {
+      throw new Error("Ngày học mới đề xuất không được là ngày trong quá khứ.");
+    }
+
+    const origSlot = await db.query.schedule.findFirst({
+      where: eq(schedule.id, parseInt(reqData.scheduleId))
+    });
+    if (!origSlot) {
+      throw new Error("Lịch học ban đầu không tồn tại.");
+    }
+    if (origSlot.schDate < todayStr) {
+      throw new Error("Không thể yêu cầu thay đổi cho buổi học đã diễn ra trong quá khứ.");
+    }
+
+    // 2. Validate collisions for the new slot
+    const cc = await db.query.courseClass.findFirst({
+      where: eq(courseClass.id, reqData.classId)
+    });
+    if (!cc) {
+      throw new Error("Lớp học phần không tồn tại.");
+    }
+
+    const validation = await validateManualEdit({
+      scheduleId: parseInt(reqData.scheduleId),
+      courseClassId: reqData.classId,
+      teacherId: cc.teacherId,
+      roomId: typeof reqData.newRoomId === 'string' ? parseInt(reqData.newRoomId) : reqData.newRoomId,
+      schDate: reqData.newDate,
+      startPeriod: typeof reqData.newStartPeriod === 'string' ? parseInt(reqData.newStartPeriod) : reqData.newStartPeriod,
+      endPeriod: typeof reqData.newEndPeriod === 'string' ? parseInt(reqData.newEndPeriod) : reqData.newEndPeriod,
+    });
+
+    if (!validation.valid) {
+      throw new Error(validation.reason || "Xung đột lịch học phát hiện.");
     }
   }
 

@@ -1,0 +1,42 @@
+================================================================================
+PHÂN TÍCH ƯU VÀ NHƯỢC ĐIỂM (PROS & CONS) - INTERNATIONALIZATION (next-intl)
+================================================================================
+
+Tài liệu này phân tích chi tiết các ưu và nhược điểm của thư viện đa ngôn ngữ 
+next-intl trong dự án QuickUni.
+
+--------------------------------------------------------------------------------
+1. NEXT-INTL (v4.8.2)
+--------------------------------------------------------------------------------
+Thư viện quốc tế hóa (i18n) được thiết kế chuyên dụng cho Next.js App Router. 
+Trong QuickUni, thư viện này chịu trách nhiệm dịch thuật toàn bộ giao diện 
+(Tiếng Việt, Tiếng Anh, v.v.) từ các nhãn tĩnh, thông báo lỗi cho đến định dạng 
+tiền tệ, ngày tháng.
+
+* ƯU ĐIỂM (PROS):
+  - Hỗ trợ hoàn hảo React Server Components (RSC): Cho phép tải dữ liệu ngôn ngữ và 
+    dịch thuật ngay tại Server, giúp gửi HTML hoàn chỉnh xuống Client mà không cần 
+    chạy thêm Javascript dịch thuật ở trình duyệt, cải thiện đáng kể tốc độ load trang.
+  - Định dạng thông điệp mạnh mẽ (ICU Message Syntax): Hỗ trợ đầy đủ các tính năng dịch 
+    thuật phức tạp như: truyền tham số vào câu dịch, xử lý số nhiều/số ít (Pluralization), 
+    và lựa chọn từ ngữ theo ngữ cảnh (Select).
+  - Định tuyến đa ngôn ngữ tích hợp (Middleware-based Routing): Tự động bắt mã ngôn ngữ 
+    từ URL (ví dụ: `/vi/dashboard` hoặc `/en/dashboard`), tự động chuyển hướng người dùng 
+    dựa trên ngôn ngữ trình duyệt của họ thông qua Next.js Middleware.
+  - Type-safe Translations: Hỗ trợ cấu hình TypeScript để tự động gợi ý phím dịch (keys) 
+    từ các file JSON ngôn ngữ, tránh lỗi gõ sai key dịch dẫn đến hiển thị trống.
+  - Quản lý hiệu quả: Tích hợp tốt với các script quét mã nguồn để tự động cập nhật 
+    file dịch (như script `i18n:scan` trong dự án).
+
+* NHƯỢC ĐIỂM (CONS):
+  - Thiết lập ban đầu rất phức tạp: Đòi hỏi phải cấu trúc lại toàn bộ thư mục trang 
+    (`app` phải chuyển thành `app/[locale]`), cấu hình file `middleware.ts`, 
+    file `i18n/request.ts`, và bao bọc Next.js config bằng `withNextIntl`.
+  - Khó khăn trong môi trường ngoài Context (Server Actions / APIs): Khi thực hiện các 
+    hành động ở Server Actions hoặc Route Handlers độc lập, việc lấy ngữ cảnh ngôn ngữ 
+    (locale context) hiện tại của người dùng để trả về thông báo lỗi đã dịch có thể 
+    gặp khó khăn, đòi hỏi lập trình viên phải truyền tham số `locale` thủ công qua các hàm.
+  - Quản lý file JSON dịch phình to: Khi dự án QuickUni phát triển lớn với hàng trăm màn hình, 
+    các tệp tin chứa nội dung dịch (`messages/vi.json`, `messages/en.json`) sẽ trở nên 
+    khổng lồ và khó quản lý nếu không có quy trình phân chia thư mục dịch khoa học hoặc 
+    sử dụng các công cụ dịch thuật bên ngoài.

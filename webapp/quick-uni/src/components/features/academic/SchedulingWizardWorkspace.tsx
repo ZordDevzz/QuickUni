@@ -791,14 +791,14 @@ export function SchedulingWizardWorkspace() {
                             </div>
                           </td>
                           <td className="p-4 text-right">
-                            <div className="inline-flex items-center gap-3">
+                            <div className="flex items-center justify-end gap-2">
                               <span className={cn(
-                                "text-[9.5px] font-bold px-2 py-0.5 rounded-full shrink-0",
+                                "text-[9.5px] font-bold px-2 py-0.5 rounded-full truncate max-w-[100px] block",
                                 c.allowEvening 
                                   ? "bg-amber-500/15 text-amber-600 dark:text-amber-500 border border-amber-500/10" 
                                   : "bg-muted text-muted-foreground/60"
                               )}>
-                                {c.allowEvening ? t("AllowEvening") : (t("DefaultNoEvening") || "Default no evening")}
+                                {c.allowEvening ? t("AllowEveningCell") : (t("DefaultNoEveningCell") || "Default no evening")}
                               </span>
                               <Switch
                                 disabled={isSaving}
@@ -808,14 +808,14 @@ export function SchedulingWizardWorkspace() {
                             </div>
                           </td>
                           <td className="p-4 text-right">
-                            <div className="inline-flex items-center gap-3">
+                            <div className="flex items-center justify-end gap-2">
                               <span className={cn(
-                                "text-[9.5px] font-bold px-2 py-0.5 rounded-full shrink-0",
+                                "text-[9.5px] font-bold px-2 py-0.5 rounded-full truncate max-w-[100px] block",
                                 c.allowWeekend 
                                   ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/10" 
                                   : "bg-muted text-muted-foreground/60"
                               )}>
-                                {c.allowWeekend ? t("AllowWeekendClasses") : (t("DefaultNoWeekend") || "Default no weekend")}
+                                {c.allowWeekend ? t("AllowWeekendCell") : (t("DefaultNoWeekendCell") || "Default no weekend")}
                               </span>
                               <Switch
                                 disabled={isSaving}

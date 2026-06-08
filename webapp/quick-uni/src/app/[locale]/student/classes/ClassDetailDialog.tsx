@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Loader2, FileText, Info } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { FormattedDate } from "@/components/shared/FormattedDate";
 
 import { ClassEnrollment } from "./ClassCard";
 
@@ -87,6 +88,28 @@ export function ClassDetailDialog({
                   <div className="space-y-1">
                     <h4 className="font-semibold text-sm text-muted-foreground uppercase">{t("StatusLabel")}</h4>
                     <p className="capitalize">{courseClass.status}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold text-sm text-muted-foreground uppercase">{t("CapacityLabel")}</h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="font-mono text-sm">{courseClass.currentSlot} / {courseClass.cap}</p>
+                      <div className="h-1.5 w-24 overflow-hidden rounded-full bg-secondary">
+                        <div 
+                          className="h-full bg-primary transition-all duration-300" 
+                          style={{ width: `${Math.min(100, (courseClass.currentSlot / courseClass.cap) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold text-sm text-muted-foreground uppercase">{t("DateStartEndLabel")}</h4>
+                    {courseClass.startDate && courseClass.endDate ? (
+                      <p className="text-sm mt-1">
+                        <FormattedDate date={courseClass.startDate} /> – <FormattedDate date={courseClass.endDate} />
+                      </p>
+                    ) : (
+                      <p className="text-sm italic mt-1">N/A</p>
+                    )}
                   </div>
                 </div>
                 {/* Add schedule info if available in details */}

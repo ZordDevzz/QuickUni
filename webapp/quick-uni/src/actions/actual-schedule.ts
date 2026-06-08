@@ -2,13 +2,15 @@
 
 import { db } from "@/db";
 import { schedule, weeklyTemplate, room, availability } from "@/db/schemas/schedule";
-import { courseClass } from "@/db/schemas/course";
+import { courseClass, enrollment } from "@/db/schemas/course";
 import { subject } from "@/db/schemas/academic";
-import { and, eq, ne, between, isNull } from "drizzle-orm";
+import { profile, employee, student } from "@/db/schemas/user";
+import { and, eq, ne, between, isNull, exists } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { validateManualEdit } from "@/services/schedule-validation";
 import { createMask, hasCollision } from "@/lib/scheduling/bitmask";
 import { findEmptySlots } from "@/lib/scheduling/slot-finder";
+import { getAvailability } from "./scheduling-data";
 
 export async function getActualScheduleByEntity(
   entityId: string,
@@ -391,5 +393,130 @@ export async function getOccupiedRoomsAction(params: {
     return { success: false, occupiedRoomIds: [] };
   }
 }
+
+export async function getActualScheduleByStudent(
+  studentId: string,
+  semesterId: number,
+  startDateStr: string, // YYYY-MM-DD
+  endDateStr: string    // YYYY-MM-DD
+) {
+  try {
+    const data = await db.query.schedule.findMany({
+      where: and(
+        between(schedule.schDate, startDateStr, endDateStr),
+        isNull(schedule.deletedAt),
+        exists(
+          db.select()
+            .from(enrollment)
+            .where(and(
+              eq(enrollment.courseClassId, schedule.courseClassId),
+              eq(enrollment.studentId, studentId),
+              exists(
+                db.select()
+                  .from(courseClass)
+                  .where(and(
+                    eq(courseClass.id, schedule.courseClassId),
+                    eq(courseClass.semesterId, semesterId)
+                  ))
+              )
+            ))
+        )
+      ),
+      with: {
+        courseClass: {
+          with: {
+            subject: true,
+            employee: {
+              with: {
+                profile: true
+              }
+            }
+          }
+        },
+        room: {
+          with: {
+            building: true
+          }
+        }
+      }
+    });
+
+    return data.map(item => ({
+      id: item.id.toString(),
+      courseClassId: item.courseClassId,
+      roomId: item.roomId ?? 0,
+      dayOfWeek: new Date(item.schDate).getDay(), // 0 (Sun) - 6 (Sat)
+      startPeriod: item.period,
+      endPeriod: item.endPeriod ?? item.period,
+      occupyMask: 0,
+      scheduleTypeId: item.type,
+      courseClass: item.courseClass,
+      room: item.room,
+      schDate: item.schDate,
+      startTime: item.startTime,
+      endTime: item.endTime,
+    }));
+  } catch (error) {
+    console.error("Error in getActualScheduleByStudent:", error);
+    throw new Error("Failed to fetch actual schedule for student");
+  }
+}
+
+export async function getActualScheduleByRole(
+  role: string,
+  accountId: string,
+  semesterId: number | null,
+  startDateStr: string,
+  endDateStr: string
+) {
+  if (!semesterId) return { assignments: [], availability: [] };
+
+  try {
+    if (role === 'teacher') {
+      const emp = await db.query.employee.findFirst({
+        where: (emp, { exists }) => exists(
+          db.select()
+            .from(profile)
+            .where(and(
+              eq(profile.id, emp.profileId),
+              eq(profile.accountId, accountId)
+            ))
+        )
+      });
+
+      if (emp) {
+        const [assignments, availData] = await Promise.all([
+          getActualScheduleByEntity(emp.id, 'teacher', startDateStr, endDateStr),
+          getAvailability(emp.id, 'teacher', startDateStr, endDateStr)
+        ]);
+        return { assignments, availability: availData };
+      }
+    }
+
+    if (role === 'student') {
+      const stu = await db.query.student.findFirst({
+        where: (stu, { exists }) => exists(
+          db.select()
+            .from(profile)
+            .where(and(
+              eq(profile.id, stu.profileId),
+              eq(profile.accountId, accountId)
+            ))
+        )
+      });
+
+      if (stu) {
+        const assignments = await getActualScheduleByStudent(stu.id, semesterId, startDateStr, endDateStr);
+        return { assignments, availability: [] };
+      }
+    }
+
+    return { assignments: [], availability: [] };
+  } catch (error) {
+    console.error("Error in getActualScheduleByRole:", error);
+    throw new Error("Failed to fetch actual schedule by role");
+  }
+}
+
 
 

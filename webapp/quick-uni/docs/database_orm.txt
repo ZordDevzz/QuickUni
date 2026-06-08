@@ -1,0 +1,92 @@
+================================================================================
+PHÂN TÍCH ƯU VÀ NHƯỢC ĐIỂM (PROS & CONS) - DATABASE & ORM
+================================================================================
+
+Tài liệu này phân tích chi tiết các ưu và nhược điểm của công nghệ cơ sở dữ liệu 
+và bộ công cụ ánh xạ đối tượng - quan hệ (ORM) trong dự án QuickUni.
+
+--------------------------------------------------------------------------------
+1. POSTGRESQL (HỆ QUẢN TRỊ CƠ SỞ DỮ LIỆU CHÍNH)
+--------------------------------------------------------------------------------
+Hệ quản trị cơ sở dữ liệu quan hệ mã nguồn mở mạnh mẽ nhất hiện nay.
+
+* ƯU ĐIỂM (PROS):
+  - Tính toàn vẹn dữ liệu cao: Hỗ trợ đầy đủ các tính chất ACID (Atomicity, Consistency, 
+    Isolation, Durability), khóa ngoại, ràng buộc dữ liệu nghiêm ngặt giúp bảo vệ 
+    dữ liệu học vụ và tài chính phức tạp của hệ thống trường đại học.
+  - Tính năng nâng cao phong phú: Hỗ trợ tốt các kiểu dữ liệu nâng cao như JSONB (để 
+    lưu trữ cấu hình động hoặc log mà không cần cấu trúc bảng cố định), Array, và 
+    các truy vấn phức tạp (Window Functions, CTEs).
+  - Tính năng Schemas: Cho phép phân chia cơ sở dữ liệu thành các không gian logic 
+    khác nhau (ví dụ: `academic`, `finance`, `users`, `schedule` như cấu hình trong 
+    [drizzle.config.ts](file:///d:/source/QuickUni/webapp/quick-uni/drizzle.config.ts)), giúp quản lý phân quyền và cấu trúc bảng rõ ràng, ngăn nắp.
+
+* NHƯỢC ĐIỂM (CONS):
+  - Yêu cầu cấu hình và quản trị: PostgreSQL cần tài nguyên hệ thống lớn hơn so với 
+    các cơ sở dữ liệu nhẹ như SQLite trong quá trình phát triển dự án. Cần có kỹ năng 
+    cấu hình tối ưu hóa index, bộ nhớ đệm (shared_buffers), và kết nối khi ứng dụng 
+    đạt quy mô lớn.
+
+--------------------------------------------------------------------------------
+2. DRIZZLE ORM (v0.45.1)
+--------------------------------------------------------------------------------
+ORM hướng TypeScript thế hệ mới, hoạt động như một SQL query builder siêu nhẹ.
+
+* ƯU ĐIỂM (PROS):
+  - Hiệu năng vượt trội (Zero-overhead): Không giống như Prisma phải chạy một tiến trình 
+    Engine nhị phân (Binary Rust Engine) làm trung gian, Drizzle viết hoàn toàn bằng 
+    TypeScript và giao tiếp trực tiếp thông qua driver Node.js. Thời gian khởi động 
+    (cold start) và truy vấn nhanh hơn đáng kể.
+  - Type-Safety Tuyệt đối (End-to-End): Định nghĩa Schema bằng mã TypeScript 
+    (ở [schema.ts](file:///d:/source/QuickUni/webapp/quick-uni/src/db/schema.ts)) và Drizzle sẽ tự động suy luận ra kiểu dữ liệu chính xác cho các kết quả truy vấn.
+  - Cú pháp gần gũi với SQL: Lập trình viên viết truy vấn rất sát với SQL truyền thống, 
+    giúp dễ dàng kiểm soát các câu lệnh JOIN, subquery và tối ưu hóa hiệu năng câu lệnh.
+  - Hỗ trợ tốt PostgreSQL: Drizzle được thiết kế tập trung hỗ trợ tối đa các tính năng 
+    đặc thù của PostgreSQL (như Schemas, Enums, Custom Types).
+  - Tính năng Casing tự động: Tự động chuyển đổi giữa định dạng camelCase trong code 
+    TypeScript và snake_case trong cơ sở dữ liệu SQL thông qua cấu hình `casing: "snake_case"`.
+
+* NHƯỢC ĐIỂM (CONS):
+  - Cộng đồng và Tài liệu còn mới: So với Prisma hay TypeORM, Drizzle mới phát triển 
+    những năm gần đây. Khi gặp các trường hợp lỗi hiếm gặp hoặc truy vấn cực kỳ phức tạp, 
+    việc tìm kiếm giải pháp từ StackOverflow hay các diễn đàn sẽ khó khăn hơn.
+  - Cú pháp Relations API chưa trực quan bằng Prisma: Dù đã cải tiến nhiều với 
+    `drizzle-orm/relations`, việc định nghĩa và truy vấn quan hệ lồng nhau phức tạp 
+    vẫn đòi hỏi nhiều dòng code cấu hình thủ công hơn.
+
+--------------------------------------------------------------------------------
+3. DRIZZLE KIT
+--------------------------------------------------------------------------------
+Bộ công cụ CLI đi kèm Drizzle dùng để tạo và quản lý các lượt di chuyển cơ sở dữ liệu (migrations).
+
+* ƯU ĐIỂM (PROS):
+  - Tự động tạo tệp Migration: Phân tích sự khác biệt giữa file code schema và trạng 
+    thái DB hiện tại để tự tạo ra các file SQL migration chính xác.
+  - Drizzle Studio: Công cụ giao diện Web tích hợp sẵn giúp xem nhanh, chỉnh sửa dữ liệu 
+    trong database trực quan mà không cần cài đặt thêm các app bên thứ ba như DBeaver, 
+    pgAdmin.
+  - Schema Push: Hỗ trợ đẩy trực tiếp các thay đổi schema lên DB dev mà không cần tạo 
+    file migration, tăng tốc độ thử nghiệm tính năng mới.
+
+* NHƯỢC ĐIỂM (CONS):
+  - Xử lý các thay đổi phức tạp còn hạn chế: Khi đổi tên cột (rename column) hoặc đổi 
+    tên bảng, Drizzle Kit đôi khi không nhận diện được đó là hành động đổi tên mà 
+    hiểu nhầm là xóa cột cũ và thêm cột mới. Lập trình viên bắt buộc phải kiểm tra lại 
+    và chỉnh sửa file SQL migration thủ công.
+
+--------------------------------------------------------------------------------
+4. PG (NODE-POSTGRES)
+--------------------------------------------------------------------------------
+Driver kết nối PostgreSQL chuẩn mực của hệ sinh thái Node.js.
+
+* ƯU ĐIỂM (PROS):
+  - Cực kỳ ổn định và trưởng thành: Đã được kiểm chứng qua nhiều năm hoạt động trong 
+    các hệ thống lớn.
+  - Hỗ trợ Connection Pooling: Cho phép tái sử dụng các kết nối cơ sở dữ liệu, tránh 
+    tải nặng cho DB server khi có lượng lớn yêu cầu đồng thời.
+
+* NHƯỢC ĐIỂM (CONS):
+  - Phức tạp trong môi trường Serverless: Trong Next.js API hoặc Server Actions, các 
+    hàm có thể bị hủy và tạo lại liên tục, dẫn đến việc tạo quá nhiều kết nối mới 
+    (exhausting connections). Lập trình viên phải thiết lập giải pháp quản lý 
+    connection singleton hoặc sử dụng proxy kết nối như PgBouncer/Supabase Connection Pool.

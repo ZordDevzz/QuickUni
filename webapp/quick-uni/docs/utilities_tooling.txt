@@ -1,0 +1,132 @@
+================================================================================
+PHÂN TÍCH ƯU VÀ NHƯỢC ĐIỂM (PROS & CONS) - UTILITIES, TESTING & TOOLING
+================================================================================
+
+Tài liệu này phân tích chi tiết các ưu và nhược điểm của các thư viện tiện ích, 
+công cụ kiểm thử và phát triển hệ thống trong dự án QuickUni.
+
+--------------------------------------------------------------------------------
+1. DATE-FNS (v4.1.0)
+--------------------------------------------------------------------------------
+Thư viện xử lý thời gian (Date/Time) dựa trên các hàm thuần khiết (Pure Functions).
+
+* ƯU ĐIỂM (PROS):
+  - Thiết kế mô-đun hóa cao (Modular): Mỗi hàm (ví dụ: `format`, `addDays`, `isAfter`) 
+    là một tệp riêng. Nhờ đó hỗ trợ Tree Shaking tối đa, chỉ đóng gói những hàm 
+    thực tế được dùng vào bundle.
+  - Immutable (Bất biến): Các hàm luôn trả về một đối tượng Date mới thay vì thay đổi 
+    trực tiếp đối tượng Date đầu vào, hạn chế lỗi logic về tham chiếu dữ liệu.
+  - API trực quan, thân thiện: Dễ sử dụng hơn nhiều so với API Date mặc định của Javascript.
+
+* NHƯỢC ĐIỂM (CONS):
+  - Xử lý múi giờ (Timezones) cơ bản: Để xử lý các bài toán múi giờ phức tạp (ví dụ 
+    lịch học trực tuyến giữa các quốc gia khác nhau), date-fns cần cài thêm thư viện 
+    bổ trợ `date-fns-tz` hoặc cấu hình múi giờ thủ công phức tạp hơn so với Luxon hay Moment.js.
+
+--------------------------------------------------------------------------------
+2. XLSX (SHEETJS v0.18.5)
+--------------------------------------------------------------------------------
+Thư viện hàng đầu để đọc, ghi và xử lý các tệp tin bảng tính Excel (XLSX, XLS, CSV).
+
+* ƯU ĐIỂM (PROS):
+  - Tính năng mạnh mẽ, toàn diện: Đọc và ghi tệp Excel từ cơ bản đến nâng cao (nhiều 
+    sheet, định dạng ô, chèn công thức) hoạt động mượt mà ở cả Client (trình duyệt) 
+    lẫn Server (Node.js). Phù hợp cho tính năng nhập/xuất danh sách sinh viên, điểm số.
+  - Tốc độ xử lý nhanh: Parse các file Excel lớn hàng vạn dòng với hiệu năng cao.
+
+* NHƯỢC ĐIỂM (CONS):
+  - Dung lượng cực lớn: Thư viện XLSX rất nặng (khoảng hơn 1MB chưa nén). Nếu không 
+    tách mã (code-splitting) hoặc tải động (dynamic import) ở phía Client, nó sẽ 
+    làm chậm đáng kể tốc độ tải trang ban đầu.
+  - Vấn đề giấy phép phiên bản mới: Các phiên bản mới của SheetJS đã chuyển sang 
+    phân phối trên registry riêng của họ thay vì npmjs.com cho một số tính năng 
+    nâng cao, gây khó khăn cho việc quản lý dependency tự động qua package.json.
+
+--------------------------------------------------------------------------------
+3. TSX (TYPESCRIPT EXECUTE)
+--------------------------------------------------------------------------------
+Công cụ chạy trực tiếp file TypeScript mà không cần biên dịch trước sang JavaScript.
+
+* ƯU ĐIỂM (PROS):
+  - Tốc độ siêu nhanh: Sử dụng `esbuild` làm bộ biên dịch dưới nền tảng, giúp chạy 
+    các script viết bằng TS (như seed database, scan i18n) ngay lập tức mà không có 
+    độ trễ.
+  - Không cần cấu hình phức tạp: Tự động nhận diện `tsconfig.json` và giải quyết 
+    các alias path (ví dụ: `@/...`).
+
+* NHƯỢC ĐIỂM (CONS):
+  - Chỉ dùng cho môi trường phát triển: Không được khuyến cáo dùng để chạy máy chủ 
+    production chính thức do không tối ưu hóa mã nguồn sâu như build tĩnh thông thường.
+
+--------------------------------------------------------------------------------
+4. DOTENV
+--------------------------------------------------------------------------------
+Thư viện tải các biến môi trường từ file `.env` vào `process.env`.
+
+* ƯU ĐIỂM (PROS):
+  - Đơn giản và hiệu quả: Giúp bảo mật thông tin nhạy cảm (DB URL, Auth Secret) khỏi 
+    mã nguồn chính.
+
+* NHƯỢC ĐIỂM (CONS):
+  - Hơi dư thừa trong Next.js: Next.js vốn đã tự động tải các file `.env` mà không 
+    cần thư viện ngoài. Tuy nhiên, `dotenv` vẫn cần thiết khi chạy các script độc lập 
+    bên ngoài Next.js thông qua `tsx` (ví dụ: chạy seed DB, migrations).
+
+--------------------------------------------------------------------------------
+5. VITEST (v4.1.5)
+--------------------------------------------------------------------------------
+Framework kiểm thử mã nguồn (Unit Test) thế hệ mới được tối ưu hóa cho Vite.
+
+* ƯU ĐIỂM (PROS):
+  - Tốc độ thực thi cực nhanh: Sử dụng cơ chế load module thông minh của Vite, 
+    nhanh hơn rất nhiều so với Jest truyền thống.
+  - Tích hợp sẵn: Chia sẻ chung cấu hình, transformer và plugins với dự án, giảm 
+    thiểu thời gian thiết lập môi trường test.
+  - Hỗ trợ tốt TDD (Test-Driven Development): Chế độ Watch mode siêu nhạy, tự động 
+    chạy lại các test liên quan ngay khi sửa code.
+
+* NHƯỢC ĐIỂM (CONS):
+  - Tương thích Next.js App Router: Một số tính năng đặc thù của Next.js (như Server 
+    Components, headers, cookies) cần cấu hình giả lập (mocking) phức tạp trong Vitest 
+    để kiểm thử tích hợp (Integration Test) diễn ra chính xác.
+
+--------------------------------------------------------------------------------
+6. ESLINT, PRETTIER & @FAKER-JS/FAKER
+--------------------------------------------------------------------------------
+Bộ công cụ chuẩn hóa mã nguồn và tạo dữ liệu giả lập.
+
+* ƯU ĐIỂM (PROS):
+  - ESLint & Prettier: Tự động hóa việc kiểm tra lỗi và định dạng code thống nhất 
+    cho toàn bộ đội ngũ phát triển, tiết kiệm thời gian review code.
+  - Faker: Tạo ra hàng loạt dữ liệu giả lập chất lượng cao (tên sinh viên, email học vụ, 
+    điểm số, ngày tháng học) trông như thật, giúp kiểm thử giao diện và hiệu năng 
+    hệ thống chân thực nhất.
+
+* NHƯỢC ĐIỂM (CONS):
+  - Faker có dung lượng lớn: Chỉ được phép cấu hình trong `devDependencies` để tránh 
+    bị đóng gói nhầm vào bản build production, gây nặng tải cho Client.
+  - Cấu hình xung đột: Đôi khi luật định dạng của ESLint xung đột với cách căn chỉnh 
+    của Prettier, đòi hỏi phải cài thêm `eslint-config-prettier` để giải quyết.
+
+--------------------------------------------------------------------------------
+7. TS-MORPH
+--------------------------------------------------------------------------------
+Thư viện cung cấp wrapper API mạnh mẽ xung quanh TypeScript Compiler API dùng để phân 
+tích cú pháp và thao tác với cây cú pháp trừu tượng (AST) của mã nguồn TypeScript.
+
+* ƯU ĐIỂM (PROS):
+  - Phân tích mã nguồn tĩnh mạnh mẽ: Cho phép viết các script tùy biến tự động quét toàn bộ 
+    codebase để tìm văn bản viết cứng (hardcoded text) hoặc các key đa ngôn ngữ bị thiếu 
+    (như được triển khai trong file [i18n-scan.ts](file:///d:/source/QuickUni/webapp/quick-uni/scripts/i18n-scan.ts)).
+  - API dễ tiếp cận hơn TypeScript Compiler API gốc: Gói gọn các tác vụ phức tạp liên 
+    quan đến quản lý AST thành các phương thức hướng đối tượng trực quan (`getSourceFiles`, 
+    `forEachDescendant`, `getDescendantsOfKind`, v.v.).
+
+* NHƯỢC ĐIỂM (CONS):
+  - Hiệu năng phân tích: Việc phân tích toàn bộ dự án TypeScript lớn (đặc biệt là khi 
+    cần phân tích ngữ cảnh kiểu đầy đủ thông qua TypeChecker) tiêu tốn rất nhiều RAM và 
+    CPU, làm chậm thời gian thực thi của script.
+  - Phức tạp về mặt khái niệm: Yêu cầu lập trình viên phải hiểu rõ về kiến trúc AST 
+    của TypeScript (ví dụ: phân biệt giữa các Node như SyntaxKind.JsxText, VariableDeclaration, 
+    CallExpression) để viết logic chính xác.
+
