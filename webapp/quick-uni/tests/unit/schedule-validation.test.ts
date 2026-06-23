@@ -9,6 +9,9 @@ vi.mock('@/db', () => ({
       schedule: {
         findMany: vi.fn(),
       },
+      enrollment: {
+        findMany: vi.fn(),
+      },
     },
   },
 }));
@@ -16,6 +19,7 @@ vi.mock('@/db', () => ({
 describe('Schedule Validation Service', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    (db.query.enrollment.findMany as any).mockResolvedValue([]);
   });
 
   const baseParams = {
@@ -59,6 +63,34 @@ describe('Schedule Validation Service', () => {
     const result = await validateManualEdit(baseParams);
     expect(result.valid).toBe(false);
     expect(result.reason).toBe('Phòng học đã được sử dụng trong khung giờ này.');
+  });
+
+  it('should detect student collisions', async () => {
+    // Student enrolled in class-1
+    (db.query.enrollment.findMany as any).mockResolvedValueOnce([
+      { studentId: 'student-A', courseClassId: 'class-1' }
+    ]);
+
+    // Teacher and Room are free, but there is a conflicting schedule with student-A
+    (db.query.schedule.findMany as any)
+      .mockResolvedValueOnce([]) // No teacher conflicts
+      .mockResolvedValueOnce([]) // No room conflicts
+      .mockResolvedValueOnce([
+        {
+          id: 30,
+          period: 1,
+          endPeriod: 2,
+          courseClass: {
+            enrollments: [
+              { studentId: 'student-A', courseClassId: 'class-2' }
+            ]
+          }
+        }
+      ]);
+
+    const result = await validateManualEdit(baseParams);
+    expect(result.valid).toBe(false);
+    expect(result.reason).toBe('Có sinh viên bị trùng lịch học khác trên thực tế.');
   });
 
   it('should ignore the current schedule ID being edited', async () => {

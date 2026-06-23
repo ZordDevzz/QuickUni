@@ -299,6 +299,68 @@ export async function validateWeeklyTemplateEdit(params: {
     }
   }
 
+  // 4. Check for Student collisions: students enrolled in this class must not have another
+  //    class scheduled at the same day/time with overlapping date ranges.
+  const studentEnrollments = await db.query.enrollment.findMany({
+    where: (e, { and, eq, isNull }) => and(
+      eq(e.courseClassId, params.courseClassId),
+      isNull(e.deletedAt)
+    )
+  });
+
+  if (studentEnrollments.length > 0) {
+    const studentIds = studentEnrollments.map(e => e.studentId);
+
+    // Find all other templates on the same day where any of these students are enrolled
+    const studentConflicts = await db.query.weeklyTemplate.findMany({
+      where: (template, { and, eq, ne, exists: existsFn }) => and(
+        eq(template.dayOfWeek, params.dayOfWeek),
+        params.id ? ne(template.id, params.id) : undefined,
+        existsFn(
+          db.select()
+            .from(enrollment)
+            .where(and(
+              eq(enrollment.courseClassId, template.courseClassId),
+              isNull(enrollment.deletedAt),
+              existsFn(
+                db.select()
+                  .from(courseClass)
+                  .where(and(
+                    eq(courseClass.id, enrollment.courseClassId),
+                    eq(courseClass.semesterId, semesterId)
+                  ))
+              )
+            ))
+        )
+      ),
+      with: { courseClass: true }
+    });
+
+    // Filter to only templates where an enrolled student overlaps
+    for (const conflict of studentConflicts) {
+      if (!hasCollision(newMask, conflict.occupyMask)) continue;
+
+      const conflictStart = conflict.courseClass?.startDate || "0000-00-00";
+      const conflictEnd   = conflict.courseClass?.endDate   || "9999-99-99";
+      if (!(targetStart <= conflictEnd && conflictStart <= targetEnd)) continue;
+
+      // Check if any student is enrolled in both the target class and this conflict
+      const conflictStudents = await db.query.enrollment.findMany({
+        where: (e, { and, eq, isNull }) => and(
+          eq(e.courseClassId, conflict.courseClassId),
+          isNull(e.deletedAt)
+        )
+      });
+
+      const conflictStudentIds = new Set(conflictStudents.map(e => e.studentId));
+      const hasSharedStudent = studentIds.some(id => conflictStudentIds.has(id));
+
+      if (hasSharedStudent) {
+        return { valid: false, reason: "Có sinh viên đang học hai lớp bị trùng khung giờ này." };
+      }
+    }
+  }
+
   return { valid: true };
 }
 

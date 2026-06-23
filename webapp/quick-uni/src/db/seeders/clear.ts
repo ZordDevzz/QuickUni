@@ -17,6 +17,8 @@ export const clearDatabase = async () => {
     '"course"."main_class"',
     '"schedule"."schedule"',
     '"schedule"."weekly_template"',
+    '"schedule"."availability"',
+    '"schedule"."holiday_blacklist"',
     '"schedule"."room"',
     '"schedule"."building"',
     '"academic"."department"',

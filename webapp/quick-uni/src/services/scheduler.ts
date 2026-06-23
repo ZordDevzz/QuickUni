@@ -22,6 +22,8 @@ export interface ScheduleRequest {
   classes: ClassRequest[];
   rooms: RoomRequest[];
   availability: Map<string, number[]>; // entityId -> 7-day masks (teacher, room, subject)
+  /** studentId -> list of courseClassIds the student is enrolled in */
+  studentGroups?: Map<string, string[]>;
 }
 
 const DAYS_IN_WEEK = 7;
@@ -48,6 +50,23 @@ export function solveWeekly(request: ScheduleRequest): Assignment[] | null {
   // Initialize tracked assignments maps
   const teacherAssignments = new Map<string, AssignedSlot[][]>();
   const roomAssignments = new Map<number, AssignedSlot[][]>();
+  // studentId -> per-day list of assigned slots (to detect student time conflicts)
+  const studentAssignments = new Map<string, AssignedSlot[][]>();
+
+  // Pre-build: classId -> list of enrolled studentIds
+  const classStudents = new Map<string, string[]>();
+  if (request.studentGroups) {
+    request.studentGroups.forEach((classIds, studentId) => {
+      classIds.forEach(classId => {
+        if (!classStudents.has(classId)) classStudents.set(classId, []);
+        classStudents.get(classId)!.push(studentId);
+        // Ensure each student has a slot tracker
+        if (!studentAssignments.has(studentId)) {
+          studentAssignments.set(studentId, Array.from({ length: DAYS_IN_WEEK }, () => []));
+        }
+      });
+    });
+  }
   
   request.classes.forEach(c => {
     if (!teacherAssignments.has(c.teacherId)) {
@@ -149,9 +168,22 @@ export function solveWeekly(request: ScheduleRequest): Assignment[] | null {
           }
         });
 
+        // Combine student occupancy: any student enrolled in this class must be free
+        let studentMaskForClass = 0;
+        const enrolledStudents = classStudents.get(currentClass.id) || [];
+        for (const studentId of enrolledStudents) {
+          const studentDaySlots = studentAssignments.get(studentId)?.[day] || [];
+          for (const slot of studentDaySlots) {
+            if (slot.startDate <= classEnd && classStart <= slot.endDate) {
+              studentMaskForClass |= slot.mask;
+            }
+          }
+        }
+
         let combinedOccupancy = 
           teacherMaskForClass | 
           roomMaskForClass | 
+          studentMaskForClass |
           globalAvailability[day];
         
         // Enforce evening block: default to no-evening unless allowEvening is marked
@@ -221,6 +253,10 @@ export function solveWeekly(request: ScheduleRequest): Assignment[] | null {
 
           teacherAssignments.get(teacherId)![day].push(slotItem);
           roomAssignments.get(roomId)![day].push(roomSlotItem);
+          // Mark this slot as occupied for all enrolled students
+          for (const studentId of enrolledStudents) {
+            studentAssignments.get(studentId)![day].push(slotItem);
+          }
           
           assignments.push({
             courseClassId: currentClass.id,
@@ -237,6 +273,9 @@ export function solveWeekly(request: ScheduleRequest): Assignment[] | null {
           assignments.pop();
           teacherAssignments.get(teacherId)![day].pop();
           roomAssignments.get(roomId)![day].pop();
+          for (const studentId of enrolledStudents) {
+            studentAssignments.get(studentId)![day].pop();
+          }
         }
       }
     }
