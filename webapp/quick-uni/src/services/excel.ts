@@ -79,14 +79,14 @@ export async function parseAndValidateOnboardingExcel(buffer: Buffer, fields: { 
     const hasNationalId = row["Số CCCD/Hộ chiếu"] || row["National ID"];
     const hasEntityCode = row["Mã định danh"] || row["Entity Code"];
 
-    if (!hasFullName) errors.push("Thiếu trường thông tin bắt buộc: Họ và tên");
-    if (!hasNationalId) errors.push("Thiếu trường thông tin bắt buộc: Số CCCD/Hộ chiếu");
-    if (!hasEntityCode) errors.push("Thiếu trường thông tin bắt buộc: Mã định danh");
+    if (!hasFullName) errors.push("Thiếu thông tin: Họ và tên");
+    if (!hasNationalId) errors.push("Thiếu thông tin: Số CCCD/Hộ chiếu");
+    if (!hasEntityCode) errors.push("Thiếu thông tin: Mã định danh");
     
     // Dynamic validations
     fields.forEach(f => {
       if (f.isRequired && !row[f.label]) {
-        errors.push(`Thiếu trường thông tin bắt buộc: ${f.label}`);
+        errors.push(`Thiếu thông tin: ${f.label}`);
       }
     });
 
