@@ -549,6 +549,8 @@ export function ScheduleManager() {
         semesterId={semesterId}
         onSuccess={handleSuccess}
         viewMode={viewMode}
+        weekStart={viewMode === "actual" && weeks[selectedWeekIndex] ? weeks[selectedWeekIndex].start : undefined}
+        weekEnd={viewMode === "actual" && weeks[selectedWeekIndex] ? weeks[selectedWeekIndex].end : undefined}
       />
 
       <AlertDialog open={showConflictDialog} onOpenChange={setShowConflictDialog}>

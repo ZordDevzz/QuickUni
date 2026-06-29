@@ -50,15 +50,15 @@ export function SemesterClient({ data }: { data: Semester[] }) {
     try {
       if (editingSemester) {
         await updateSemester(editingSemester.id, values);
-        toast.success("Semester updated");
+        toast.success(t("SemesterUpdated"));
       } else {
         await createSemester(values);
-        toast.success("Semester created");
+        toast.success(t("SemesterCreated"));
       }
       setIsOpen(false);
       form.reset();
     } catch (e: unknown) {
-      const errorMessage = e instanceof Error ? e.message : "An error occurred";
+      const errorMessage = e instanceof Error ? e.message : t("AnErrorOccurred");
       toast.error(errorMessage);
     }
   };
@@ -83,7 +83,7 @@ export function SemesterClient({ data }: { data: Semester[] }) {
         </Button>
       </div>
 
-      <DataTable columns={getColumns(onEdit)} data={data} />
+      <DataTable columns={getColumns(onEdit, t)} data={data} />
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-[425px]">

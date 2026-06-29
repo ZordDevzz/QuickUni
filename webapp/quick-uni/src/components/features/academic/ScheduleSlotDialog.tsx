@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "@tanstack/react-form";
 import { useTranslations } from "next-intl";
+
 import { 
   Dialog, 
   DialogContent, 
@@ -23,7 +24,7 @@ import {
   validateWeeklyTemplateEdit
 } from "@/actions/scheduling-data";
 import { upsertActualScheduleAction, deleteActualScheduleAction, getOccupiedRoomsAction } from "@/actions/actual-schedule";
-import { weeklyTemplateValidator, WeeklyTemplateInput } from "@/lib/validators/scheduling";
+import { weeklyTemplateValidator, weeklyTemplateBaseSchema, WeeklyTemplateInput } from "@/lib/validators/scheduling";
 import { Loader2, Trash2, RefreshCw, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +44,7 @@ interface RoomSelectFieldProps {
   endPeriod: number;
   semesterId: number | null;
   excludeScheduleId?: string;
+  actualSchDate?: string; // for actual mode: the editable date
 }
 
 function RoomSelectField({
@@ -56,10 +58,14 @@ function RoomSelectField({
   startPeriod,
   endPeriod,
   semesterId,
-  excludeScheduleId
+  excludeScheduleId,
+  actualSchDate
 }: RoomSelectFieldProps) {
   const [occupiedRoomIds, setOccupiedRoomIds] = useState<number[]>([]);
   const [checking, setChecking] = useState(false);
+
+  // In actual mode, use the editable actualSchDate; in template mode use schDate
+  const effectiveSchDate = viewMode === 'actual' ? actualSchDate : schDate;
 
   useEffect(() => {
     let active = true;
@@ -68,7 +74,7 @@ function RoomSelectField({
       try {
         const result = await getOccupiedRoomsAction({
           viewMode: viewMode || 'template',
-          schDate,
+          schDate: effectiveSchDate,
           dayOfWeek,
           startPeriod,
           endPeriod,
@@ -92,7 +98,7 @@ function RoomSelectField({
     return () => {
       active = false;
     };
-  }, [viewMode, schDate, dayOfWeek, startPeriod, endPeriod, semesterId, excludeScheduleId]);
+  }, [viewMode, effectiveSchDate, schDate, dayOfWeek, startPeriod, endPeriod, semesterId, excludeScheduleId]);
 
   return (
     <div className="space-y-2">
@@ -128,6 +134,10 @@ interface ScheduleSlotDialogProps {
   semesterId: number | null;
   onSuccess: () => void;
   viewMode?: 'template' | 'actual';
+  /** ISO date string (YYYY-MM-DD) for the start of the displayed week, used to constrain date picker in actual mode */
+  weekStart?: string;
+  /** ISO date string (YYYY-MM-DD) for the end of the displayed week */
+  weekEnd?: string;
 }
 
 export function ScheduleSlotDialog({ 
@@ -136,7 +146,9 @@ export function ScheduleSlotDialog({
   initialData, 
   semesterId,
   onSuccess,
-  viewMode
+  viewMode,
+  weekStart,
+  weekEnd
 }: ScheduleSlotDialogProps) {
   const t = useTranslations("Admin");
   const tSM = useTranslations("ScheduleManager");
@@ -145,6 +157,11 @@ export function ScheduleSlotDialog({
   const [courseClasses, setCourseClasses] = useState<CourseClassOption[]>([]);
   const [scheduleTypes, setScheduleTypes] = useState<ScheduleTypeOption[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // In actual mode, the user can change the date — track it in state
+  const [actualSchDate, setActualSchDate] = useState<string>(
+    (initialData as any)?.schDate ?? ""
+  );
 
   async function loadOptions() {
     await Promise.resolve();
@@ -169,6 +186,14 @@ export function ScheduleSlotDialog({
     }
   }
 
+  // Reset actualSchDate whenever dialog opens with new data
+  useEffect(() => {
+    if (isOpen) {
+      setActualSchDate((initialData as any)?.schDate ?? "");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, (initialData as any)?.schDate]);
+
   useEffect(() => {
     async function init() {
       if (isOpen) {
@@ -191,24 +216,30 @@ export function ScheduleSlotDialog({
     } as WeeklyTemplateInput,
     onSubmit: async ({ value }) => {
       try {
-        const validation = weeklyTemplateValidator.safeParse(value);
-        if (!validation.success) {
-          toast.error(validation.error.issues[0].message);
-          return;
-        }
-
         if (viewMode === 'actual') {
-          const schDate = (initialData as any)?.schDate;
-          if (!schDate) {
+          // In actual mode, validate without id (schedule ids are integers, not UUIDs)
+          // Use base schema (ZodObject) instead of refined (ZodEffects) so .omit() works
+          const actualValidator = weeklyTemplateBaseSchema.omit({ id: true });
+          const validation = actualValidator.safeParse(value);
+          if (!validation.success) {
+            toast.error(validation.error.issues[0].message);
+            return;
+          }
+          if (validation.data.startPeriod > validation.data.endPeriod) {
+            toast.error("Start period must be less than or equal to end period");
+            return;
+          }
+
+          if (!actualSchDate) {
             toast.error(tSM("InvalidActualDate") || "Invalid actual date");
             return;
           }
 
           const result = await upsertActualScheduleAction({
-            id: initialData?.id,
+            id: initialData?.id,  // pass integer id directly, bypass UUID check
             courseClassId: validation.data.courseClassId,
             roomId: validation.data.roomId,
-            schDate,
+            schDate: actualSchDate,
             startPeriod: validation.data.startPeriod,
             endPeriod: validation.data.endPeriod,
             scheduleType: validation.data.scheduleType
@@ -221,6 +252,13 @@ export function ScheduleSlotDialog({
           } else {
             toast.error(result.error || tSM("ErrorSaveActual") || "Failed to save actual schedule");
           }
+          return;
+        }
+
+        // Template mode: use full validator (id must be UUID)
+        const validation = weeklyTemplateValidator.safeParse(value);
+        if (!validation.success) {
+          toast.error(validation.error.issues[0].message);
           return;
         }
 
@@ -298,9 +336,22 @@ export function ScheduleSlotDialog({
           </DialogTitle>
         </DialogHeader>
 
-        {viewMode === 'actual' && (initialData as any)?.schDate && (
-          <div className="bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20 px-3 py-2 rounded-md text-xs font-semibold text-center flex items-center justify-center gap-1.5">
-            {tSM("ActualDates")} <span className="underline font-bold">{(initialData as any).schDate}</span>
+        {viewMode === 'actual' && (
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-muted-foreground">{tSM("ActualDates") || "Ngày thực tế"}</label>
+            <input
+              type="date"
+              value={actualSchDate}
+              min={weekStart}
+              max={weekEnd}
+              onChange={(e) => setActualSchDate(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            />
+            {actualSchDate && (
+              <p className="text-[10px] text-muted-foreground">
+                {new Date(actualSchDate + 'T00:00:00').toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              </p>
+            )}
           </div>
         )}
 
@@ -396,35 +447,38 @@ export function ScheduleSlotDialog({
                       endPeriod={endPeriod as number}
                       semesterId={semesterId}
                       excludeScheduleId={initialData?.id}
+                      actualSchDate={actualSchDate}
                     />
                   )}
                 </form.Field>
               )}
             </form.Subscribe>
 
-            <div className="grid grid-cols-3 gap-4">
-              <form.Field name="dayOfWeek">
-                {(field) => (
-                  <div className="space-y-2">
-                    <Label htmlFor={field.name}>{t("Day")}</Label>
-                    <select
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(Number(e.target.value))}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
-                      <option value="1">{t("Mon")}</option>
-                      <option value="2">{t("Tue")}</option>
-                      <option value="3">{t("Wed")}</option>
-                      <option value="4">{t("Thu")}</option>
-                      <option value="5">{t("Fri")}</option>
-                      <option value="6">{t("Sat")}</option>
-                      <option value="0">{t("Sun")}</option>
-                    </select>
-                  </div>
-                )}
-              </form.Field>
+            <div className={viewMode === 'actual' ? "grid grid-cols-2 gap-4" : "grid grid-cols-3 gap-4"}>
+              {viewMode !== 'actual' && (
+                <form.Field name="dayOfWeek">
+                  {(field) => (
+                    <div className="space-y-2">
+                      <Label htmlFor={field.name}>{t("Day")}</Label>
+                      <select
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(Number(e.target.value))}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        <option value="1">{t("Mon")}</option>
+                        <option value="2">{t("Tue")}</option>
+                        <option value="3">{t("Wed")}</option>
+                        <option value="4">{t("Thu")}</option>
+                        <option value="5">{t("Fri")}</option>
+                        <option value="6">{t("Sat")}</option>
+                        <option value="0">{t("Sun")}</option>
+                      </select>
+                    </div>
+                  )}
+                </form.Field>
+              )}
 
               <form.Field name="startPeriod">
                 {(field) => (

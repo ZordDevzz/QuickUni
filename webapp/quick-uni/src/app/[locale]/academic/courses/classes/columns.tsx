@@ -1,27 +1,28 @@
 "use client";
 
+"use client";
+
 import { ColumnDef } from "@tanstack/react-table";
 import { CourseClassRowActions } from "@/components/features/academic/CourseClassRowActions";
 import { Dependencies } from "@/components/features/academic/CourseClassForm";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useTranslations } from "next-intl";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getColumns = (dependencies: Dependencies): ColumnDef<any>[] => [
+export const getColumns = (dependencies: Dependencies, t: any): ColumnDef<any>[] => [
   {
     accessorKey: "code",
     header: ({ column }) => (
       <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        Class Code
+        {t("ClassCode")}
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
   },
   {
     accessorKey: "subject",
-    header: "Subject",
+    header: t("Subject"),
     cell: ({ row }) => {
       const subject = row.original.subject;
       return subject ? `${subject.code} - ${subject.name}` : "N/A";
@@ -29,7 +30,7 @@ export const getColumns = (dependencies: Dependencies): ColumnDef<any>[] => [
   },
   {
     accessorKey: "teacher",
-    header: "Teacher",
+    header: t("Teacher"),
     cell: ({ row }) => {
       const emp = row.original.employee;
       return emp?.profile?.fullname || emp?.code || "N/A";
@@ -37,22 +38,30 @@ export const getColumns = (dependencies: Dependencies): ColumnDef<any>[] => [
   },
   {
     accessorKey: "semester",
-    header: "Semester",
+    header: t("Semester"),
     cell: ({ row }) => row.original.semester?.name || "N/A",
   },
   {
     accessorKey: "cap",
-    header: "Capacity",
+    header: t("Capacity"),
     cell: ({ row }) => `${row.original.currentSlot} / ${row.original.cap}`,
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: t("Status"),
     cell: ({ row }) => {
       const status = row.original.status as string;
+      const statusLabel =
+        status === "opened"
+          ? t("Opened")
+          : status === "closed"
+          ? t("Closed")
+          : status === "cancelled"
+          ? t("Cancelled")
+          : status;
       return (
         <Badge variant={status === 'opened' ? 'success' : status === 'closed' ? 'secondary' : 'destructive'}>
-          {status}
+          {statusLabel}
         </Badge>
       );
     }

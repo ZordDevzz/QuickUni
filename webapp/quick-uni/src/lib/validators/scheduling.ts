@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const weeklyTemplateValidator = z.object({
+export const weeklyTemplateBaseSchema = z.object({
   id: z.string().uuid().optional(),
   courseClassId: z.string().uuid({ message: "Course class is required" }),
   roomId: z.coerce.number().min(1, { message: "Room is required" }),
@@ -8,10 +8,13 @@ export const weeklyTemplateValidator = z.object({
   startPeriod: z.coerce.number().min(1).max(15),
   endPeriod: z.coerce.number().min(1).max(15),
   scheduleType: z.coerce.number().int().min(1).default(1), // 1=REGULAR 2=MAKEUP
-}).refine(data => data.startPeriod <= data.endPeriod, {
+});
+
+export const weeklyTemplateValidator = weeklyTemplateBaseSchema.refine(data => data.startPeriod <= data.endPeriod, {
   message: "Start period must be less than or equal to end period",
   path: ["endPeriod"]
 });
+
 
 export type WeeklyTemplateInput = z.infer<typeof weeklyTemplateValidator>;
 

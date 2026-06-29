@@ -8,10 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { School, GraduationCap, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSemester } from "@/components/providers/semester-provider";
+import { useTranslations } from "next-intl";
 
 export function CourseClassTable({ data, dependencies }: { data: any[], dependencies: Dependencies }) {
+  const t = useTranslations("Admin");
   const { selectedSemesterId } = useSemester();
-  const columns = useMemo(() => getColumns(dependencies), [dependencies]);
+  const columns = useMemo(() => getColumns(dependencies, t), [dependencies, t]);
 
   const [selectedDeptId, setSelectedDeptId] = useState<string>("ALL");
   const [selectedMajorId, setSelectedMajorId] = useState<string>("ALL");
@@ -99,14 +101,14 @@ export function CourseClassTable({ data, dependencies }: { data: any[], dependen
           <div className="space-y-1.5 min-w-[220px]">
             <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
               <School className="w-3.5 h-3.5 text-primary/75" />
-              Khoa / Phòng Ban
+              {t("Department")}
             </label>
             <Select value={selectedDeptId} onValueChange={handleDeptChange}>
               <SelectTrigger className="w-full h-10 border-border/80 bg-background/50 hover:bg-background/90 transition-all rounded-lg text-xs font-medium">
-                <SelectValue placeholder="Tất cả các khoa" />
+                <SelectValue placeholder={t("AllDepartments")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL" className="text-xs font-semibold">Tất cả khoa</SelectItem>
+                <SelectItem value="ALL" className="text-xs font-semibold">{t("AllDepartments")}</SelectItem>
                 {departments.map((d) => (
                   <SelectItem key={d.id} value={String(d.id)} className="text-xs font-medium">
                     {d.name} ({d.code})
@@ -120,14 +122,14 @@ export function CourseClassTable({ data, dependencies }: { data: any[], dependen
           <div className="space-y-1.5 min-w-[220px]">
             <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
               <GraduationCap className="w-3.5 h-3.5 text-primary/75" />
-              Chuyên ngành
+              {t("Major")}
             </label>
             <Select value={selectedMajorId} onValueChange={setSelectedMajorId}>
               <SelectTrigger className="w-full h-10 border-border/80 bg-background/50 hover:bg-background/90 transition-all rounded-lg text-xs font-medium">
-                <SelectValue placeholder="Tất cả chuyên ngành" />
+                <SelectValue placeholder={t("AllMajors")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL" className="text-xs font-semibold">Tất cả chuyên ngành</SelectItem>
+                <SelectItem value="ALL" className="text-xs font-semibold">{t("AllMajors")}</SelectItem>
                 {filteredMajorsList.map((m) => (
                   <SelectItem key={m.id} value={String(m.id)} className="text-xs font-medium">
                     {(m as any).des || m.code} ({m.code})
@@ -146,7 +148,7 @@ export function CourseClassTable({ data, dependencies }: { data: any[], dependen
             className="h-10 text-xs font-semibold hover:bg-muted text-muted-foreground hover:text-foreground flex items-center gap-1.5 px-4 rounded-lg shrink-0 w-full sm:w-auto"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            Xóa bộ lọc
+            {t("ClearFilters")}
           </Button>
         )}
       </div>

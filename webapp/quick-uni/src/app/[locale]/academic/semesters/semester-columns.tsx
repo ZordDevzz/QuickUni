@@ -20,6 +20,7 @@ export type Semester = typeof semester.$inferSelect;
 
 function CurrentSemesterSwitch({ semester: s }: { semester: Semester }) {
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations("Semesters");
   
   return (
     <Switch 
@@ -29,9 +30,9 @@ function CurrentSemesterSwitch({ semester: s }: { semester: Semester }) {
         startTransition(async () => {
           try {
             await toggleCurrentSemester(s.id);
-            toast.success("Current semester updated");
+            toast.success(t("CurrentSemesterUpdated"));
           } catch (e: unknown) {
-            const errorMessage = e instanceof Error ? e.message : "Failed to update status";
+            const errorMessage = e instanceof Error ? e.message : t("FailedToUpdateStatus");
             toast.error(errorMessage);
           }
         });
@@ -40,23 +41,23 @@ function CurrentSemesterSwitch({ semester: s }: { semester: Semester }) {
   );
 }
 
-export const getColumns = (onEdit: (s: Semester) => void): ColumnDef<Semester>[] => [
-  { accessorKey: "code", header: "Code" },
-  { accessorKey: "name", header: "Name" },
-  { accessorKey: "academicYear", header: "Year" },
+export const getColumns = (onEdit: (s: Semester) => void, t: any): ColumnDef<Semester>[] => [
+  { accessorKey: "code", header: t("Code") },
+  { accessorKey: "name", header: t("Name") },
+  { accessorKey: "academicYear", header: t("Year") },
   { 
     accessorKey: "startDate", 
-    header: "Start",
+    header: t("StartDate"),
     cell: ({ row }) => new Date(row.original.startDate).toLocaleDateString()
   },
   { 
     accessorKey: "endDate", 
-    header: "End",
+    header: t("EndDate"),
     cell: ({ row }) => new Date(row.original.endDate).toLocaleDateString()
   },
   {
     accessorKey: "isCurrent",
-    header: "Current",
+    header: t("IsCurrent"),
     cell: ({ row }) => <CurrentSemesterSwitch semester={row.original} />
   },
   {
@@ -71,23 +72,23 @@ export const getColumns = (onEdit: (s: Semester) => void): ColumnDef<Semester>[]
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => onEdit(row.original)}>
-              <Pencil className="mr-2 h-4 w-4" /> Edit
+              <Pencil className="mr-2 h-4 w-4" /> {t("Edit")}
             </DropdownMenuItem>
             <DropdownMenuItem 
               className="text-destructive"
               onClick={async () => {
-                if (confirm("Are you sure?")) {
+                if (confirm(t("ConfirmDelete"))) {
                   try {
                     await deleteSemester(row.original.id);
-                    toast.success("Semester deleted");
+                    toast.success(t("SemesterDeleted"));
                   } catch (e: unknown) {
-                    const errorMessage = e instanceof Error ? e.message : "Failed to delete semester";
+                    const errorMessage = e instanceof Error ? e.message : t("FailedToDeleteSemester");
                     toast.error(errorMessage);
                   }
                 }
               }}
             >
-              <Trash className="mr-2 h-4 w-4" /> Delete
+              <Trash className="mr-2 h-4 w-4" /> {t("Delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
